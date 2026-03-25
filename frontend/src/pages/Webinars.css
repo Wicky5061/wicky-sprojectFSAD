@@ -1,0 +1,67 @@
+/* ========================================
+   Webinars Listing Page Styles
+   ======================================== */
+
+.webinars-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 24px;
+  margin-bottom: 32px;
+  border-radius: var(--radius-lg);
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+.search-icon {
+  font-size: 1.05rem;
+}
+.search-input {
+  border: none !important;
+  background: transparent !important;
+  padding: 8px 0 !important;
+}
+.search-input:focus {
+  box-shadow: none !important;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 4px;
+}
+.filter-tab {
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--duration) var(--ease);
+  white-space: nowrap;
+}
+.filter-tab:hover {
+  color: var(--text-primary);
+  background: var(--bg-glass);
+}
+.filter-tab.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .webinars-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filter-tabs {
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+}

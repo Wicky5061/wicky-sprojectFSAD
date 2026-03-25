@@ -1,0 +1,93 @@
+/* ========================================
+   Dashboard Styles (User & Admin)
+   ======================================== */
+
+/* Stats Bar */
+.dash-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1px;
+  margin-bottom: 40px;
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+}
+.dash-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px;
+  background: var(--bg-glass);
+}
+.dash-stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+.dash-stat-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 4px;
+}
+
+/* Sections */
+.dash-section {
+  margin-bottom: 48px;
+}
+.dash-section h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+}
+
+/* Reg link */
+.reg-webinar-link {
+  font-weight: 500;
+  color: var(--primary-light) !important;
+}
+.reg-webinar-link:hover {
+  color: var(--accent-light) !important;
+}
+
+/* Admin page specifics */
+.admin-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0;
+}
+.admin-tab {
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-secondary);
+  font-family: var(--font);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--duration) var(--ease);
+}
+.admin-tab:hover {
+  color: var(--text-primary);
+}
+.admin-tab.active {
+  color: var(--primary-light);
+  border-bottom-color: var(--primary);
+}
+
+/* Action buttons in table */
+.table-actions {
+  display: flex;
+  gap: 6px;
+}
