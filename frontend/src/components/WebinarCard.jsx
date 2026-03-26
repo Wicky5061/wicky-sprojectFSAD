@@ -73,18 +73,21 @@ export default function WebinarCard({ webinar }) {
         <div className="webinar-participants">
           {webinar.status === 'LIVE' ? (
             <>
-              <span style={{ color: '#ef4444', fontWeight: 600, fontSize: '0.85rem' }}>47 watching</span>
+              <span style={{ color: '#ef4444', fontWeight: 600, fontSize: '0.85rem' }}>
+                {webinar.registrationCount || 0} watching
+              </span>
+            </>
+          ) : webinar.status === 'CANCELLED' ? (
+            <>
+              <span className="meta-icon">👥</span>
+              <span>—</span>
             </>
           ) : (
             <>
               <span className="meta-icon">👥</span>
               <span>
-                {webinar.id === 2 ? '38 registered' : 
-                 webinar.id === 3 ? '52 registered' : 
-                 webinar.id === 4 ? '89 attended' : 
-                 webinar.id === 5 ? '74 attended' : 
-                 webinar.status === 'CANCELLED' ? '-' : 
-                 `${webinar.registrationCount || 0} registered`}
+                {webinar.registrationCount || 0}{' '}
+                {webinar.status === 'COMPLETED' ? 'attended' : 'registered'}
               </span>
             </>
           )}

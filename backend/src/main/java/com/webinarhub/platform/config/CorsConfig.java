@@ -7,11 +7,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * CORS Configuration for Spring Boot.
- * Allows the React frontend (running on port 3000) to communicate
- * with the Spring Boot backend (running on port 8080).
+ * Allows React frontend (both local dev and production) to communicate
+ * with the Spring Boot backend.
  */
 @Configuration
 public class CorsConfig {
@@ -20,20 +21,30 @@ public class CorsConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // Allow React dev server origin
-        config.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:5173", "http://localhost:5174"));
+        // Allow all origins for development and production
+        config.setAllowedOrigins(Arrays.asList(
+                "http://localhost:3000",
+                "http://localhost:5173",
+                "http://localhost:5174",
+                "https://wicky-sprojectfsad.netlify.app",
+                "https://wicky-sprojectfsad.vercel.app"
+        ));
+
+        // Also allow any Netlify/Vercel preview deploys
+        config.setAllowedOriginPatterns(List.of(
+                "https://*.netlify.app",
+                "https://*.vercel.app",
+                "https://*.onrender.com"
+        ));
+
         config.setAllowCredentials(true);
-
-        // Allow common HTTP methods
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-
-        // Allow common headers
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(Arrays.asList(
                 "Origin", "Content-Type", "Accept", "Authorization",
                 "X-Requested-With", "Access-Control-Request-Method",
                 "Access-Control-Request-Headers"
         ));
-
+        config.setExposedHeaders(List.of("Authorization"));
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

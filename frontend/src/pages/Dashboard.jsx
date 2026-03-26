@@ -76,7 +76,7 @@ export default function Dashboard() {
         </div>
         <div className="dash-stat-item">
           <span className="dash-stat-value">
-            {registrations.filter((r) => r.webinar?.status === 'UPCOMING').length}
+            {registrations.length}
           </span>
           <span className="dash-stat-label">Upcoming</span>
         </div>
@@ -97,8 +97,7 @@ export default function Dashboard() {
               <thead>
                 <tr>
                   <th>Webinar</th>
-                  <th>Date</th>
-                  <th>Status</th>
+                  <th>Registered On</th>
                   <th>Attended</th>
                   <th>Actions</th>
                 </tr>
@@ -107,19 +106,14 @@ export default function Dashboard() {
                 {registrations.map((reg) => (
                   <tr key={reg.id}>
                     <td>
-                      <Link to={`/webinars/${reg.webinar?.id || reg.webinarId}`} className="reg-webinar-link">
-                        {reg.webinar?.title || 'Webinar'}
+                      <Link to={`/webinars/${reg.webinarId}`} className="reg-webinar-link">
+                        {reg.webinarTitle || 'Webinar'}
                       </Link>
                     </td>
-                    <td>{formatDate(reg.webinar?.dateTime)}</td>
-                    <td>
-                      <span className={`badge badge-${(reg.webinar?.status || 'upcoming').toLowerCase()}`}>
-                        {reg.webinar?.status || 'UPCOMING'}
-                      </span>
-                    </td>
+                    <td>{formatDate(reg.registeredAt)}</td>
                     <td>{reg.attended ? '✅' : '—'}</td>
                     <td>
-                      {reg.webinar?.status === 'UPCOMING' ? (
+                      {!reg.attended ? (
                         <button
                           className="btn btn-outline btn-sm"
                           onClick={() => handleCancel(reg.id)}

@@ -48,6 +48,16 @@ function App() {
                   <CreateWebinar />
                 </ProtectedRoute>
               } />
+              <Route path="/admin/webinars/create" element={
+                <ProtectedRoute requireAdmin>
+                  <CreateWebinar />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/webinars/edit/:id" element={
+                <ProtectedRoute requireAdmin>
+                  <CreateWebinar />
+                </ProtectedRoute>
+              } />
             </Routes>
           </main>
         </div>

@@ -211,12 +211,11 @@ export default function WebinarDetail() {
                 <div>
                   <span className="sidebar-label">Participants</span>
                   <span className="sidebar-value">
-                    {webinar.id === 1 ? '47 watching now' : 
-                     webinar.id === 2 ? '38 registered (62 seats left)' : 
-                     webinar.id === 3 ? '52 registered (48 seats left)' : 
-                     webinar.id === 4 ? '89 attended' : 
-                     webinar.id === 5 ? '74 attended' : 
-                     `${webinar.registrationCount || 0} registered (${(webinar.maxParticipants || 100) - (webinar.registrationCount || 0)} seats left)`}
+                    {webinar.status === 'LIVE'
+                      ? `${webinar.registrationCount || 0} watching now`
+                      : webinar.status === 'COMPLETED'
+                      ? `${webinar.registrationCount || 0} attended`
+                      : `${webinar.registrationCount || 0} registered (${Math.max(0, (webinar.maxParticipants || 100) - (webinar.registrationCount || 0))} seats left)`}
                   </span>
                 </div>
               </div>

@@ -30,6 +30,8 @@ com\webinarhub\platform\entity\User$Role.class
 com\webinarhub\platform\controller\ResourceController.class
 com\webinarhub\platform\exception\ResourceNotFoundException.class
 com\webinarhub\platform\repository\UserRepository.class
+com\webinarhub\platform\config\SecurityConfig.class
 com\webinarhub\platform\exception\GlobalExceptionHandler.class
 com\webinarhub\platform\service\ResourceService.class
+com\webinarhub\platform\config\DataSeeder.class
 com\webinarhub\platform\controller\RegistrationController.class

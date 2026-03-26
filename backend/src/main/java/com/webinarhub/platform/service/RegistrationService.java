@@ -42,6 +42,7 @@ public class RegistrationService {
     /**
      * Register user for a webinar
      */
+    @Transactional
     public RegistrationDto registerForWebinar(Long userId, Long webinarId) {
         // Check if already registered
         Optional<Registration> existing = registrationRepository.findByUserIdAndWebinarId(userId, webinarId);
@@ -80,6 +81,7 @@ public class RegistrationService {
     /**
      * Get registrations by user ID
      */
+    @Transactional(readOnly = true)
     public List<RegistrationDto> getRegistrationsByUserId(Long userId) {
         return registrationRepository.findByUserId(userId)
                 .stream()
@@ -90,6 +92,7 @@ public class RegistrationService {
     /**
      * Get registrations by webinar ID
      */
+    @Transactional(readOnly = true)
     public List<RegistrationDto> getRegistrationsByWebinarId(Long webinarId) {
         return registrationRepository.findByWebinarId(webinarId)
                 .stream()
@@ -129,6 +132,7 @@ public class RegistrationService {
     /**
      * Check if user is registered for a webinar
      */
+    @Transactional(readOnly = true)
     public boolean isUserRegistered(Long userId, Long webinarId) {
         return registrationRepository.findByUserIdAndWebinarId(userId, webinarId).isPresent();
     }
