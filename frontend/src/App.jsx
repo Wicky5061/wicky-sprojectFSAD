@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Pages
 import Landing from './pages/Landing';
@@ -22,14 +23,31 @@ function App() {
           <Navbar />
           <main className="main-content">
             <Routes>
+              {/* Public Routes */}
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/webinars" element={<Webinars />} />
               <Route path="/webinars/:id" element={<WebinarDetail />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/create-webinar" element={<CreateWebinar />} />
+
+              {/* Protected Routes — Requires Login */}
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
+
+              {/* Admin Routes — Requires ADMIN role */}
+              <Route path="/admin" element={
+                <ProtectedRoute requireAdmin>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/create-webinar" element={
+                <ProtectedRoute requireAdmin>
+                  <CreateWebinar />
+                </ProtectedRoute>
+              } />
             </Routes>
           </main>
         </div>

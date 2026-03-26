@@ -52,6 +52,7 @@ public class WebinarService {
     /**
      * Get all webinars
      */
+    @Transactional(readOnly = true)
     public List<WebinarDto> getAllWebinars() {
         return webinarRepository.findAllByOrderByDateTimeDesc()
                 .stream()
@@ -62,6 +63,7 @@ public class WebinarService {
     /**
      * Get webinar by ID
      */
+    @Transactional(readOnly = true)
     public WebinarDto getWebinarById(Long id) {
         Webinar webinar = webinarRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Webinar", id));
@@ -71,6 +73,7 @@ public class WebinarService {
     /**
      * Get webinar entity by ID (internal use)
      */
+    @Transactional(readOnly = true)
     public Webinar getWebinarEntityById(Long id) {
         return webinarRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Webinar", id));
@@ -111,6 +114,7 @@ public class WebinarService {
     /**
      * Get upcoming webinars
      */
+    @Transactional(readOnly = true)
     public List<WebinarDto> getUpcomingWebinars() {
         return webinarRepository.findUpcomingWebinars(LocalDateTime.now())
                 .stream()
@@ -121,6 +125,7 @@ public class WebinarService {
     /**
      * Search webinars by title
      */
+    @Transactional(readOnly = true)
     public List<WebinarDto> searchByTitle(String title) {
         return webinarRepository.findByTitleContainingIgnoreCase(title)
                 .stream()
@@ -131,6 +136,7 @@ public class WebinarService {
     /**
      * Get webinars by category
      */
+    @Transactional(readOnly = true)
     public List<WebinarDto> getByCategory(String category) {
         return webinarRepository.findByCategory(category)
                 .stream()

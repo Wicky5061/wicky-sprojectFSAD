@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.webinarhub.platform.service.UserServiceTest
+-------------------------------------------------------------------------------
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.076 s -- in com.webinarhub.platform.service.UserServiceTest

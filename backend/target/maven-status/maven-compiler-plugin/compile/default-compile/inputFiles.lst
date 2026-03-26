@@ -1,4 +1,5 @@
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\dto\ResourceDto.java
+C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\config\SecurityConfig.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\exception\GlobalExceptionHandler.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\service\EmailService.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\service\RegistrationService.java
@@ -10,6 +11,7 @@ C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platfo
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\exception\ErrorResponse.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\config\CorsConfig.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\dto\LoginRequest.java
+C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\config\DataSeeder.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\dto\WebinarDto.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\WebinarHubApplication.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\dto\RegistrationDto.java

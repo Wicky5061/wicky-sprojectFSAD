@@ -10,6 +10,7 @@ import com.webinarhub.platform.exception.ResourceNotFoundException;
 import com.webinarhub.platform.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,11 +30,13 @@ public class UserService {
     // Dependency Injection via @Autowired (constructor injection)
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository, ModelMapper modelMapper) {
+    public UserService(UserRepository userRepository, ModelMapper modelMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -48,7 +51,8 @@ public class UserService {
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
+        // Hash password with BCrypt before storing (never store plaintext!)
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setPhone(request.getPhone());
         user.setOrganization(request.getOrganization());
         user.setRole(User.Role.USER);
@@ -64,7 +68,8 @@ public class UserService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BadRequestException("Invalid email or password"));
 
-        if (!user.getPassword().equals(request.getPassword())) {
+        // Verify password using BCrypt encoder.matches() instead of plaintext comparison
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new BadRequestException("Invalid email or password");
         }
 
