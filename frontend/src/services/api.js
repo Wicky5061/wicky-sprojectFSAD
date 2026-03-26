@@ -6,7 +6,7 @@ import axios from 'axios';
  * CORS is configured on the backend to allow requests from this origin.
  */
 const API = axios.create({
-  baseURL: 'http://localhost:8080/api',
+  baseURL: 'https://wicky-sprojectfsad-backend.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
   },
