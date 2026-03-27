@@ -69,6 +69,31 @@
   --duration: 0.25s;
 }
 
+/* ---------- Dark Mode Overrides ---------- */
+:root[data-theme='dark'] {
+  /* Backgrounds */
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-card: rgba(30, 41, 59, 0.7);
+  --bg-glass: rgba(15, 23, 42, 0.65);
+  --bg-input: #1e293b;
+
+  /* Text */
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+
+  /* Borders */
+  --border: #334155;
+
+  /* Gradients */
+  --gradient-card: linear-gradient(135deg, rgba(30,41,59,0.8), rgba(15,23,42,0.9));
+  
+  /* Buttons outline adapting to dark mode */
+  --btn-outline-bg: transparent;
+  --btn-outline-hover-bg: rgba(22, 163, 74, 0.15);
+}
+
 /* ---------- Reset ---------- */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -213,14 +238,14 @@ img {
 }
 
 .btn-outline {
-  background: #ffffff;
+  background: var(--bg-primary);
   color: #16a34a;
   border: 1px solid #16a34a;
 }
 .btn-outline:hover:not(:disabled) {
   border-color: #15803d;
   color: #15803d;
-  background: #f0fdf4;
+  background: var(--btn-outline-hover-bg, #f0fdf4);
 }
 
 .btn-danger {

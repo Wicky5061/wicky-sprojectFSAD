@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import './Navbar.css';
 
 /**
@@ -9,6 +10,7 @@ import './Navbar.css';
  */
 export default function Navbar() {
   const { user, logout, isAdmin } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -42,6 +44,15 @@ export default function Navbar() {
           <Link to="/webinars" className="nav-link" id="nav-webinars" onClick={() => setMobileOpen(false)}>
             Webinars
           </Link>
+
+          <button 
+            className="theme-toggle" 
+            onClick={toggleTheme} 
+            aria-label="Toggle dark mode"
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
 
           {user ? (
             <>
