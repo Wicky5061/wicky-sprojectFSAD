@@ -62,5 +62,16 @@
   .webinars-toolbar {
     flex-direction: column;
     align-items: stretch;
+    padding: 20px;
+  }
+  
+  .filter-tabs {
+    overflow-x: auto;
+    padding: 2px;
+  }
+  
+  .filter-tab {
+    padding: 8px 15px;
+    white-space: nowrap;
   }
 }

@@ -53,7 +53,14 @@ export default function WebinarCard({ webinar }) {
       </div>
 
       <div className="webinar-card-footer">
-        <span className="instructor-name">{webinar.instructor}</span>
+        <div className="instructor-chip">
+          <img 
+            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(webinar.instructor)}&background=random&color=fff`} 
+            alt={webinar.instructor} 
+            className="instructor-avatar-sm"
+          />
+          <span className="instructor-name">{webinar.instructor}</span>
+        </div>
         <span className="view-btn">Details &rarr;</span>
       </div>
     </Link>

@@ -144,7 +144,11 @@ export default function WebinarDetail() {
               
               <div className="detail-instructor-strip">
                 <div className="instructor-info">
-                  <span className="instructor-pfp">👤</span>
+                  <img 
+                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(webinar.instructor)}&background=random&color=fff&size=64`} 
+                    alt={webinar.instructor} 
+                    className="instructor-avatar-lg"
+                  />
                   <div>
                     <span className="inst-label">Presented By</span>
                     <span className="inst-name">{webinar.instructor}</span>
@@ -157,6 +161,52 @@ export default function WebinarDetail() {
             <div className="detail-section">
               <h3>About this Session</h3>
               <p className="description-text">{webinar.description}</p>
+            </div>
+
+            <div className="detail-grid-sections">
+              <div className="detail-section">
+                <h3>🎯 What You Will Learn</h3>
+                <ul className="learning-list">
+                  <li>Master the core concepts of {webinar.category || 'this topic'}</li>
+                  <li>Industry best practices and advanced techniques</li>
+                  <li>Real-world case studies and practical applications</li>
+                  <li>How to optimize your workflow for 2026 standards</li>
+                  <li>Q&A session with {webinar.instructor}</li>
+                </ul>
+              </div>
+              <div className="detail-section">
+                <h3>📋 Prerequisites</h3>
+                <p>Basic understanding of {webinar.category || 'the subject matter'}. No advanced setup required.</p>
+              </div>
+            </div>
+
+            <div className="detail-section">
+              <h3>🎤 Speaker Bio</h3>
+              <div className="speaker-bio-card card glass">
+                <p><strong>{webinar.instructor}</strong> is a world-class expert in {webinar.category || 'technology'} with over 12 years of experience. Having led teams at top Fortune 500 companies, they bring a wealth of practical knowledge and a passion for teaching the next generation of professionals.</p>
+              </div>
+            </div>
+
+            <div className="detail-section">
+              <h3>📅 Session Agenda</h3>
+              <div className="agenda-timeline">
+                <div className="agenda-item">
+                  <span className="time">0:00</span>
+                  <span className="event">Introduction & Housekeeping</span>
+                </div>
+                <div className="agenda-item">
+                  <span className="time">0:15</span>
+                  <span className="event">Main Topic: Deep Dive into {webinar.title}</span>
+                </div>
+                <div className="agenda-item">
+                  <span className="time">0:45</span>
+                  <span className="event">Interactive Workshop & Live Demo</span>
+                </div>
+                <div className="agenda-item">
+                  <span className="time">1:15</span>
+                  <span className="event">Q&A Session & Closing Remarks</span>
+                </div>
+              </div>
             </div>
 
             {resources.length > 0 && (
@@ -252,16 +302,40 @@ export default function WebinarDetail() {
             </div>
 
             <div className="sidebar-actions">
-              {webinar.status !== 'CANCELLED' && !isAdmin() && (
-                isRegistered ? (
-                  <div className="reg-status-pill">✅ You are Registered</div>
-                ) : (
-                  <button className="btn btn-primary btn-lg w-full" onClick={handleRegister} disabled={regLoading || webinar.registrationCount >= (webinar.maxParticipants || 100)}>
-                    {regLoading ? 'Processing...' : 'Register Now'}
-                  </button>
-                )
+              {regLoading ? (
+                <button className="btn btn-primary btn-lg w-full" disabled>Processing...</button>
+              ) : (
+                <>
+                  {webinar.status === 'UPCOMING' && !isAdmin() && !isRegistered && (
+                    <button className="btn btn-primary btn-lg w-full" onClick={handleRegister} disabled={webinar.registrationCount >= (webinar.maxParticipants || 100)}>
+                      Register Now →
+                    </button>
+                  )}
+                  {webinar.status === 'LIVE' && !isAdmin() && (
+                    isRegistered ? (
+                      <a href={webinar.streamUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-lg w-full">
+                        Join Live Now 🔴
+                      </a>
+                    ) : (
+                      <button className="btn btn-primary btn-lg w-full" onClick={handleRegister}>
+                        Register to Join Live Now 🔴
+                      </button>
+                    )
+                  )}
+                  {webinar.status === 'COMPLETED' && !isAdmin() && (
+                    <a href={webinar.streamUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-lg w-full">
+                      View Recording
+                    </a>
+                  )}
+                  {webinar.status === 'CANCELLED' && !isAdmin() && (
+                    <button className="btn btn-outline btn-lg w-full" disabled>Event Cancelled</button>
+                  )}
+                  {isRegistered && webinar.status === 'UPCOMING' && (
+                    <div className="reg-status-pill">✅ You are Registered</div>
+                  )}
+                </>
               )}
-              {isAdmin() && <Link to={`/admin/webinars/edit/${webinar.id}`} className="btn btn-outline w-full">Edit Webinar</Link>}
+              {isAdmin() && <Link to={`/admin/webinars/edit/${webinar.id}`} className="btn btn-outline w-full">Edit Webinar Details</Link>}
             </div>
           </div>
         </aside>

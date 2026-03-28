@@ -72,72 +72,80 @@
   gap: 15px;
 }
 
-.instructor-pfp {
-  font-size: 2rem;
-  background: var(--bg-primary);
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.instructor-avatar-lg {
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary);
 }
 
-.inst-label {
-  display: block;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.inst-name {
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.detail-avg-rating {
-  font-weight: 700;
-  color: #fbbf24;
-}
-
-.detail-avg-rating span {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  margin-left: 8px;
-}
-
-.detail-section {
+.detail-grid-sections {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 30px;
   margin-bottom: 50px;
 }
 
-.detail-section h3 {
-  font-size: 1.4rem;
-  margin-bottom: 20px;
-  border-bottom: 2px solid var(--border);
-  padding-bottom: 10px;
-}
-
-.description-text {
-  line-height: 1.8;
+.learning-list {
+  padding-left: 20px;
   color: var(--text-secondary);
-  white-space: pre-wrap;
+  line-height: 1.8;
 }
 
-.resources-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+.learning-list li {
+  margin-bottom: 10px;
+}
+
+.speaker-bio-card {
+  padding: 30px;
+  border-left: 5px solid var(--primary);
+  background: var(--bg-secondary);
+}
+
+.agenda-timeline {
+  display: flex;
+  flex-direction: column;
   gap: 20px;
 }
 
-.resource-link {
+.agenda-item {
   display: flex;
-  align-items: center;
-  gap: 15px;
-  padding: 15px;
-  text-decoration: none;
+  gap: 25px;
+  align-items: flex-start;
+  position: relative;
+  padding-bottom: 15px;
 }
 
-.res-icon { font-size: 1.5rem; }
-.res-title { display: block; font-weight: 600; color: var(--text-primary); }
+.agenda-item::after {
+  content: '';
+  position: absolute;
+  left: 50px;
+  top: 25px;
+  bottom: -15px;
+  width: 2px;
+  background: var(--border);
+}
+
+.agenda-item:last-child::after { display: none; }
+
+.agenda-item .time {
+  background: var(--primary);
+  color: white;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 700;
+  min-width: 65px;
+  text-align: center;
+}
+
+.agenda-item .event {
+  font-weight: 600;
+  color: var(--text-primary);
+  padding-top: 4px;
+}
+
 .res-type { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
 
 .stream-section {

@@ -8,9 +8,7 @@ import './Dashboard.css';
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const [registrations, setRegistrations] = useState([]);
-  const [recommended, setRecommended] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [allWebinars, setAllWebinars] = useState([]);
 
   useEffect(() => {
     if (user) loadData();
@@ -18,12 +16,13 @@ export default function Dashboard() {
 
   const loadData = async () => {
     try {
-      const [regRes, recRes] = await Promise.all([
+      const [regRes, webRes] = await Promise.all([
         registrationAPI.getUserRegistrations().catch(() => ({ data: [] })),
-        webinarAPI.getUpcoming().catch(() => ({ data: [] })),
+        webinarAPI.getAll().catch(() => ({ data: [] })),
       ]);
       setRegistrations(regRes.data || []);
-      setRecommended((recRes.data || []).slice(0, 3));
+      setAllWebinars(webRes.data || []);
+      setRecommended(webRes.data.filter(w => !regRes.data.some(r => r.webinarId === w.id)).slice(0, 3));
     } catch (err) {
       console.error('Failed to load dashboard data:', err);
     } finally {
@@ -31,114 +30,195 @@ export default function Dashboard() {
     }
   };
 
-  const handleCancel = async (regId) => {
-    const confirmed = await new Promise(resolve => {
-      const toastId = toast((t) => (
-        <span>
-          Cancel registration?
-          <button onClick={() => { toast.dismiss(t.id); resolve(true); }} className="btn btn-sm btn-primary ml-4">Yes</button>
-          <button onClick={() => { toast.dismiss(t.id); resolve(false); }} className="btn btn-sm btn-outline ml-2">No</button>
-        </span>
-      ), { duration: 6000 });
-    });
-
-    if (!confirmed) return;
-
-    try {
-      await registrationAPI.cancel(regId);
-      setRegistrations(registrations.filter((r) => r.id !== regId));
-      toast.success('Registration cancelled successfully.');
-    } catch {
-      toast.error('Failed to cancel registration.');
-    }
+  const handleDownloadCertificate = (reg) => {
+    const certWindow = window.open('', '_blank');
+    const content = `
+      <html>
+        <head>
+          <title>Certificate of Completion - ${reg.webinarTitle}</title>
+          <style>
+            body { font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f0f4f8; }
+            .cert-card { border: 20px solid #2563eb; padding: 60px; text-align: center; background: white; width: 800px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative; }
+            .branding { font-size: 24px; color: #2563eb; font-weight: 800; margin-bottom: 40px; }
+            h1 { font-size: 48px; margin: 20px 0; color: #1e293b; }
+            .recipient { font-size: 32px; border-bottom: 2px solid #cbd5e1; display: inline-block; padding: 0 40px; }
+            .webinar { font-weight: 700; color: #2563eb; }
+            .date { margin-top: 40px; color: #64748b; }
+            .stamp { position: absolute; bottom: 40px; right: 40px; opacity: 0.2; transform: rotate(-20deg); font-size: 48px; border: 5px solid #2563eb; padding: 10px; color: #2563eb; font-weight: 900; }
+          </style>
+        </head>
+        <body>
+          <div class="cert-card">
+            <div class="branding">WebinarHub PLATFORM</div>
+            <p>This is to certify that</p>
+            <div class="recipient">${user.name}</div>
+            <p>has successfully completed the webinar</p>
+            <h2 class="webinar">${reg.webinarTitle}</h2>
+            <div class="date">${new Date().toLocaleDateString()}</div>
+            <div class="stamp">VERIFIED</div>
+          </div>
+          <script>window.print();</script>
+        </body>
+      </html>
+    `;
+    certWindow.document.write(content);
   };
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return 'TBD';
-    return new Date(dateStr).toLocaleDateString([], {
-      month: 'short', day: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    });
+  const stats = {
+    total: registrations.length,
+    upcoming: registrations.filter(r => new Date(r.dateTime) > new Date()).length,
+    completed: registrations.filter(r => r.attended || new Date(r.dateTime) < new Date()).length,
+    certificates: registrations.filter(r => r.attended).length
   };
+
+  const recentActivity = registrations.slice(0, 3);
+  const upcomingReminders = registrations
+    .filter(r => {
+      const diff = new Date(r.dateTime) - new Date();
+      return diff > 0 && diff < (7 * 24 * 60 * 60 * 1000);
+    })
+    .slice(0, 3);
 
   if (loading) return <div className="loading-page"><div className="spinner"></div></div>;
 
   return (
     <div className="page container" id="user-dashboard">
       <div className="page-header">
-        <h1 className="gradient-text">My Dashboard</h1>
-        <p>Welcome back, {user?.name}! Manage your learning journey here.</p>
+        <h1 className="gradient-text">Welcome back, {user?.name}!</h1>
+        <p>Your personalized learning dashboard is ready.</p>
       </div>
 
       <div className="dash-stats-grid animate-fade-in">
         <div className="dash-stat-card card">
-          <span className="stat-icon">📅</span>
+          <span className="stat-icon">📈</span>
           <div className="stat-content">
-            <span className="stat-value">{registrations.length}</span>
-            <span className="stat-label">Registrations</span>
+            <span className="stat-value">{stats.total}</span>
+            <span className="stat-label">Total Registrations</span>
           </div>
         </div>
         <div className="dash-stat-card card">
-          <span className="stat-icon">🎓</span>
+          <span className="stat-icon">🔔</span>
           <div className="stat-content">
-            <span className="stat-value">{registrations.filter(r => r.attended).length}</span>
-            <span className="stat-label">Sessions Attended</span>
+            <span className="stat-value">{stats.upcoming}</span>
+            <span className="stat-label">Upcoming Sessions</span>
           </div>
         </div>
         <div className="dash-stat-card card">
-          <span className="stat-icon">🔥</span>
+          <span className="stat-icon">✅</span>
           <div className="stat-content">
-            <span className="stat-value">{recommended.length}</span>
-            <span className="stat-label">New Recommendations</span>
+            <span className="stat-value">{stats.completed}</span>
+            <span className="stat-label">Completed Sessions</span>
+          </div>
+        </div>
+        <div className="dash-stat-card card">
+          <span className="stat-icon">📜</span>
+          <div className="stat-content">
+            <span className="stat-value">{stats.certificates}</span>
+            <span className="stat-label">Certificates Earned</span>
           </div>
         </div>
       </div>
 
-      <section className="dash-section" id="my-registrations">
-        <div className="section-header-flex mb-6">
-          <h3>Your Upcoming Sessions</h3>
-          {registrations.length > 0 && <span className="item-count">{registrations.length} Total</span>}
+      <div className="learning-progress-section card glass mb-12">
+        <div className="progress-info">
+          <h3>Your Learning Journey</h3>
+          <span>{Math.round((stats.certificates / (stats.total || 1)) * 100)}% Milestone Completed</span>
         </div>
-        
-        {registrations.length > 0 ? (
-          <div className="registrations-list grid grid-2">
-            {registrations.map((reg) => (
-              <div key={reg.id} className="registration-item card glass shadow-sm">
-                <div className="reg-info">
-                  <h4 className="reg-title">{reg.webinarTitle}</h4>
-                  <p className="reg-date">📅 {formatDate(reg.dateTime)}</p>
-                </div>
-                <div className="reg-actions">
-                  <Link to={`/webinars/${reg.webinarId}`} className="btn btn-sm btn-outline">Details</Link>
-                  {!reg.attended && (
-                    <button className="btn btn-sm btn-outline btn-error" onClick={() => handleCancel(reg.id)}>Cancel</button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="empty-dashboard-state glass">
-            <h3>No registrations yet</h3>
-            <p>Ready to start learning? Explore our featured webinars below.</p>
-            <Link to="/webinars" className="btn btn-primary">Browse Webinars</Link>
-          </div>
-        )}
-      </section>
+        <div className="progress-bar-container">
+          <div 
+            className="progress-bar-fill" 
+            style={{ width: `${(stats.certificates / (stats.total || 1)) * 100}%` }}
+          ></div>
+        </div>
+      </div>
 
-      {recommended.length > 0 && (
-        <section className="dash-section" id="recommended-webinars">
-          <div className="section-header-flex mb-6">
-            <h3>Recommended Webinars</h3>
-            <Link to="/webinars" className="btn btn-sm btn-outline">Explore More</Link>
+      <div className="dashboard-grid-main">
+        <div className="dashboard-main-col">
+          <section className="dash-section" id="my-registrations">
+            <div className="section-header-flex mb-6">
+              <h3>Registered Webinars</h3>
+              {registrations.length > 0 && <span className="item-count">{registrations.length} Total</span>}
+            </div>
+            
+            {registrations.length > 0 ? (
+              <div className="registrations-list grid grid-1">
+                {registrations.map((reg) => (
+                  <div key={reg.id} className="registration-item-full card glass shadow-sm">
+                    <div className="reg-info">
+                      <h4 className="reg-title">{reg.webinarTitle}</h4>
+                      <p className="reg-meta">📅 {new Date(reg.dateTime).toLocaleDateString()} at {new Date(reg.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                    </div>
+                    <div className="reg-actions-flex">
+                      <Link to={`/webinars/${reg.webinarId}`} className="btn btn-sm btn-outline">Details</Link>
+                      {reg.attended && (
+                        <button className="btn btn-sm btn-primary" onClick={() => handleDownloadCertificate(reg)}>
+                          Download Certificate
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="empty-dashboard-state glass">
+                <h3>Start Your Journey</h3>
+                <p>Register for your first webinar to see it here.</p>
+                <Link to="/webinars" className="btn btn-primary">Discover Webinars</Link>
+              </div>
+            )}
+          </section>
+
+          {recommended.length > 0 && (
+            <section className="dash-section" id="recommended">
+              <div className="section-header-flex mb-6">
+                <h3>Recommended for You</h3>
+                <Link to="/webinars" className="btn btn-sm btn-outline">Explore More</Link>
+              </div>
+              <div className="grid grid-3">
+                {recommended.map((w) => (
+                  <WebinarCard key={w.id} webinar={w} />
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+
+        <aside className="dashboard-side-col">
+          <div className="dashboard-sidebar-section card">
+            <h3>Recent Activity</h3>
+            {recentActivity.length > 0 ? (
+              <div className="activity-list">
+                {recentActivity.map(act => (
+                  <div key={act.id} className="activity-item">
+                    <span className="activity-icon">🔗</span>
+                    <div className="activity-details">
+                      <p>Registered for <strong>{act.webinarTitle}</strong></p>
+                      <span className="activity-time">Just recently</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : <p className="empty-text">No recent activity.</p>}
           </div>
-          <div className="grid grid-3">
-            {recommended.map((w) => (
-              <WebinarCard key={w.id} webinar={w} />
-            ))}
+
+          <div className="dashboard-sidebar-section card mt-6">
+            <h3>Upcoming Reminders</h3>
+            {upcomingReminders.length > 0 ? (
+              <div className="reminder-list">
+                {upcomingReminders.map(rem => (
+                  <div key={rem.id} className="reminder-item-card">
+                    <div className="reminder-dot"></div>
+                    <div className="reminder-info">
+                      <p className="reminder-title">{rem.webinarTitle}</p>
+                      <span className="reminder-time">In {Math.round((new Date(rem.dateTime) - new Date()) / (24 * 60 * 60 * 1000))} days</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : <p className="empty-text">No reminders for the next 7 days.</p>}
           </div>
-        </section>
-      )}
+        </aside>
+      </div>
     </div>
   );
 }
