@@ -2,7 +2,28 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { webinarAPI, userAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+} from 'chart.js';
+import { Bar, Pie } from 'react-chartjs-2';
 import './Dashboard.css';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
 
 /**
  * Admin Dashboard — Manage webinars, view users, registrations.
@@ -103,6 +124,52 @@ export default function AdminDashboard() {
             {webinars.filter((w) => w.status === 'LIVE').length}
           </span>
           <span className="dash-stat-label">Live Now</span>
+        </div>
+      </div>
+
+      {/* Analytics Charts */}
+      <div className="admin-analytics animate-fade-in">
+        <div className="chart-container glass">
+          <h3>📊 Registrations Per Webinar</h3>
+          <Bar 
+            data={{
+              labels: webinars.slice(0, 10).map(w => w.title.substring(0, 20) + (w.title.length > 20 ? '...' : '')),
+              datasets: [{
+                label: 'Registrations',
+                data: webinars.slice(0, 10).map(w => w.registrationCount || 0),
+                backgroundColor: 'rgba(124, 58, 237, 0.6)',
+                borderColor: 'rgb(124, 58, 237)',
+                borderWidth: 1,
+                borderRadius: 4,
+              }]
+            }}
+            options={{
+              responsive: true,
+              plugins: { legend: { display: false } },
+              scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'var(--text-muted)' } }, x: { grid: { display: false }, ticks: { color: 'var(--text-muted)' } } }
+            }}
+          />
+        </div>
+        <div className="chart-container glass small-chart">
+          <h3>👥 User Distribution</h3>
+          <Pie 
+            data={{
+              labels: ['Admin', 'User'],
+              datasets: [{
+                data: [
+                  users.filter(u => u.role === 'ADMIN').length,
+                  users.filter(u => u.role === 'USER').length
+                ],
+                backgroundColor: ['rgba(6, 182, 212, 0.6)', 'rgba(236, 72, 153, 0.6)'],
+                borderColor: ['rgb(6, 182, 212)', 'rgb(236, 72, 153)'],
+                borderWidth: 1,
+              }]
+            }}
+            options={{
+              responsive: true,
+              plugins: { legend: { position: 'bottom', labels: { color: 'var(--text-muted)' } } }
+            }}
+          />
         </div>
       </div>
 

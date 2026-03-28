@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { webinarAPI, registrationAPI, resourceAPI } from '../services/api';
+import { webinarAPI, registrationAPI, resourceAPI, ratingAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import './WebinarDetail.css';
 
@@ -19,6 +19,10 @@ export default function WebinarDetail() {
   const [isRegistered, setIsRegistered] = useState(false);
   const [regLoading, setRegLoading] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
+  const [ratings, setRatings] = useState([]);
+  const [avgRating, setAvgRating] = useState(0);
+  const [userRating, setUserRating] = useState({ stars: 5, comment: '' });
+  const [submittingRating, setSubmittingRating] = useState(false);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -27,12 +31,19 @@ export default function WebinarDetail() {
 
   const loadWebinar = async () => {
     try {
-      const [webRes, resRes] = await Promise.all([
+      const [webRes, resRes, ratingRes] = await Promise.all([
         webinarAPI.getById(id),
         resourceAPI.getByWebinar(id).catch(() => ({ data: [] })),
+        ratingAPI.getByWebinar(id).catch(() => ({ data: [] })),
       ]);
       setWebinar(webRes.data);
       setResources(resRes.data || []);
+      setRatings(ratingRes.data || []);
+      
+      if (ratingRes.data?.length > 0) {
+        const avg = ratingRes.data.reduce((acc, r) => acc + r.stars, 0) / ratingRes.data.length;
+        setAvgRating(avg.toFixed(1));
+      }
 
       // Check if user is registered
       if (user) {
@@ -47,6 +58,30 @@ export default function WebinarDetail() {
       console.error('Failed to load webinar:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRatingSubmit = async (e) => {
+    e.preventDefault();
+    if (!user) return navigate('/login');
+    
+    setSubmittingRating(true);
+    try {
+      const res = await ratingAPI.submit({
+        userId: user.id,
+        webinarId: id,
+        stars: userRating.stars,
+        comment: userRating.comment
+      });
+      setRatings([res.data, ...ratings]);
+      setUserRating({ stars: 5, comment: '' });
+      // Update average
+      const newAvg = ([res.data, ...ratings]).reduce((acc, r) => acc + r.stars, 0) / (ratings.length + 1);
+      setAvgRating(newAvg.toFixed(1));
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to submit rating.');
+    } finally {
+      setSubmittingRating(false);
     }
   };
 
@@ -184,6 +219,65 @@ export default function WebinarDetail() {
                 </a>
               </div>
             )}
+
+            {/* Ratings Section */}
+            <div className="detail-ratings">
+              <div className="rating-header">
+                <h2>⭐ Ratings & Reviews ({ratings.length})</h2>
+                {avgRating > 0 && <span className="avg-rating-badge">{avgRating} / 5</span>}
+              </div>
+
+              {/* Submit Rating - Only if completed/live and registered */}
+              {(webinar.status === 'COMPLETED' || webinar.status === 'LIVE') && isRegistered && (
+                <div className="rating-form card animate-fade-in">
+                  <h3>Share your experience</h3>
+                  <form onSubmit={handleRatingSubmit}>
+                    <div className="star-input-group">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          className={`star-btn ${userRating.stars >= s ? 'active' : ''}`}
+                          onClick={() => setUserRating({ ...userRating, stars: s })}
+                        >
+                          ★
+                        </button>
+                      ))}
+                    </div>
+                    <textarea
+                      placeholder="Write a short review (optional)..."
+                      className="form-control"
+                      value={userRating.comment}
+                      onChange={(e) => setUserRating({ ...userRating, comment: e.target.value })}
+                      rows="3"
+                    ></textarea>
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={submittingRating}
+                    >
+                      {submittingRating ? 'Submitting...' : 'Post Review'}
+                    </button>
+                  </form>
+                </div>
+              )}
+
+              <div className="ratings-list">
+                {ratings.map((r) => (
+                  <div key={r.id} className="rating-item card animate-fade-in">
+                    <div className="rating-item-header">
+                      <span className="rating-user">{r.userName || 'Anonymous'}</span>
+                      <span className="rating-stars">{'★'.repeat(r.stars)}{'☆'.repeat(5 - r.stars)}</span>
+                      <span className="rating-date">{new Date(r.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    {r.comment && <p className="rating-comment">{r.comment}</p>}
+                  </div>
+                ))}
+                {ratings.length === 0 && (
+                  <p className="empty-ratings">No reviews yet. Be the first to share your feedback!</p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 

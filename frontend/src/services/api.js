@@ -87,4 +87,10 @@ export const userAPI = {
   search: (name) => API.get(`/users/search?name=${encodeURIComponent(name)}`),
 };
 
+// ==================== RATING API ====================
+export const ratingAPI = {
+  submit: (data) => API.post('/ratings', data),
+  getByWebinar: (webinarId) => API.get(`/ratings/webinar/${webinarId}`),
+};
+
 export default API;

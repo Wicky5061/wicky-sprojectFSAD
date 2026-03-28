@@ -55,4 +55,7 @@ public interface WebinarRepository extends JpaRepository<Webinar, Long> {
 
     // Derived query - order by dateTime
     List<Webinar> findAllByOrderByDateTimeDesc();
+
+    // Find webinars starting between two dates where reminders haven't been sent
+    List<Webinar> findByDateTimeBetweenAndReminderSentFalse(LocalDateTime start, LocalDateTime end);
 }

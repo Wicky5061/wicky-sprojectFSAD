@@ -57,6 +57,9 @@ public class Webinar {
     private Integer maxParticipants = 100;
 
     private String category;
+    
+    @Column(nullable = false)
+    private boolean reminderSent = false;
 
     // One Webinar can have Many Registrations
     @OneToMany(mappedBy = "webinar", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -97,4 +100,6 @@ public class Webinar {
     public void setRegistrations(List<Registration> registrations) { this.registrations = registrations; }
     public List<Resource> getResources() { return resources; }
     public void setResources(List<Resource> resources) { this.resources = resources; }
+    public boolean isReminderSent() { return reminderSent; }
+    public void setReminderSent(boolean reminderSent) { this.reminderSent = reminderSent; }
 }

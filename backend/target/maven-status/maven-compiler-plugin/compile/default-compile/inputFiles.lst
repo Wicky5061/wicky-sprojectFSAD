@@ -2,6 +2,8 @@ C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platfo
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\config\SecurityConfig.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\exception\GlobalExceptionHandler.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\service\EmailService.java
+C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\entity\Rating.java
+C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\dto\RatingDto.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\service\RegistrationService.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\entity\Registration.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\controller\AuthController.java
@@ -20,13 +22,17 @@ C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platfo
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\entity\User.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\controller\UserController.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\dto\RegisterRequest.java
+C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\controller\RatingController.java
+C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\service\WebinarReminderTask.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\controller\WebinarController.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\exception\ResourceNotFoundException.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\service\ResourceService.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\repository\UserRepository.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\dto\LoginResponse.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\config\AppConfig.java
+C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\service\RatingService.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\controller\RegistrationController.java
+C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\repository\RatingRepository.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\dto\UserDto.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\controller\ResourceController.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\service\UserService.java
