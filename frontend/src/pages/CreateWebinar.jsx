@@ -1,12 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { webinarAPI } from '../services/api';
+import toast from 'react-hot-toast';
 import './CreateWebinar.css';
 
-/**
- * Create/Edit Webinar Page — Admin form for webinar management.
- * Demonstrates: @RequestBody, form handling, conditional create/update.
- */
 export default function CreateWebinar() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -23,7 +20,6 @@ export default function CreateWebinar() {
     maxParticipants: 100,
     category: '',
   });
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(isEdit);
 
@@ -49,7 +45,7 @@ export default function CreateWebinar() {
         category: w.category || '',
       });
     } catch (err) {
-      setError('Failed to load webinar data.');
+      toast.error('Failed to load webinar data.');
     } finally {
       setFetching(false);
     }
@@ -61,13 +57,12 @@ export default function CreateWebinar() {
       ...form,
       [name]: type === 'number' ? parseInt(value) || '' : value,
     });
-    setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.title || !form.description || !form.instructor || !form.dateTime) {
-      setError('Title, description, instructor, and date are required.');
+      toast.error('Missing required fields.');
       return;
     }
 
@@ -76,74 +71,70 @@ export default function CreateWebinar() {
       const payload = { ...form };
       if (isEdit) {
         await webinarAPI.update(id, payload);
+        toast.success('Webinar updated successfully!');
       } else {
         await webinarAPI.create(payload);
+        toast.success('Webinar created successfully!');
       }
       navigate('/admin');
     } catch (err) {
-      setError(err.response?.data?.message || `Failed to ${isEdit ? 'update' : 'create'} webinar.`);
+      toast.error(err.response?.data?.message || `Failed to ${isEdit ? 'update' : 'create'} webinar.`);
     } finally {
       setLoading(false);
     }
   };
 
-  if (fetching) {
-    return (
-      <div className="loading-page">
-        <div className="spinner"></div>
-        <p>Loading webinar data...</p>
-      </div>
-    );
-  }
+  if (fetching) return <div className="loading-page"><div className="spinner"></div></div>;
 
   return (
     <div className="page container" id="create-webinar-page">
       <div className="create-form-wrapper animate-fade-in">
-        <div className="page-header">
-          <h1>{isEdit ? 'Edit Webinar' : 'Create Webinar'}</h1>
-          <p>{isEdit ? 'Update webinar details' : 'Fill in the details to create a new webinar'}</p>
+        <div className="page-header mb-8">
+          <h1 className="gradient-text">{isEdit ? 'Edit Webinar' : 'Create New Webinar'}</h1>
+          <p className="text-muted">{isEdit ? `Modifying: ${form.title}` : 'Fill in the details for your upcoming session'}</p>
         </div>
 
-        {error && <div className="alert alert-error">{error}</div>}
-
-        <form onSubmit={handleSubmit} className="create-form glass" id="webinar-form">
-          <div className="form-group">
-            <label className="form-label" htmlFor="wf-title">Title *</label>
+        <form onSubmit={handleSubmit} className="create-form card glass shadow-xl" id="webinar-form">
+          <div className="form-group mb-6">
+            <label className="form-label" htmlFor="wf-title">Webinar Title *</label>
             <input
               type="text"
               id="wf-title"
               name="title"
               className="form-input"
-              placeholder="e.g. Introduction to React Hooks"
+              placeholder="e.g. Master React in 60 Minutes"
               value={form.title}
               onChange={handleChange}
+              required
             />
           </div>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="wf-description">Description *</label>
+          <div className="form-group mb-6">
+            <label className="form-label" htmlFor="wf-description">Detailed Description *</label>
             <textarea
               id="wf-description"
               name="description"
               className="form-textarea"
-              placeholder="Describe what attendees will learn..."
+              placeholder="Provide a compelling description of what learners will gain..."
               rows={5}
               value={form.description}
               onChange={handleChange}
+              required
             />
           </div>
 
-          <div className="form-row">
+          <div className="form-row grid grid-2 gap-6 mb-6">
             <div className="form-group">
-              <label className="form-label" htmlFor="wf-instructor">Instructor *</label>
+              <label className="form-label" htmlFor="wf-instructor">Lead Instructor *</label>
               <input
                 type="text"
                 id="wf-instructor"
                 name="instructor"
                 className="form-input"
-                placeholder="Instructor name"
+                placeholder="Full Name"
                 value={form.instructor}
                 onChange={handleChange}
+                required
               />
             </div>
             <div className="form-group">
@@ -153,16 +144,16 @@ export default function CreateWebinar() {
                 id="wf-category"
                 name="category"
                 className="form-input"
-                placeholder="e.g. Web Development"
+                placeholder="e.g. Software Development"
                 value={form.category}
                 onChange={handleChange}
               />
             </div>
           </div>
 
-          <div className="form-row">
+          <div className="form-row grid grid-2 gap-6 mb-6">
             <div className="form-group">
-              <label className="form-label" htmlFor="wf-datetime">Date & Time *</label>
+              <label className="form-label" htmlFor="wf-datetime">Start Date & Time *</label>
               <input
                 type="datetime-local"
                 id="wf-datetime"
@@ -170,10 +161,11 @@ export default function CreateWebinar() {
                 className="form-input"
                 value={form.dateTime}
                 onChange={handleChange}
+                required
               />
             </div>
             <div className="form-group">
-              <label className="form-label" htmlFor="wf-duration">Duration (minutes)</label>
+              <label className="form-label" htmlFor="wf-duration">Duration (mins)</label>
               <input
                 type="number"
                 id="wf-duration"
@@ -187,9 +179,9 @@ export default function CreateWebinar() {
             </div>
           </div>
 
-          <div className="form-row">
+          <div className="form-row grid grid-2 gap-6 mb-6">
             <div className="form-group">
-              <label className="form-label" htmlFor="wf-max">Max Participants</label>
+              <label className="form-label" htmlFor="wf-max">Max Capacity</label>
               <input
                 type="number"
                 id="wf-max"
@@ -201,49 +193,49 @@ export default function CreateWebinar() {
               />
             </div>
             <div className="form-group">
-              <label className="form-label" htmlFor="wf-stream">Stream / Meeting URL</label>
+              <label className="form-label" htmlFor="wf-stream">Live Stream Link</label>
               <input
                 type="url"
                 id="wf-stream"
                 name="streamUrl"
                 className="form-input"
-                placeholder="https://zoom.us/..."
+                placeholder="https://zoom.us/j/..."
                 value={form.streamUrl}
                 onChange={handleChange}
               />
             </div>
           </div>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="wf-cover">Cover Image URL</label>
+          <div className="form-group mb-8">
+            <label className="form-label" htmlFor="wf-cover">Cover Image Link</label>
             <input
               type="url"
               id="wf-cover"
               name="coverImageUrl"
               className="form-input"
-              placeholder="https://example.com/image.jpg"
+              placeholder="https://image-host.com/cover.jpg"
               value={form.coverImageUrl}
               onChange={handleChange}
             />
           </div>
 
-          <div className="form-actions">
+          <div className="form-actions flex justify-end gap-4 border-t pt-8">
             <button
               type="button"
-              className="btn btn-outline"
+              className="btn btn-outline px-8"
               onClick={() => navigate('/admin')}
             >
-              Cancel
+              Back to List
             </button>
             <button
               type="submit"
-              className="btn btn-primary btn-lg"
+              className="btn btn-primary px-12 shadow-lg"
               id="submit-webinar"
               disabled={loading}
             >
               {loading
-                ? (isEdit ? 'Updating...' : 'Creating...')
-                : (isEdit ? 'Update Webinar' : 'Create Webinar')}
+                ? (isEdit ? 'Updating Session...' : 'Creating Session...')
+                : (isEdit ? 'Finalize Changes' : 'Launch Webinar')}
             </button>
           </div>
         </form>

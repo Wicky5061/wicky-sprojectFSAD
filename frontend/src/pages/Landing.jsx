@@ -4,10 +4,6 @@ import { webinarAPI } from '../services/api';
 import WebinarCard from '../components/WebinarCard';
 import './Landing.css';
 
-/**
- * Landing Page — Hero section + Featured webinars.
- * Demonstrates: useState, useEffect hooks, Axios API calls.
- */
 export default function Landing() {
   const [webinars, setWebinars] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,7 +11,22 @@ export default function Landing() {
 
   useEffect(() => {
     loadData();
-  }, []);
+    
+    // Intersection Observer for reveal animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('reveal');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('section').forEach(section => {
+      observer.observe(section);
+    });
+
+    return () => observer.disconnect();
+  }, [loading]);
 
   const loadData = async () => {
     try {
@@ -32,127 +43,157 @@ export default function Landing() {
     }
   };
 
+  const speakers = [
+    { id: 1, name: 'Sarah Johnson', title: 'Cloud Architect', expertise: 'AWS & DevOps', image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200' },
+    { id: 2, name: 'Michael Chen', title: 'Full Stack Engineer', expertise: 'React & Node.js', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200' },
+    { id: 3, name: 'Alex Williams', title: 'Security Lead', expertise: 'Cybersecurity', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200' },
+    { id: 4, name: 'Dr. Alan Turing', title: 'AI Researcher', expertise: 'Machine Learning', image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200' },
+  ];
+
+  const testimonials = [
+    { id: 1, name: 'Emily Davis', text: 'The React workshop was a game-changer for my career. The instructor was brilliant!', rating: 5, photo: 'https://i.pravatar.cc/100?u=emily' },
+    { id: 2, name: 'David Miller', text: 'I love how interactive the sessions are. Much better than pre-recorded videos.', rating: 5, photo: 'https://i.pravatar.cc/100?u=david' },
+    { id: 3, name: 'Sophia Wilson', text: 'The resources provided after the AWS webinar were incredibly detailed. 10/10.', rating: 5, photo: 'https://i.pravatar.cc/100?u=sophia' },
+  ];
+
   return (
     <div className="landing-page">
       {/* Hero Section */}
-      <section className="hero-section" id="hero-section">
-        <div className="hero-bg-effects">
-          <div className="hero-orb hero-orb-1"></div>
-          <div className="hero-orb hero-orb-2"></div>
-          <div className="hero-orb hero-orb-3"></div>
+      <section className="hero-section">
+        <div className="hero-background-animation">
+          <div className="blob"></div>
+          <div className="blob"></div>
         </div>
-        <div className="container hero-content animate-slide-up">
-          <span className="hero-badge">🚀 Live Webinars & Workshops</span>
-          <h1 className="hero-title">
-            Learn From the <span className="gradient-text">Best Minds</span> in Tech
-          </h1>
-          <p className="hero-subtitle">
-            Join thousands of learners on WebinarHub. Access live sessions, interactive workshops,
-            and post-event resources — all in one platform.
-          </p>
-          <div className="hero-actions">
-            <Link to="/webinars" className="btn btn-primary btn-lg" id="hero-explore-btn">
-              Explore Webinars
-            </Link>
-            <Link to="/register" className="btn btn-outline btn-lg" id="hero-join-btn">
-              Join Free
-            </Link>
+        <div className="container hero-content">
+          <div className="hero-text-area">
+            <span className="hero-badge">🚀 Expert-Led Learning</span>
+            <h1 className="hero-title">
+              Learn Real-World Skills from <span className="gradient-text">Industry Experts</span>
+            </h1>
+            <p className="hero-subtitle">
+              Join live webinars, participate in hands-on workshops, and master the technology that matters today. No more learning in silos.
+            </p>
+            <div className="hero-actions">
+              <Link to="/webinars" className="btn btn-primary btn-lg">Browse Webinars</Link>
+              <Link to="/register" className="btn btn-outline btn-lg">Get Started Free</Link>
+            </div>
           </div>
-
-          {/* Stats */}
-          <div className="hero-stats">
-            <div className="stat-item">
-              <span className="stat-value">{stats.total || '0'}+</span>
-              <span className="stat-label">Webinars</span>
+          
+          <div className="hero-stats-floating shadow-lg">
+            <div className="floating-stat">
+              <span className="stat-num">{stats.total || '50'}+</span>
+              <span className="stat-desc">Webinars</span>
             </div>
-            <div className="stat-item">
-              <span className="stat-value">500+</span>
-              <span className="stat-label">Learners</span>
+            <div className="floating-stat">
+              <span className="stat-num">500+</span>
+              <span className="stat-desc">Students</span>
             </div>
-            <div className="stat-item">
-              <span className="stat-value">50+</span>
-              <span className="stat-label">Instructors</span>
+            <div className="floating-stat">
+              <span className="stat-num">20+</span>
+              <span className="stat-desc">Experts</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="features-section container" id="features-section">
-        <h2 className="section-title">Why Choose <span className="gradient-text">WebinarHub?</span></h2>
-        <div className="features-grid stagger">
-          <div className="feature-card card">
-            <div className="feature-icon">📡</div>
-            <h3>Live Streaming</h3>
-            <p>Join live sessions from anywhere. Interact with instructors in real time.</p>
-          </div>
-          <div className="feature-card card">
-            <div className="feature-icon">📚</div>
-            <h3>Rich Resources</h3>
-            <p>Access slides, recordings, and materials even after the event ends.</p>
-          </div>
-          <div className="feature-card card">
-            <div className="feature-icon">🎯</div>
-            <h3>Easy Registration</h3>
-            <p>Register for webinars with one click. Get reminders before events.</p>
-          </div>
-          <div className="feature-card card">
-            <div className="feature-icon">🏆</div>
-            <h3>Expert Instructors</h3>
-            <p>Learn from industry veterans and thought leaders across domains.</p>
+      {/* How It Works Section */}
+      <section className="how-it-works-section bg-secondary">
+        <div className="container">
+          <h2 className="section-title">How It <span className="gradient-text">Works</span></h2>
+          <div className="steps-grid">
+            <div className="step-card card">
+              <div className="step-icon">🔍</div>
+              <h3>1. Browse</h3>
+              <p>Explore our catalog of upcoming live webinars across various tech domains.</p>
+            </div>
+            <div className="step-card card">
+              <div className="step-icon">📝</div>
+              <h3>2. Register</h3>
+              <p>Click once to join any session you're interested in. It's that simple.</p>
+            </div>
+            <div className="step-card card">
+              <div className="step-icon">🎓</div>
+              <h3>3. Learn</h3>
+              <p>Join the live stream, interact with experts, and access post-event materials.</p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Upcoming Webinars Section */}
-      <section className="upcoming-section container" id="upcoming-section">
-        <div className="section-header">
-          <h2 className="section-title">Upcoming <span className="gradient-text">Webinars</span></h2>
-          <Link to="/webinars" className="btn btn-outline btn-sm" id="view-all-webinars">
-            View All →
-          </Link>
-        </div>
-
-        {loading ? (
-          <div className="loading-page">
-            <div className="spinner"></div>
-            <p>Loading webinars...</p>
-          </div>
-        ) : webinars.length > 0 ? (
-          <div className="grid grid-3 stagger">
-            {webinars.map((w) => (
-              <WebinarCard key={w.id} webinar={w} />
+      {/* Speakers Section */}
+      <section className="speakers-section">
+        <div className="container">
+          <h2 className="section-title">Learn from <span className="gradient-text">Top Experts</span></h2>
+          <div className="speakers-grid">
+            {speakers.map(speaker => (
+              <div key={speaker.id} className="speaker-card card">
+                <img src={speaker.image} alt={speaker.name} className="speaker-image" />
+                <h3>{speaker.name}</h3>
+                <p className="speaker-title">{speaker.title}</p>
+                <span className="speaker-expertise">{speaker.expertise}</span>
+              </div>
             ))}
           </div>
-        ) : (
-          <div className="empty-state">
-            <h3>No upcoming webinars yet</h3>
-            <p>Check back soon or create your first webinar!</p>
+        </div>
+      </section>
+
+      {/* Upcoming Timeline Section */}
+      <section className="timeline-section bg-secondary">
+        <div className="container">
+          <div className="section-header-flex">
+            <h2 className="section-title text-left">Upcoming <span className="gradient-text">Schedule</span></h2>
+            <Link to="/webinars" className="btn btn-sm btn-outline">View All &rarr;</Link>
           </div>
-        )}
+          
+          {loading ? (
+            <div className="loading-spinner"></div>
+          ) : (
+            <div className="timeline">
+              {webinars.slice(0, 3).map((webinar, idx) => (
+                <div key={webinar.id} className="timeline-item">
+                  <div className="timeline-dot"></div>
+                  <div className="timeline-date">{new Date(webinar.dateTime).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+                  <div className="timeline-content card">
+                    <h3>{webinar.title}</h3>
+                    <p>{webinar.instructor} &bull; {webinar.category}</p>
+                    <Link to={`/webinars/${webinar.id}`} className="btn btn-sm btn-primary">Join Live</Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="testimonials-section">
+        <div className="container">
+          <h2 className="section-title">What Students <span className="gradient-text">Say</span></h2>
+          <div className="testimonials-grid">
+            {testimonials.map(t => (
+              <div key={t.id} className="testimonial-card card">
+                <div className="rating">{'★'.repeat(t.rating)}</div>
+                <p>"{t.text}"</p>
+                <div className="testimonial-user">
+                  <img src={t.photo} alt={t.name} />
+                  <span>{t.name}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* CTA Section */}
-      <section className="cta-section" id="cta-section">
-        <div className="container cta-content">
-          <h2>Ready to start learning?</h2>
-          <p>Join WebinarHub today and access world-class webinars and workshops.</p>
-          <Link to="/register" className="btn btn-accent btn-lg" id="cta-register-btn">
-            Create Free Account
-          </Link>
+      <section className="final-cta">
+        <div className="container glass cta-inner">
+          <h2>Ready to Ignite Your Learning Journey?</h2>
+          <p>Join over 5,000+ engineers learning and growing with WebinarHub every day.</p>
+          <div className="cta-buttons">
+            <Link to="/register" className="btn btn-primary btn-lg">Create Free Account</Link>
+          </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="site-footer">
-        <div className="container footer-inner">
-          <div className="footer-brand">
-            <span className="brand-icon">⚡</span>
-            <span className="gradient-text" style={{ fontWeight: 700, fontSize: '1.1rem' }}>WebinarHub</span>
-          </div>
-          <p className="footer-text">© 2026 WebinarHub. Built with Spring Boot & React.</p>
-        </div>
-      </footer>
     </div>
   );
 }

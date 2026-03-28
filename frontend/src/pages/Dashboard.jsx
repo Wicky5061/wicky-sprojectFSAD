@@ -3,12 +3,9 @@ import { Link } from 'react-router-dom';
 import { registrationAPI, webinarAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import WebinarCard from '../components/WebinarCard';
+import toast from 'react-hot-toast';
 import './Dashboard.css';
 
-/**
- * User Dashboard — My registrations, recommended webinars.
- * Demonstrates: Context API usage, multiple API calls, conditional rendering.
- */
 export default function Dashboard() {
   const { user } = useAuth();
   const [registrations, setRegistrations] = useState([]);
@@ -35,118 +32,107 @@ export default function Dashboard() {
   };
 
   const handleCancel = async (regId) => {
-    if (!window.confirm('Cancel this registration?')) return;
+    const confirmed = await new Promise(resolve => {
+      const toastId = toast((t) => (
+        <span>
+          Cancel registration?
+          <button onClick={() => { toast.dismiss(t.id); resolve(true); }} className="btn btn-sm btn-primary ml-4">Yes</button>
+          <button onClick={() => { toast.dismiss(t.id); resolve(false); }} className="btn btn-sm btn-outline ml-2">No</button>
+        </span>
+      ), { duration: 6000 });
+    });
+
+    if (!confirmed) return;
+
     try {
       await registrationAPI.cancel(regId);
       setRegistrations(registrations.filter((r) => r.id !== regId));
+      toast.success('Registration cancelled successfully.');
     } catch {
-      alert('Failed to cancel registration.');
+      toast.error('Failed to cancel registration.');
     }
   };
 
   const formatDate = (dateStr) => {
     if (!dateStr) return 'TBD';
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      month: 'short', day: 'numeric', year: 'numeric',
+    return new Date(dateStr).toLocaleDateString([], {
+      month: 'short', day: 'numeric',
       hour: '2-digit', minute: '2-digit',
     });
   };
 
-  if (loading) {
-    return (
-      <div className="loading-page">
-        <div className="spinner"></div>
-        <p>Loading dashboard...</p>
-      </div>
-    );
-  }
+  if (loading) return <div className="loading-page"><div className="spinner"></div></div>;
 
   return (
     <div className="page container" id="user-dashboard">
-      <div className="page-header animate-fade-in">
-        <h1>My Dashboard</h1>
-        <p>Welcome back, {user?.name}! Here are your upcoming sessions.</p>
+      <div className="page-header">
+        <h1 className="gradient-text">My Dashboard</h1>
+        <p>Welcome back, {user?.name}! Manage your learning journey here.</p>
       </div>
 
-      {/* Stats Overview */}
-      <div className="dash-stats glass animate-fade-in">
-        <div className="dash-stat-item">
-          <span className="dash-stat-value">{registrations.length}</span>
-          <span className="dash-stat-label">My Registrations</span>
+      <div className="dash-stats-grid animate-fade-in">
+        <div className="dash-stat-card card">
+          <span className="stat-icon">📅</span>
+          <div className="stat-content">
+            <span className="stat-value">{registrations.length}</span>
+            <span className="stat-label">Registrations</span>
+          </div>
         </div>
-        <div className="dash-stat-item">
-          <span className="dash-stat-value">
-            {registrations.length}
-          </span>
-          <span className="dash-stat-label">Upcoming</span>
+        <div className="dash-stat-card card">
+          <span className="stat-icon">🎓</span>
+          <div className="stat-content">
+            <span className="stat-value">{registrations.filter(r => r.attended).length}</span>
+            <span className="stat-label">Sessions Attended</span>
+          </div>
         </div>
-        <div className="dash-stat-item">
-          <span className="dash-stat-value">
-            {registrations.filter((r) => r.attended).length}
-          </span>
-          <span className="dash-stat-label">Attended</span>
+        <div className="dash-stat-card card">
+          <span className="stat-icon">🔥</span>
+          <div className="stat-content">
+            <span className="stat-value">{recommended.length}</span>
+            <span className="stat-label">New Recommendations</span>
+          </div>
         </div>
       </div>
 
-      {/* My Registrations */}
       <section className="dash-section" id="my-registrations">
-        <h2>📋 My Registrations</h2>
+        <div className="section-header-flex mb-6">
+          <h3>Your Upcoming Sessions</h3>
+          {registrations.length > 0 && <span className="item-count">{registrations.length} Total</span>}
+        </div>
+        
         {registrations.length > 0 ? (
-          <div className="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Webinar</th>
-                  <th>Registered On</th>
-                  <th>Attended</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {registrations.map((reg) => (
-                  <tr key={reg.id}>
-                    <td>
-                      <Link to={`/webinars/${reg.webinarId}`} className="reg-webinar-link">
-                        {reg.webinarTitle || 'Webinar'}
-                      </Link>
-                    </td>
-                    <td>{formatDate(reg.registeredAt)}</td>
-                    <td>{reg.attended ? '✅' : '—'}</td>
-                    <td>
-                      {!reg.attended ? (
-                        <button
-                          className="btn btn-outline btn-sm"
-                          onClick={() => handleCancel(reg.id)}
-                        >
-                          Cancel
-                        </button>
-                      ) : (
-                        <span style={{ color: 'var(--text-muted)' }}>-</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="registrations-list grid grid-2">
+            {registrations.map((reg) => (
+              <div key={reg.id} className="registration-item card glass shadow-sm">
+                <div className="reg-info">
+                  <h4 className="reg-title">{reg.webinarTitle}</h4>
+                  <p className="reg-date">📅 {formatDate(reg.dateTime)}</p>
+                </div>
+                <div className="reg-actions">
+                  <Link to={`/webinars/${reg.webinarId}`} className="btn btn-sm btn-outline">Details</Link>
+                  {!reg.attended && (
+                    <button className="btn btn-sm btn-outline btn-error" onClick={() => handleCancel(reg.id)}>Cancel</button>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
-          <div className="empty-state">
+          <div className="empty-dashboard-state glass">
             <h3>No registrations yet</h3>
-            <p>
-              Browse our <Link to="/webinars">webinars</Link> and register for one!
-            </p>
+            <p>Ready to start learning? Explore our featured webinars below.</p>
+            <Link to="/webinars" className="btn btn-primary">Browse Webinars</Link>
           </div>
         )}
       </section>
 
-      {/* Recommended */}
       {recommended.length > 0 && (
         <section className="dash-section" id="recommended-webinars">
-          <div className="section-header">
-            <h2>🔥 Recommended for You</h2>
-            <Link to="/webinars" className="btn btn-outline btn-sm">View All</Link>
+          <div className="section-header-flex mb-6">
+            <h3>Recommended Webinars</h3>
+            <Link to="/webinars" className="btn btn-sm btn-outline">Explore More</Link>
           </div>
-          <div className="grid grid-3 stagger">
+          <div className="grid grid-3">
             {recommended.map((w) => (
               <WebinarCard key={w.id} webinar={w} />
             ))}

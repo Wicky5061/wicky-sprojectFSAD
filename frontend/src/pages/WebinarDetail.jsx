@@ -2,12 +2,9 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { webinarAPI, registrationAPI, resourceAPI, ratingAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 import './WebinarDetail.css';
 
-/**
- * Webinar Detail Page — Full info, register button, resources.
- * Demonstrates: useParams, multiple API calls, conditional rendering.
- */
 export default function WebinarDetail() {
   const { id } = useParams();
   const { user, isAdmin } = useAuth();
@@ -18,13 +15,11 @@ export default function WebinarDetail() {
   const [loading, setLoading] = useState(true);
   const [isRegistered, setIsRegistered] = useState(false);
   const [regLoading, setRegLoading] = useState(false);
-  const [message, setMessage] = useState({ text: '', type: '' });
   const [ratings, setRatings] = useState([]);
   const [avgRating, setAvgRating] = useState(0);
   const [userRating, setUserRating] = useState({ stars: 5, comment: '' });
   const [submittingRating, setSubmittingRating] = useState(false);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadWebinar();
   }, [id]);
@@ -45,7 +40,6 @@ export default function WebinarDetail() {
         setAvgRating(avg.toFixed(1));
       }
 
-      // Check if user is registered
       if (user) {
         try {
           const checkRes = await registrationAPI.checkRegistration(id);
@@ -56,6 +50,7 @@ export default function WebinarDetail() {
       }
     } catch (err) {
       console.error('Failed to load webinar:', err);
+      toast.error('Failed to load webinar details.');
     } finally {
       setLoading(false);
     }
@@ -75,11 +70,11 @@ export default function WebinarDetail() {
       });
       setRatings([res.data, ...ratings]);
       setUserRating({ stars: 5, comment: '' });
-      // Update average
       const newAvg = ([res.data, ...ratings]).reduce((acc, r) => acc + r.stars, 0) / (ratings.length + 1);
       setAvgRating(newAvg.toFixed(1));
+      toast.success('Thank you for your feedback!');
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to submit rating.');
+      toast.error(err.response?.data?.message || 'Failed to submit rating.');
     } finally {
       setSubmittingRating(false);
     }
@@ -94,12 +89,9 @@ export default function WebinarDetail() {
     try {
       await registrationAPI.register(webinar.id);
       setIsRegistered(true);
-      setMessage({ text: 'Successfully registered for this webinar!', type: 'success' });
+      toast.success('Successfully registered! Check your email for details.');
     } catch (err) {
-      setMessage({
-        text: err.response?.data?.message || 'Failed to register.',
-        type: 'error',
-      });
+      toast.error(err.response?.data?.message || 'Failed to register.');
     } finally {
       setRegLoading(false);
     }
@@ -107,7 +99,7 @@ export default function WebinarDetail() {
 
   const formatDate = (dateStr) => {
     if (!dateStr) return 'TBD';
-    return new Date(dateStr).toLocaleDateString('en-US', {
+    return new Date(dateStr).toLocaleDateString([], {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -117,14 +109,7 @@ export default function WebinarDetail() {
     });
   };
 
-  if (loading) {
-    return (
-      <div className="loading-page">
-        <div className="spinner"></div>
-        <p>Loading webinar...</p>
-      </div>
-    );
-  }
+  if (loading) return <div className="loading-page"><div className="spinner"></div></div>;
 
   if (!webinar) {
     return (
@@ -141,62 +126,49 @@ export default function WebinarDetail() {
 
   return (
     <div className="page container" id="webinar-detail-page">
-      <div className="detail-layout animate-fade-in">
-        {/* Main Content */}
+      <div className="detail-layout">
         <div className="detail-main">
-          {/* Cover Image */}
-          <div className="detail-cover">
+          <div className="detail-cover shadow-xl">
             {webinar.coverImageUrl ? (
               <img src={webinar.coverImageUrl} alt={webinar.title} />
             ) : (
-              <div className="detail-cover-placeholder">
-                <span>⚡</span>
-              </div>
+              <div className="detail-cover-placeholder">⚡</div>
             )}
+            <span className={`badge badge-${statusClass} detail-status-badge`}>{webinar.status}</span>
           </div>
 
-          <div className="detail-body">
-            <div className="detail-meta-top">
-              <span className={`badge badge-${statusClass}`}>{webinar.status}</span>
-              {webinar.category && (
-                <span className="detail-category">{webinar.category}</span>
-              )}
-            </div>
-
-            <h1 className="detail-title">{webinar.title}</h1>
-
-            <div className="detail-instructor">
-              <span className="instructor-avatar">👤</span>
-              <div>
-                <span className="instructor-label">Instructor</span>
-                <span className="instructor-name">{webinar.instructor}</span>
+          <div className="detail-content-area">
+            <div className="detail-header-info">
+              {webinar.category && <span className="detail-category-tag">{webinar.category}</span>}
+              <h1 className="detail-title">{webinar.title}</h1>
+              
+              <div className="detail-instructor-strip">
+                <div className="instructor-info">
+                  <span className="instructor-pfp">👤</span>
+                  <div>
+                    <span className="inst-label">Presented By</span>
+                    <span className="inst-name">{webinar.instructor}</span>
+                  </div>
+                </div>
+                {avgRating > 0 && <div className="detail-avg-rating">⭐ {avgRating}<span>({ratings.length} Reviews)</span></div>}
               </div>
             </div>
 
-            <div className="detail-description">
-              <h2>About this Webinar</h2>
-              <p>{webinar.description}</p>
+            <div className="detail-section">
+              <h3>About this Session</h3>
+              <p className="description-text">{webinar.description}</p>
             </div>
 
-            {/* Resources */}
             {resources.length > 0 && (
-              <div className="detail-resources">
-                <h2>📚 Resources</h2>
-                <div className="resources-list">
+              <div className="detail-section">
+                <h3>📚 Learning Materials</h3>
+                <div className="resources-grid">
                   {resources.map((r) => (
-                    <a
-                      key={r.id}
-                      href={r.fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="resource-item card"
-                    >
-                      <span className="resource-icon">
-                        {r.fileType === 'PDF' ? '📄' : r.fileType === 'VIDEO' ? '🎥' : '📎'}
-                      </span>
-                      <div>
-                        <span className="resource-title">{r.title}</span>
-                        <span className="resource-type">{r.fileType}</span>
+                    <a key={r.id} href={r.fileUrl} target="_blank" rel="noopener noreferrer" className="resource-link card">
+                      <span className="res-icon">{r.fileType === 'PDF' ? '📄' : '🎥'}</span>
+                      <div className="res-info">
+                        <span className="res-title">{r.title}</span>
+                        <span className="res-type">{r.fileType}</span>
                       </div>
                     </a>
                   ))}
@@ -204,151 +176,93 @@ export default function WebinarDetail() {
               </div>
             )}
 
-            {/* Stream URL for Live/Completed */}
             {webinar.streamUrl && (webinar.status === 'LIVE' || webinar.status === 'COMPLETED') && (
-              <div className="detail-stream">
-                <h2>{webinar.status === 'LIVE' ? '📡 Live Stream' : '🎬 Recording'}</h2>
-                <a
-                  href={webinar.streamUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-accent btn-lg"
-                  id="stream-link"
-                >
-                  {webinar.status === 'LIVE' ? 'Join Live Stream' : 'Watch Recording'}
+              <div className="detail-section stream-section glass">
+                <h3>{webinar.status === 'LIVE' ? '📡 Watch Live Session' : '🎬 Watch Replay'}</h3>
+                <p>Access the {webinar.status === 'LIVE' ? 'live stream' : 'recording'} for this webinar below.</p>
+                <a href={webinar.streamUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-lg w-full">
+                  {webinar.status === 'LIVE' ? 'Enter Live Stream' : 'Watch Recording'}
                 </a>
               </div>
             )}
 
-            {/* Ratings Section */}
-            <div className="detail-ratings">
-              <div className="rating-header">
-                <h2>⭐ Ratings & Reviews ({ratings.length})</h2>
-                {avgRating > 0 && <span className="avg-rating-badge">{avgRating} / 5</span>}
+            <div className="detail-section ratings-section">
+              <div className="section-title-flex">
+                <h3>Reviews & Feedback</h3>
+                {avgRating > 0 && <span className="count-badge">{ratings.length} Reviews</span>}
               </div>
 
-              {/* Submit Rating - Only if completed/live and registered */}
               {(webinar.status === 'COMPLETED' || webinar.status === 'LIVE') && isRegistered && (
-                <div className="rating-form card animate-fade-in">
-                  <h3>Share your experience</h3>
+                <div className="rating-form-card card">
+                  <h4>Leave a Review</h4>
                   <form onSubmit={handleRatingSubmit}>
-                    <div className="star-input-group">
+                    <div className="star-rating-input">
                       {[1, 2, 3, 4, 5].map((s) => (
-                        <button
-                          key={s}
-                          type="button"
-                          className={`star-btn ${userRating.stars >= s ? 'active' : ''}`}
-                          onClick={() => setUserRating({ ...userRating, stars: s })}
-                        >
-                          ★
-                        </button>
+                        <button key={s} type="button" className={`star-btn ${userRating.stars >= s ? 'active' : ''}`} onClick={() => setUserRating({ ...userRating, stars: s })}>★</button>
                       ))}
                     </div>
-                    <textarea
-                      placeholder="Write a short review (optional)..."
-                      className="form-control"
-                      value={userRating.comment}
-                      onChange={(e) => setUserRating({ ...userRating, comment: e.target.value })}
-                      rows="3"
-                    ></textarea>
-                    <button
-                      type="submit"
-                      className="btn btn-primary"
-                      disabled={submittingRating}
-                    >
-                      {submittingRating ? 'Submitting...' : 'Post Review'}
-                    </button>
+                    <textarea placeholder="Tell others what you learned..." className="form-input" value={userRating.comment} onChange={(e) => setUserRating({ ...userRating, comment: e.target.value })} rows="3"></textarea>
+                    <button type="submit" className="btn btn-primary btn-sm" disabled={submittingRating}>{submittingRating ? 'Posting...' : 'Post Review'}</button>
                   </form>
                 </div>
               )}
 
-              <div className="ratings-list">
+              <div className="reviews-list">
                 {ratings.map((r) => (
-                  <div key={r.id} className="rating-item card animate-fade-in">
-                    <div className="rating-item-header">
-                      <span className="rating-user">{r.userName || 'Anonymous'}</span>
-                      <span className="rating-stars">{'★'.repeat(r.stars)}{'☆'.repeat(5 - r.stars)}</span>
-                      <span className="rating-date">{new Date(r.createdAt).toLocaleDateString()}</span>
+                  <div key={r.id} className="review-card card">
+                    <div className="review-header">
+                      <span className="review-user">{r.userName || 'Learning Enthusiast'}</span>
+                      <span className="review-stars">{'★'.repeat(r.stars)}</span>
                     </div>
-                    {r.comment && <p className="rating-comment">{r.comment}</p>}
+                    {r.comment && <p className="review-text">{r.comment}</p>}
+                    <span className="review-date">{new Date(r.createdAt).toLocaleDateString()}</span>
                   </div>
                 ))}
-                {ratings.length === 0 && (
-                  <p className="empty-ratings">No reviews yet. Be the first to share your feedback!</p>
-                )}
+                {ratings.length === 0 && <p className="empty-reviews">No reviews yet. Join the session to be the first!</p>}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Sidebar */}
         <aside className="detail-sidebar">
-          <div className="sidebar-card glass">
-            <h3>Event Details</h3>
-            <div className="sidebar-info">
-              <div className="sidebar-row">
-                <span className="sidebar-icon">📅</span>
-                <div>
-                  <span className="sidebar-label">Date & Time</span>
-                  <span className="sidebar-value">{formatDate(webinar.dateTime)}</span>
+          <div className="sticky-sidebar-card glass shadow-lg">
+            <h3>Event Information</h3>
+            <div className="sidebar-meta-list">
+              <div className="side-meta-item">
+                <span className="side-icon">📅</span>
+                <div className="side-info">
+                  <span className="side-label">Scheduled For</span>
+                  <span className="side-value">{formatDate(webinar.dateTime)}</span>
                 </div>
               </div>
-              <div className="sidebar-row">
-                <span className="sidebar-icon">⏱️</span>
-                <div>
-                  <span className="sidebar-label">Duration</span>
-                  <span className="sidebar-value">{webinar.durationMinutes} minutes</span>
+              <div className="side-meta-item">
+                <span className="side-icon">⏱️</span>
+                <div className="side-info">
+                  <span className="side-label">Duration</span>
+                  <span className="side-value">{webinar.durationMinutes || '60'} Minutes</span>
                 </div>
               </div>
-              <div className="sidebar-row">
-                <span className="sidebar-icon">👥</span>
-                <div>
-                  <span className="sidebar-label">Participants</span>
-                  <span className="sidebar-value">
-                    {webinar.status === 'LIVE'
-                      ? `${webinar.registrationCount || 0} watching now`
-                      : webinar.status === 'COMPLETED'
-                      ? `${webinar.registrationCount || 0} attended`
-                      : `${webinar.registrationCount || 0} registered (${Math.max(0, (webinar.maxParticipants || 100) - (webinar.registrationCount || 0))} seats left)`}
-                  </span>
+              <div className="side-meta-item">
+                <span className="side-icon">👥</span>
+                <div className="side-info">
+                  <span className="side-label">Participants</span>
+                  <span className="side-value">{webinar.registrationCount || '0'} Registered</span>
                 </div>
               </div>
             </div>
 
-            {message.text && (
-              <div className={`alert alert-${message.type}`}>{message.text}</div>
-            )}
-
-            {webinar.status !== 'CANCELLED' && !isAdmin() && (
-              isRegistered ? (
-                <div className="registered-badge">
-                  <span>✅</span> You are registered
-                </div>
-              ) : (
-                <button
-                  className="btn btn-primary btn-lg sidebar-cta"
-                  id="register-btn"
-                  onClick={handleRegister}
-                  disabled={regLoading || webinar.registrationCount >= webinar.maxParticipants}
-                >
-                  {regLoading
-                    ? 'Registering...'
-                    : webinar.registrationCount >= webinar.maxParticipants
-                    ? 'Event Full'
-                    : 'Register Now — Free'}
-                </button>
-              )
-            )}
-
-            {isAdmin() && (
-              <Link
-                to={`/admin/webinars/edit/${webinar.id}`}
-                className="btn btn-outline sidebar-cta"
-                id="edit-webinar-btn"
-              >
-                ✏️ Edit Webinar
-              </Link>
-            )}
+            <div className="sidebar-actions">
+              {webinar.status !== 'CANCELLED' && !isAdmin() && (
+                isRegistered ? (
+                  <div className="reg-status-pill">✅ You are Registered</div>
+                ) : (
+                  <button className="btn btn-primary btn-lg w-full" onClick={handleRegister} disabled={regLoading || webinar.registrationCount >= (webinar.maxParticipants || 100)}>
+                    {regLoading ? 'Processing...' : 'Register Now'}
+                  </button>
+                )
+              )}
+              {isAdmin() && <Link to={`/admin/webinars/edit/${webinar.id}`} className="btn btn-outline w-full">Edit Webinar</Link>}
+            </div>
           </div>
         </aside>
       </div>
