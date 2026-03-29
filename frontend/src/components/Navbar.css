@@ -26,7 +26,7 @@
   align-items: center;
   gap: 12px;
   text-decoration: none;
-  min-width: fit-content;
+  min-width: 280px;
   overflow: visible;
 }
 .brand-icon {
