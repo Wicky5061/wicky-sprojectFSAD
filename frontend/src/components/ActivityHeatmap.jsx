@@ -1,12 +1,35 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import './ActivityHeatmap.css';
 
 /**
- * Enhanced ActivityHeatmap — Rewritten using pure SVG for pixel-perfect rendering.
- * Mimics GitHub's contribution graph with 53 columns and 7 rows.
+ * Enhanced ActivityHeatmap — Completely rewritten from scratch using SVG.
+ * Follows exact user specification for pixel-perfect contribution graph.
  */
 export default function ActivityHeatmap({ registrations = [] }) {
-  // 1. Process registrations into a date-count lookup
+  const [tooltip, setTooltip] = useState({ show: false, x: 0, y: 0, text: '' });
+
+  // CONSTANTS
+  const CELL_SIZE = 13;
+  const CELL_GAP = 3;
+  const CELL_TOTAL = CELL_SIZE + CELL_GAP;
+  const COLS = 53;
+  const ROWS = 7;
+  const LEFT_PADDING = 40;
+  const TOP_PADDING = 25;
+  const DAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
+
+  const SVG_WIDTH = LEFT_PADDING + (COLS * CELL_TOTAL) + 20;
+  const SVG_HEIGHT = TOP_PADDING + (ROWS * CELL_TOTAL) + 30;
+
+  const COLORS = {
+    0: '#2d333b',
+    1: '#0e4429',
+    2: '#006d32',
+    3: '#26a641',
+    4: '#39d353'
+  };
+
+  // 1. Process registrations
   const activityMap = useMemo(() => {
     const map = {};
     registrations.forEach(reg => {
@@ -18,155 +41,170 @@ export default function ActivityHeatmap({ registrations = [] }) {
     return map;
   }, [registrations]);
 
-  // 2. Generate the 53-week grid data starting from Sunday
-  const { weeks, monthLabels, totalActiveDays, currentStreak } = useMemo(() => {
+  // 2. Generate Grid and Month Metadata
+  const { grid, months, totalActive, currentStreak } = useMemo(() => {
     const today = new Date();
-    const resultWeeks = [];
-    let activeDaysCount = 0;
-    const mLabels = [];
+    const resultGrid = [];
+    const resultMonths = [];
+    let activeCount = 0;
     
-    // Calculate start date: 52 weeks ago + current partial week, aligned to Sunday
+    // Start date: 52 weeks ago, aligned to Sunday
     const startDate = new Date();
     startDate.setDate(today.getDate() - 364);
-    startDate.setDate(startDate.getDate() - startDate.getDay()); // Align to Sunday
+    startDate.setDate(startDate.getDate() - startDate.getDay()); // Sunday
 
-    const dateCursor = new Date(startDate);
+    const cursor = new Date(startDate);
     
-    for (let w = 0; w < 53; w++) {
-      const days = [];
-      for (let d = 0; d < 7; d++) {
-        const dateKey = dateCursor.toISOString().split('T')[0];
+    for (let w = 0; w < COLS; w++) {
+      const week = [];
+      for (let d = 0; d < ROWS; d++) {
+        const dateKey = cursor.toISOString().split('T')[0];
         const count = activityMap[dateKey] || 0;
-        if (count > 0) activeDaysCount++;
+        if (count > 0) activeCount++;
 
-        // Detect month change for labels
-        if (dateCursor.getDate() <= 7 && d === 0) {
-            const mName = dateCursor.toLocaleString('default', { month: 'short' });
-            if (!mLabels.some(l => l.name === mName)) {
-                mLabels.push({ name: mName, weekIndex: w });
+        // Detect month start (first 7 days of month)
+        if (cursor.getDate() <= 7 && d === 0) {
+            const mName = cursor.toLocaleString('default', { month: 'short' });
+            if (!resultMonths.some(m => m.name === mName)) {
+                resultMonths.push({ name: mName, weekIndex: w });
             }
         }
 
-        days.push({
-          date: new Date(dateCursor),
-          dateKey,
-          count,
-          level: getLevel(count)
+        week.push({
+            date: new Date(cursor),
+            dateKey,
+            count,
+            level: count >= 4 ? 4 : count
         });
-        dateCursor.setDate(dateCursor.getDate() + 1);
+        cursor.setDate(cursor.getDate() + 1);
       }
-      resultWeeks.push(days);
+      resultGrid.push(week);
     }
 
-    // Current Streak logic
+    // Streak logic
     let streak = 0;
-    const streakCursor = new Date();
+    const sCursor = new Date();
     while (true) {
-        const skey = streakCursor.toISOString().split('T')[0];
-        if (activityMap[skey]) {
+        const key = sCursor.toISOString().split('T')[0];
+        if (activityMap[key]) {
             streak++;
-            streakCursor.setDate(streakCursor.getDate() - 1);
+            sCursor.setDate(sCursor.getDate() - 1);
         } else {
-            // Check if streak broke today or is ongoing from yesterday
             if (streak === 0) {
-                 const yesterday = new Date();
-                 yesterday.setDate(yesterday.getDate() - 1);
-                 const yKey = yesterday.toISOString().split('T')[0];
-                 if (!activityMap[yKey]) break; // Streak is 0
-                 streakCursor.setDate(streakCursor.getDate() - 1); // Start from yesterday
-                 continue;
+                const yest = new Date();
+                yest.setDate(yest.getDate() - 1);
+                if (!activityMap[yest.toISOString().split('T')[0]]) break;
+                sCursor.setDate(sCursor.getDate() - 1);
+                continue;
             }
             break;
         }
     }
 
-    return { 
-        weeks: resultWeeks, 
-        monthLabels: mLabels, 
-        totalActiveDays: activeDaysCount,
-        currentStreak: streak
-    };
+    return { grid: resultGrid, months: resultMonths, totalActive: activeCount, currentStreak: streak };
   }, [activityMap]);
 
-  function getLevel(count) {
-    if (count === 0) return 0;
-    if (count === 1) return 1;
-    if (count === 2) return 2;
-    if (count === 3) return 3;
-    return 4;
-  }
-
-  const levelColors = {
-    0: 'var(--heatmap-bg-0)',
-    1: '#0e4429',
-    2: '#006d32',
-    3: '#26a641',
-    4: '#39d353'
+  const handleMouseEnter = (e, day) => {
+    const rect = e.target.getBoundingClientRect();
+    const tooltipText = `${day.date.toLocaleDateString('default', { weekday: 'short', month: 'short', day: 'numeric' })} - ${day.count} webinars`;
+    setTooltip({
+      show: true,
+      x: rect.left + window.scrollX + (CELL_SIZE / 2),
+      y: rect.top + window.scrollY - 10,
+      text: tooltipText
+    });
   };
 
   return (
-    <div className="activity-heatmap-wrapper card glass shadow-sm animate-fade-in">
+    <div className="activity-heatmap-wrapper card glass shadow-sm animate-fade-in" style={{ position: 'relative' }}>
       <div className="heatmap-header mb-4">
         <div className="heatmap-titles">
           <h3>Your Learning Activity</h3>
           <p className="text-muted">
-            {totalActiveDays} days active this year • <span className="streak-badge">🔥 {currentStreak} day streak</span>
+            {totalActive} days active this year • <span className="streak-badge">🔥 {currentStreak} day streak</span>
           </p>
         </div>
       </div>
 
-      <div className="heatmap-svg-container">
-        <svg width="100%" height="130" style={{ maxWidth: '850px' }}>
+      <div className="heatmap-svg-scroll">
+        <svg width={SVG_WIDTH} height={SVG_HEIGHT} className="heatmap-svg">
           {/* Month Labels */}
-          {monthLabels.map((m, i) => (
+          {months.map((m, i) => (
             <text 
-                key={i} 
-                x={35 + (m.weekIndex * 16)} 
-                y="12" 
-                className="heatmap-text month-label"
+              key={i} 
+              x={LEFT_PADDING + (m.weekIndex * CELL_TOTAL)} 
+              y={TOP_PADDING - 10} 
+              className="heatmap-label month-label"
+              fontSize="10"
+              fill="var(--text-muted)"
             >
-                {m.name}
+              {m.name}
             </text>
           ))}
 
-          {/* Day Labels - All 7 rows exist, but only show labels for Mon, Wed, Fri */}
-          <text x="0" y="32" className="heatmap-text day-label">Mon</text>
-          <text x="0" y="64" className="heatmap-text day-label">Wed</text>
-          <text x="0" y="96" className="heatmap-text day-label">Fri</text>
+          {/* Day Labels */}
+          {DAY_LABELS.map((label, i) => (
+            label && (
+                <text 
+                  key={i} 
+                  x={LEFT_PADDING - 8} 
+                  y={TOP_PADDING + (i * CELL_TOTAL) + 10} 
+                  textAnchor="end"
+                  fontSize="10"
+                  fill="var(--text-muted)"
+                >
+                  {label}
+                </text>
+            )
+          ))}
 
-          {/* The Grid */}
-          <g transform="translate(35, 20)">
-            {weeks.map((week, weekIdx) => (
-              <g key={weekIdx} transform={`translate(${weekIdx * 16}, 0)`}>
-                {week.map((day, dayIdx) => (
-                  <rect
-                    key={dayIdx}
-                    width="13"
-                    height="13"
-                    x="0"
-                    y={dayIdx * 16}
-                    rx="2.5"
-                    fill={levelColors[day.level]}
-                    className="heatmap-cell"
-                    title={`${day.date.toLocaleDateString('default', { weekday: 'short', month: 'short', day: 'numeric' })} - ${day.count} webinars`}
-                  >
-                    <title>{`${day.date.toLocaleDateString('default', { weekday: 'short', month: 'short', day: 'numeric' })} - ${day.count} webinars`}</title>
-                  </rect>
-                ))}
-              </g>
-            ))}
-          </g>
+          {/* Grid Cells */}
+          {grid.map((week, wIndex) => (
+            <g key={wIndex}>
+              {week.map((day, dIndex) => (
+                <rect
+                  key={dIndex}
+                  x={LEFT_PADDING + (wIndex * CELL_TOTAL)}
+                  y={TOP_PADDING + (dIndex * CELL_TOTAL)}
+                  width={CELL_SIZE}
+                  height={CELL_SIZE}
+                  rx="2"
+                  fill={COLORS[day.level]}
+                  className="heatmap-rect"
+                  onMouseEnter={(e) => handleMouseEnter(e, day)}
+                  onMouseLeave={() => setTooltip({ ...tooltip, show: false })}
+                />
+              ))}
+            </g>
+          ))}
         </svg>
       </div>
 
+      {/* Floating Tooltip Improvement */}
+      {tooltip.show && (
+        <div 
+          className="heatmap-custom-tooltip"
+          style={{ 
+            position: 'fixed',
+            left: `${tooltip.x}px`,
+            top: `${tooltip.y}px`,
+            transform: 'translate(-50%, -100%)',
+            pointerEvents: 'none',
+            zIndex: 1000
+          }}
+        >
+          {tooltip.text}
+        </div>
+      )}
+
       <div className="heatmap-legend mt-4">
-        <span>Less</span>
+        <span className="text-xs">Less</span>
         <div className="legend-items">
-            {Object.entries(levelColors).map(([lvl, color]) => (
-                <div key={lvl} className="heatmap-day" style={{ backgroundColor: color }}></div>
+            {[0, 1, 2, 3, 4].map(lvl => (
+                <div key={lvl} className="heatmap-legend-cell" style={{ backgroundColor: COLORS[lvl] }}></div>
             ))}
         </div>
-        <span>More</span>
+        <span className="text-xs">More</span>
       </div>
     </div>
   );

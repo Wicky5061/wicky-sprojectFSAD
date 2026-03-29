@@ -1,68 +1,55 @@
 /* ========================================
-   Activity Heatmap CSS (SVG Version)
+   Activity Heatmap Component
    ======================================== */
 
-:root {
-  --heatmap-bg-0: #ebedf0;
-}
-
-[data-theme='dark'] {
-  --heatmap-bg-0: #2d333b;
-}
-
 .activity-heatmap-wrapper {
-  padding: 30px;
+  padding: 24px;
   border-radius: var(--radius-xl);
   background: var(--bg-card);
   margin-top: 40px;
   border: 1px solid var(--border);
-  overflow: hidden;
 }
 
-.heatmap-svg-container {
-  padding-left: 20px;
+.heatmap-svg-scroll {
   overflow-x: auto;
-  user-select: none;
+  padding-bottom: 20px;
 }
 
-.heatmap-svg-container::-webkit-scrollbar {
+.heatmap-svg-scroll::-webkit-scrollbar {
   height: 6px;
 }
 
-.heatmap-svg-container::-webkit-scrollbar-thumb {
+.heatmap-svg-scroll::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 10px;
 }
 
-/* SVG Text Styles */
-.heatmap-text {
+.heatmap-label {
+  font-family: inherit;
   font-size: 10px;
   fill: var(--text-muted);
-  dominant-baseline: middle;
 }
 
-.month-label {
-  text-anchor: middle;
-}
-
-.day-label {
-  text-anchor: start;
-}
-
-/* Cell Styles */
-.heatmap-cell {
+.heatmap-rect {
   transition: opacity 0.2s ease;
-  cursor: help;
+  cursor: pointer;
 }
 
-.heatmap-cell:hover {
+.heatmap-rect:hover {
   stroke: var(--primary);
   stroke-width: 1px;
 }
 
-.streak-badge {
-  font-weight: 700;
-  color: #f97316;
+/* Custom Heatmap Tooltip */
+.heatmap-custom-tooltip {
+  background: #1e293b;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  white-space: nowrap;
 }
 
 /* Legend */
@@ -70,18 +57,23 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 10px;
-  font-size: 0.75rem;
+  gap: 8px;
+  font-size: 11px;
   color: var(--text-muted);
 }
 
 .legend-items {
   display: flex;
-  gap: 4px;
+  gap: 3px;
 }
 
-.heatmap-day {
-  width: 12px;
-  height: 12px;
-  border-radius: 2.5px;
+.heatmap-legend-cell {
+  width: 13px;
+  height: 13px;
+  border-radius: 2px;
+}
+
+.streak-badge {
+    font-weight: 700;
+    color: #f97316;
 }
