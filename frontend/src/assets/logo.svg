@@ -1,0 +1,25 @@
+<svg width="240" height="60" viewBox="0 0 240 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Professional Modern Logo Icon -->
+  <path d="M35 15C35 15 20 22.5 20 35C20 47.5 35 55 35 55" stroke="url(#paint0_linear)" stroke-width="8" stroke-linecap="round"/>
+  <path d="M45 15C45 15 60 22.5 60 35C60 47.5 45 55 45 55" stroke="url(#paint1_linear)" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="40" cy="35" r="8" fill="#10b981">
+    <animate attributeName="r" values="8;10;8" dur="3s" repeatCount="indefinite" />
+  </circle>
+  
+  <!-- Logo Text -->
+  <text x="80" y="42" font-family="Inter, system-ui, sans-serif" font-size="28" font-weight="900" letter-spacing="-0.03em">
+    <tspan fill="#3b82f6">Wicky</tspan>
+    <tspan fill="#10b981">Webinars</tspan>
+  </text>
+  
+  <defs>
+    <linearGradient id="paint0_linear" x1="20" y1="15" x2="20" y2="55" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3b82f6"/>
+      <stop offset="1" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="paint1_linear" x1="60" y1="15" x2="60" y2="55" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#10b981"/>
+      <stop offset="1" stop-color="#3b82f6"/>
+    </linearGradient>
+  </defs>
+</svg>

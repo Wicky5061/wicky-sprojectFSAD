@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import logo from '../assets/logo.svg';
 import './Navbar.css';
 
 /**
@@ -24,8 +25,7 @@ export default function Navbar() {
     <nav className="navbar" id="main-navbar">
       <div className="navbar-inner container">
         <Link to="/" className="navbar-brand" id="navbar-brand">
-          <span className="brand-icon">⚡</span>
-          <span className="brand-text">WebinarHub</span>
+          <img src={logo} alt="WickyWebinars" height="45" style={{ objectFit: 'contain' }} />
         </Link>
 
         <button
