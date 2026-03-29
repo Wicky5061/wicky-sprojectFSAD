@@ -9,12 +9,13 @@
   text-decoration: none;
   color: inherit;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform-style: preserve-3d;
+  will-change: transform;
 }
 
 .webinar-card:hover {
   border-color: var(--primary-light);
-  transform: translateY(-8px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 25px 40px -10px rgba(0, 0, 0, 0.5);
 }
 
 .webinar-card-header {

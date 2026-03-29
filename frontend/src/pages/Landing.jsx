@@ -2,30 +2,45 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { webinarAPI } from '../services/api';
 import WebinarCard from '../components/WebinarCard';
+import ThreeBackground from '../components/ThreeBackground';
 import './Landing.css';
 
 export default function Landing() {
   const [webinars, setWebinars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ total: 0 });
+  const [offsetY, setOffsetY] = useState(0);
 
   useEffect(() => {
     loadData();
     
-    // Intersection Observer for reveal animations
+    // Parallax scroll handler
+    const handleScroll = () => setOffsetY(window.pageYOffset);
+    window.addEventListener('scroll', handleScroll);
+
+    // Advanced Intersection Observer for smooth reveal
+    const observerOptions = {
+      threshold: 0.15,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          entry.target.classList.add('reveal');
+          entry.target.classList.add('reveal-active');
         }
       });
-    }, { threshold: 0.1 });
+    }, observerOptions);
 
-    document.querySelectorAll('section').forEach(section => {
-      observer.observe(section);
+    document.querySelectorAll('section, .reveal').forEach(el => {
+      el.classList.add('reveal-init');
+      observer.observe(el);
     });
 
-    return () => observer.disconnect();
+    return () => {
+        observer.disconnect();
+        window.removeEventListener('scroll', handleScroll);
+    };
   }, [loading]);
 
   const loadData = async () => {
@@ -59,15 +74,12 @@ export default function Landing() {
 
   return (
     <div className="landing-page">
-      {/* Hero Section */}
+      {/* Hero Section with 3D Background */}
       <section className="hero-section">
-        <div className="hero-background-animation">
-          <div className="blob"></div>
-          <div className="blob"></div>
-        </div>
+        <ThreeBackground />
         <div className="container hero-content">
-          <div className="hero-text-area">
-            <span className="hero-badge">🚀 Expert-Led Learning</span>
+          <div className="hero-text-area" style={{ transform: `translateY(${offsetY * 0.2}px)` }}>
+            <span className="hero-badge animate-float">🚀 Expert-Led Learning</span>
             <h1 className="hero-title">
               Learn Real-World Skills from <span className="gradient-text">Industry Experts</span>
             </h1>
@@ -75,12 +87,12 @@ export default function Landing() {
               Join live webinars, participate in hands-on workshops, and master the technology that matters today. No more learning in silos.
             </p>
             <div className="hero-actions">
-              <Link to="/webinars" className="btn btn-primary btn-lg">Browse Webinars</Link>
+              <Link to="/webinars" className="btn btn-primary btn-lg shine">Browse Webinars</Link>
               <Link to="/register" className="btn btn-outline btn-lg">Get Started Free</Link>
             </div>
           </div>
           
-          <div className="hero-stats-floating shadow-lg">
+          <div className="hero-stats-floating shadow-lg" style={{ transform: `translateY(${offsetY * -0.1}px)` }}>
             <div className="floating-stat">
               <span className="stat-num">{stats.total || '50'}+</span>
               <span className="stat-desc">Webinars</span>
