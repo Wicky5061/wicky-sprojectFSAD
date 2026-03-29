@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { registrationAPI, webinarAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import WebinarCard from '../components/WebinarCard';
+import { BarChart2, Bell, CheckCircle, Award, Activity, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import './Dashboard.css';
 
@@ -103,7 +104,7 @@ export default function Dashboard() {
     return (
       <div className="page container" id="dashboard-error">
         <div className="error-container card glass animate-fade-in">
-          <span className="error-icon">⚠️</span>
+          <AlertTriangle size={48} className="mb-4 text-warning" />
           <h2>Something went wrong</h2>
           <p>{error}</p>
           <button className="btn btn-primary" onClick={loadData}>Retry</button>
@@ -132,32 +133,40 @@ export default function Dashboard() {
       </div>
 
       <div className="dash-stats-grid animate-fade-in">
-        <div className="dash-stat-card card">
-          <span className="stat-icon">📈</span>
+        <div className="dash-stat-card card hover-up shadow-sm">
+          <div className="stat-icon" style={{ backgroundColor: 'rgba(59, 130, 246, 0.12)', color: '#3b82f6' }}>
+            <BarChart2 size={32} />
+          </div>
           <div className="stat-content">
             <span className="stat-value">{stats.total}</span>
-            <span className="stat-label">Total Registrations</span>
+            <span className="stat-label">Registrations</span>
           </div>
         </div>
-        <div className="dash-stat-card card">
-          <span className="stat-icon">🔔</span>
+        <div className="dash-stat-card card hover-up shadow-sm">
+          <div className="stat-icon" style={{ backgroundColor: 'rgba(245, 158, 11, 0.12)', color: '#f59e0b' }}>
+            <Bell size={32} />
+          </div>
           <div className="stat-content">
             <span className="stat-value">{stats.upcoming}</span>
-            <span className="stat-label">Upcoming Sessions</span>
+            <span className="stat-label">Upcoming</span>
           </div>
         </div>
-        <div className="dash-stat-card card">
-          <span className="stat-icon">✅</span>
+        <div className="dash-stat-card card hover-up shadow-sm">
+          <div className="stat-icon" style={{ backgroundColor: 'rgba(16, 185, 129, 0.12)', color: '#10b981' }}>
+            <CheckCircle size={32} />
+          </div>
           <div className="stat-content">
             <span className="stat-value">{stats.completed}</span>
-            <span className="stat-label">Completed Sessions</span>
+            <span className="stat-label">Completed</span>
           </div>
         </div>
-        <div className="dash-stat-card card">
-          <span className="stat-icon">📜</span>
+        <div className="dash-stat-card card hover-up shadow-sm">
+          <div className="stat-icon" style={{ backgroundColor: 'rgba(139, 92, 246, 0.12)', color: '#8b5cf6' }}>
+            <Award size={32} />
+          </div>
           <div className="stat-content">
             <span className="stat-value">{stats.certificates}</span>
-            <span className="stat-label">Certificates Earned</span>
+            <span className="stat-label">Certificates</span>
           </div>
         </div>
       </div>
@@ -233,7 +242,7 @@ export default function Dashboard() {
               <div className="activity-list">
                 {recentActivity.map(act => (
                   <div key={act.id} className="activity-item">
-                    <span className="activity-icon">🔗</span>
+                    <Activity size={18} className="text-primary mt-1" />
                     <div className="activity-details">
                       <p>Registered for <strong>{act.webinarTitle}</strong></p>
                       <span className="activity-time">Just recently</span>

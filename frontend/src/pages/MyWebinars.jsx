@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { registrationAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { Calendar, Clock, Ticket, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import './Dashboard.css'; // Reuse dashboard styles for consistency
 
@@ -28,9 +29,9 @@ export default function MyWebinars() {
     try {
       setLoading(true);
       setError(null);
-      // Using the specific endpoint requested: /api/registrations/user/{id}
-      // Our api service was updated to handle the ID
-      const response = await registrationAPI.getUserRegistrations(user?.id);
+      // Always use /registrations/user/me for the logged-in user's view.
+      // This endpoint extracts the ID from the JWT token for security.
+      const response = await registrationAPI.getUserRegistrations();
       
       if (response && response.data) {
         setRegistrations(Array.isArray(response.data) ? response.data : []);
@@ -58,8 +59,8 @@ export default function MyWebinars() {
   if (error) {
     return (
       <div className="page container" id="my-webinars-error">
-        <div className="error-container card glass animate-fade-in text-center p-12">
-          <span className="error-icon" style={{ fontSize: '3rem' }}>❌</span>
+        <div className="error-container card glass animate-fade-in text-center p-12 flex flex-col items-center">
+          <AlertCircle size={48} className="text-red-500 mb-4" />
           <h2 className="mt-4">Load Error</h2>
           <p className="mb-6">{error}</p>
           <button className="btn btn-primary" onClick={loadRegistrations}>Retry</button>
@@ -93,9 +94,9 @@ export default function MyWebinars() {
             <div key={reg.id} className="registration-item-full card glass shadow-sm hover-up">
               <div className="reg-info">
                 <h3 className="reg-title text-xl font-bold">{reg.webinarTitle || 'Untitled Webinar'}</h3>
-                <div className="reg-meta-grid mt-2">
-                   <span className="reg-meta">📅 {reg.dateTime ? new Date(reg.dateTime).toLocaleDateString() : 'Date TBD'}</span>
-                   <span className="reg-meta ml-4">⏰ {reg.dateTime ? new Date(reg.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Time TBD'}</span>
+                <div className="reg-meta-grid mt-2 flex gap-4">
+                   <span className="reg-meta flex items-center gap-2"><Calendar size={14} /> {reg.dateTime ? new Date(reg.dateTime).toLocaleDateString() : 'Date TBD'}</span>
+                   <span className="reg-meta flex items-center gap-2"><Clock size={14} /> {reg.dateTime ? new Date(reg.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Time TBD'}</span>
                 </div>
               </div>
               <div className="reg-actions-flex flex items-center gap-4">
@@ -108,8 +109,8 @@ export default function MyWebinars() {
           ))}
         </div>
       ) : (
-        <div className="empty-dashboard-state glass text-center p-16 animate-fade-in">
-          <div className="empty-icon" style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>🎫</div>
+        <div className="empty-dashboard-state glass text-center p-16 animate-fade-in flex flex-col items-center">
+          <Ticket size={64} className="text-muted mb-6 opacity-50" />
           <h3>No Registrations Found</h3>
           <p className="mb-8">It looks like you haven't registered for any webinars yet. Ready to start learning?</p>
           <Link to="/webinars" className="btn btn-primary">Discover Webinars</Link>
