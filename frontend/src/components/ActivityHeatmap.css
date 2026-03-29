@@ -1,20 +1,63 @@
 /* ========================================
-   Activity Heatmap Component
+   Activity Heatmap CSS (SVG Version)
    ======================================== */
 
+:root {
+  --heatmap-bg-0: #ebedf0;
+}
+
+[data-theme='dark'] {
+  --heatmap-bg-0: #2d333b;
+}
+
 .activity-heatmap-wrapper {
-  padding: 24px;
+  padding: 30px;
   border-radius: var(--radius-xl);
   background: var(--bg-card);
   margin-top: 40px;
-  overflow: hidden;
   border: 1px solid var(--border);
+  overflow: hidden;
 }
 
-.heatmap-header h3 {
-  font-size: 1.25rem;
-  font-weight: 800;
-  margin-bottom: 4px;
+.heatmap-svg-container {
+  padding-left: 20px;
+  overflow-x: auto;
+  user-select: none;
+}
+
+.heatmap-svg-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.heatmap-svg-container::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 10px;
+}
+
+/* SVG Text Styles */
+.heatmap-text {
+  font-size: 10px;
+  fill: var(--text-muted);
+  dominant-baseline: middle;
+}
+
+.month-label {
+  text-anchor: middle;
+}
+
+.day-label {
+  text-anchor: start;
+}
+
+/* Cell Styles */
+.heatmap-cell {
+  transition: opacity 0.2s ease;
+  cursor: help;
+}
+
+.heatmap-cell:hover {
+  stroke: var(--primary);
+  stroke-width: 1px;
 }
 
 .streak-badge {
@@ -22,99 +65,12 @@
   color: #f97316;
 }
 
-/* Heatmap Grid Layout */
-.heatmap-container-outer {
-  display: flex;
-  gap: 12px;
-  position: relative;
-}
-
-.heatmap-labels-y {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 30px 0 20px;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.heatmap-labels-y span {
-  height: 12px;
-  display: flex;
-  align-items: center;
-}
-
-.heatmap-grid-scroll {
-  overflow-x: auto;
-  padding-bottom: 20px;
-  max-width: 100%;
-}
-
-.heatmap-labels-x {
-  display: grid;
-  grid-template-columns: repeat(53, 1fr);
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  margin-bottom: 8px;
-  min-width: max-content;
-}
-
-.heatmap-grid {
-  display: flex;
-  gap: 4px;
-  min-width: max-content;
-}
-
-.heatmap-week {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-/* Day Cell Styles */
-.heatmap-day {
-  width: 12px;
-  height: 12px;
-  border-radius: 2.5px;
-  background-color: #ebedf0;
-  transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-}
-
-[data-theme='dark'] .heatmap-day {
-  background-color: #161b22;
-}
-
-.heatmap-day:hover {
-  transform: scale(1.4);
-  z-index: 10;
-  cursor: pointer;
-}
-
-/* Color Intensity Levels */
-/* Light Mode Greens */
-.heatmap-day.level-1 { background-color: #9be9a8; }
-.heatmap-day.level-2 { background-color: #40c463; }
-.heatmap-day.level-3 { background-color: #30a14e; }
-.heatmap-day.level-4 { background-color: #216e39; }
-
-/* Dark Mode Green Support (using same GitHub palette as default) */
-[data-theme='dark'] .heatmap-day.level-1 { background-color: #0e4429; }
-[data-theme='dark'] .heatmap-day.level-2 { background-color: #006d32; }
-[data-theme='dark'] .heatmap-day.level-3 { background-color: #26a641; }
-[data-theme='dark'] .heatmap-day.level-4 { background-color: #39d353; }
-
-/* Dashboard Theme Match (Green Accent) */
-.heatmap-day.level-1 { background-color: #dcfce7; }
-.heatmap-day.level-2 { background-color: #86efac; }
-.heatmap-day.level-3 { background-color: #22c55e; }
-.heatmap-day.level-4 { background-color: #166534; }
-
 /* Legend */
 .heatmap-legend {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-size: 0.75rem;
   color: var(--text-muted);
 }
@@ -124,20 +80,8 @@
   gap: 4px;
 }
 
-/* Scrollbar Styling for horizontal scrolling */
-.heatmap-grid-scroll::-webkit-scrollbar {
-  height: 6px;
-}
-
-.heatmap-grid-scroll::-webkit-scrollbar-track {
-  background: var(--bg-card);
-}
-
-.heatmap-grid-scroll::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 10px;
-}
-
-.heatmap-grid-scroll::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+.heatmap-day {
+  width: 12px;
+  height: 12px;
+  border-radius: 2.5px;
 }
