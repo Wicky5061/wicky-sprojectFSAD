@@ -53,7 +53,7 @@ export default function Login() {
               id="login-email"
               name="email"
               className="form-input"
-              placeholder="you@example.com"
+              placeholder="Enter your email"
               value={form.email}
               onChange={handleChange}
               autoComplete="email"

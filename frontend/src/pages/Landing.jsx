@@ -44,17 +44,17 @@ export default function Landing() {
   };
 
   const speakers = [
-    { id: 1, name: 'Dr. Sarah Johnson', title: 'Senior Cloud Architect', expertise: 'AWS & Kubernetes', image: 'https://ui-avatars.com/api/?name=Sarah+Johnson&background=random&color=fff' },
-    { id: 2, name: 'Michael Chen', title: 'Lead Full Stack Engineer', expertise: 'React, Node.js & TypeScript', image: 'https://ui-avatars.com/api/?name=Michael+Chen&background=random&color=fff' },
-    { id: 3, name: 'Alex Williams', title: 'Cybersecurity Analyst', expertise: 'Ethical Hacking & SecOps', image: 'https://ui-avatars.com/api/?name=Alex+Williams&background=random&color=fff' },
-    { id: 4, name: 'Jessica Lee', title: 'AI Research Scientist', expertise: 'Deep Learning & LLMs', image: 'https://ui-avatars.com/api/?name=Jessica+Lee&background=random&color=fff' },
+    { id: 1, name: 'Vivek Vardhan', title: 'Full Stack Architect', expertise: 'Spring Boot & React', image: 'https://ui-avatars.com/api/?name=Vivek+Vardhan&background=random&color=fff' },
+    { id: 2, name: 'Dr. Wicky', title: 'System Designer', expertise: 'Microservices & DevOps', image: 'https://ui-avatars.com/api/?name=Wicky&background=random&color=fff' },
+    { id: 3, name: 'Viswa', title: 'Cloud Specialist', expertise: 'AWS & Azure', image: 'https://ui-avatars.com/api/?name=Viswa&background=random&color=fff' },
+    { id: 4, name: 'Siddharth', title: 'AI Researcher', expertise: 'Machine Learning & LLMs', image: 'https://ui-avatars.com/api/?name=Siddharth&background=random&color=fff' },
   ];
 
   const testimonials = [
-    { id: 1, name: 'Emily Davis', text: 'The React architecture workshop was a complete game-changer for my career. The instructor was brilliant and the content was extremely practical!', rating: 5, photo: 'https://ui-avatars.com/api/?name=Emily+Davis&background=random&color=fff' },
-    { id: 2, name: 'David Miller', text: 'I love how interactive the live sessions are. Being able to ask questions and get immediate feedback is so much better than pre-recorded videos.', rating: 5, photo: 'https://ui-avatars.com/api/?name=David+Miller&background=random&color=fff' },
-    { id: 3, name: 'Sophia Wilson', text: 'The post-webinar resources and recording access are worth every second. I finally understood AWS networking thanks to Sarah\'s session.', rating: 5, photo: 'https://ui-avatars.com/api/?name=Sophia+Wilson&background=random&color=fff' },
-    { id: 4, name: 'James Thompson', text: 'WebinarHub is my go-to platform for staying updated with the latest tech trends. The community and the quality of speakers are unmatched.', rating: 5, photo: 'https://ui-avatars.com/api/?name=James+Thompson&background=random&color=fff' },
+    { id: 1, name: 'Madhavi', text: 'The React architecture workshop was a complete game-changer for my career. The instructor was brilliant and the content was extremely practical!', rating: 5, photo: 'https://ui-avatars.com/api/?name=Madhavi&background=random&color=fff' },
+    { id: 2, name: 'Sekar', text: 'I love how interactive the live sessions are. Being able to ask questions and get immediate feedback is so much better than pre-recorded videos.', rating: 5, photo: 'https://ui-avatars.com/api/?name=Sekar&background=random&color=fff' },
+    { id: 3, name: 'Sathwik', text: 'The post-webinar resources and recording access are worth every second. I finally understood AWS networking thanks to Viswa\'s session.', rating: 5, photo: 'https://ui-avatars.com/api/?name=Sathwik&background=random&color=fff' },
+    { id: 4, name: 'Aditya', text: 'WebinarHub is my go-to platform for staying updated with the latest tech trends. The community and the quality of speakers are unmatched.', rating: 5, photo: 'https://ui-avatars.com/api/?name=Aditya&background=random&color=fff' },
   ];
 
   return (

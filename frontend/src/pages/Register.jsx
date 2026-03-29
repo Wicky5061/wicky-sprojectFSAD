@@ -70,7 +70,7 @@ export default function Register() {
                 id="reg-name"
                 name="name"
                 className="form-input"
-                placeholder="John Doe"
+                placeholder="Enter your full name"
                 value={form.name}
                 onChange={handleChange}
                 required
@@ -83,7 +83,7 @@ export default function Register() {
                 id="reg-email"
                 name="email"
                 className="form-input"
-                placeholder="you@example.com"
+                placeholder="Enter your email"
                 value={form.email}
                 onChange={handleChange}
                 required

@@ -48,7 +48,7 @@ public class DataSeeder implements CommandLineRunner {
         // Ensure Master Admin exists
         if (!userRepository.existsByEmail("admin@webinarhub.com")) {
             User admin = new User();
-            admin.setName("Master Admin");
+            admin.setName("Vivek Vardhan");
             admin.setEmail("admin@webinarhub.com");
             admin.setPassword(passwordEncoder.encode("admin123"));
             admin.setRole(User.Role.ADMIN);
@@ -87,7 +87,7 @@ public class DataSeeder implements CommandLineRunner {
             Webinar w1 = new Webinar();
             w1.setTitle("Mastering Full Stack: React & Spring Boot");
             w1.setDescription("Build production-ready applications by combining the power of React for the frontend and Spring Boot for the backend. Covers JWT, REST APIs, and Cloud deployment.");
-            w1.setInstructor("Dr. Sarah Devlin");
+            w1.setInstructor("Dr. Wicky");
             w1.setDateTime(LocalDateTime.now().plusDays(3).withHour(18).withMinute(0));
             w1.setDurationMinutes(120);
             w1.setStreamUrl("https://meet.jit.si/webinarhub-master-fs");
@@ -102,7 +102,7 @@ public class DataSeeder implements CommandLineRunner {
             Webinar w2 = new Webinar();
             w2.setTitle("AWS Architecture: Scalability & DevOps");
             w2.setDescription("Learn to design resilient, fault-tolerant architectures on Amazon Web Services. Essential for anyone preparing for the Solutions Architect certification.");
-            w2.setInstructor("James Miller");
+            w2.setInstructor("Viswa");
             w2.setDateTime(LocalDateTime.now().plusDays(7).withHour(10).withMinute(30));
             w2.setDurationMinutes(90);
             w2.setStreamUrl("https://meet.jit.si/webinarhub-aws-arch");
@@ -117,7 +117,7 @@ public class DataSeeder implements CommandLineRunner {
             Webinar w3 = new Webinar();
             w3.setTitle("AI & Generative Language Models");
             w3.setDescription("Dive deep into the mechanics of LLMs and Generative AI. Learn how to leverage prompt engineering and fine-tuning for your enterprise applications.");
-            w3.setInstructor("Alan Turing II");
+            w3.setInstructor("Siddharth");
             w3.setDateTime(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0));
             w3.setDurationMinutes(60);
             w3.setStreamUrl("https://meet.jit.si/webinarhub-ai-gen");
@@ -132,7 +132,7 @@ public class DataSeeder implements CommandLineRunner {
             Webinar w4 = new Webinar();
             w4.setTitle("Advanced Cybersecurity & Ethical Hacking");
             w4.setDescription("Protect your digital assets with advanced security techniques. Learn to identify vulnerabilities and defend against modern cyber threats.");
-            w4.setInstructor("Alex Williams");
+            w4.setInstructor("Sathwik");
             w4.setDateTime(LocalDateTime.now().minusDays(2).withHour(11).withMinute(0));
             w4.setDurationMinutes(120);
             w4.setStreamUrl("");
