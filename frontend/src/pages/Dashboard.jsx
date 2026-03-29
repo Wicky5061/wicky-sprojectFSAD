@@ -8,23 +8,38 @@ import './Dashboard.css';
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const [registrations, setRegistrations] = useState([]);
   const [allWebinars, setAllWebinars] = useState([]);
+  const [recommended, setRecommended] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (user) loadData();
+    else setLoading(false);
   }, [user]);
 
   const loadData = async () => {
     try {
+      setLoading(true);
+      setError(null);
       const [regRes, webRes] = await Promise.all([
-        registrationAPI.getUserRegistrations().catch(() => ({ data: [] })),
+        registrationAPI.getUserRegistrations(user?.id).catch(() => ({ data: [] })),
         webinarAPI.getAll().catch(() => ({ data: [] })),
       ]);
-      setRegistrations(regRes.data || []);
-      setAllWebinars(webRes.data || []);
-      setRecommended(webRes.data.filter(w => !regRes.data.some(r => r.webinarId === w.id)).slice(0, 3));
+      
+      const regs = regRes?.data || [];
+      const webs = webRes?.data || [];
+      
+      setRegistrations(Array.isArray(regs) ? regs : []);
+      setAllWebinars(Array.isArray(webs) ? webs : []);
+      
+      const rec = Array.isArray(webs) ? webs.filter(w => !regs.some(r => r.webinarId === w.id)).slice(0, 3) : [];
+      setRecommended(rec);
     } catch (err) {
       console.error('Failed to load dashboard data:', err);
+      setError('Failed to load your dashboard. Please refresh or try again later.');
+      toast.error('Failed to load dashboard data');
     } finally {
       setLoading(false);
     }
@@ -65,21 +80,49 @@ export default function Dashboard() {
   };
 
   const stats = {
-    total: registrations.length,
-    upcoming: registrations.filter(r => new Date(r.dateTime) > new Date()).length,
-    completed: registrations.filter(r => r.attended || new Date(r.dateTime) < new Date()).length,
-    certificates: registrations.filter(r => r.attended).length
+    total: registrations?.length || 0,
+    upcoming: Array.isArray(registrations) ? registrations.filter(r => r?.dateTime && new Date(r.dateTime) > new Date()).length : 0,
+    completed: Array.isArray(registrations) ? registrations.filter(r => r?.attended || (r?.dateTime && new Date(r.dateTime) < new Date())).length : 0,
+    certificates: Array.isArray(registrations) ? registrations.filter(r => r?.attended).length : 0
   };
 
-  const recentActivity = registrations.slice(0, 3);
-  const upcomingReminders = registrations
-    .filter(r => {
-      const diff = new Date(r.dateTime) - new Date();
-      return diff > 0 && diff < (7 * 24 * 60 * 60 * 1000);
-    })
-    .slice(0, 3);
+  const recentActivity = Array.isArray(registrations) ? registrations.slice(0, 3) : [];
+  const upcomingReminders = Array.isArray(registrations)
+    ? registrations
+        .filter(r => {
+          if (!r?.dateTime) return false;
+          const diff = new Date(r.dateTime) - new Date();
+          return diff > 0 && diff < (7 * 24 * 60 * 60 * 1000);
+        })
+        .slice(0, 3)
+    : [];
 
   if (loading) return <div className="loading-page"><div className="spinner"></div></div>;
+
+  if (error) {
+    return (
+      <div className="page container" id="dashboard-error">
+        <div className="error-container card glass animate-fade-in">
+          <span className="error-icon">⚠️</span>
+          <h2>Something went wrong</h2>
+          <p>{error}</p>
+          <button className="btn btn-primary" onClick={loadData}>Retry</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="page container" id="dashboard-no-auth">
+        <div className="error-container card glass">
+          <h2>Access Denied</h2>
+          <p>Please log in to view your dashboard.</p>
+          <Link to="/login" className="btn btn-primary">Login</Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page container" id="user-dashboard">

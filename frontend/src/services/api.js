@@ -64,7 +64,7 @@ export const webinarAPI = {
 // ==================== REGISTRATION API ====================
 export const registrationAPI = {
   register: (webinarId) => API.post(`/registrations?webinarId=${webinarId}`),
-  getUserRegistrations: () => API.get('/registrations/user/me'),
+  getUserRegistrations: (id) => id ? API.get(`/registrations/user/${id}`) : API.get('/registrations/user/me'),
   getWebinarRegistrations: (webinarId) => API.get(`/registrations/webinar/${webinarId}`),
   cancel: (id) => API.delete(`/registrations/${id}`),
   markAttendance: (id) => API.put(`/registrations/${id}/attend`),

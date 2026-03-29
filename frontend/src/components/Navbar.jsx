@@ -57,7 +57,7 @@ export default function Navbar() {
           {user ? (
             <>
               {!isAdmin() && (
-                <Link to="/dashboard#my-registrations" className="nav-link" id="nav-my-webinars" onClick={() => setMobileOpen(false)}>
+                <Link to="/my-webinars" className="nav-link" id="nav-my-webinars" onClick={() => setMobileOpen(false)}>
                   My Webinars
                 </Link>
               )}

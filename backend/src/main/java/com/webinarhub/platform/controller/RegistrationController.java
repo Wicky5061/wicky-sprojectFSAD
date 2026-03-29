@@ -58,6 +58,15 @@ public class RegistrationController {
     }
 
     /**
+     * GET /api/registrations/user/{userId} - Get registrations by user ID
+     */
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<RegistrationDto>> getRegistrationsByUserId(@PathVariable("userId") Long userId) {
+        List<RegistrationDto> registrations = registrationService.getRegistrationsByUserId(userId);
+        return ResponseEntity.ok(registrations);
+    }
+
+    /**
      * GET /api/registrations/webinar/{webinarId} - Get webinar registrations
      */
     @GetMapping("/webinar/{webinarId}")

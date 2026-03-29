@@ -11,6 +11,7 @@ import Register from './pages/Register';
 import Webinars from './pages/Webinars';
 import WebinarDetail from './pages/WebinarDetail';
 import Dashboard from './pages/Dashboard';
+import MyWebinars from './pages/MyWebinars';
 import AdminDashboard from './pages/AdminDashboard';
 import CreateWebinar from './pages/CreateWebinar';
 
@@ -36,6 +37,11 @@ function App() {
               <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/my-webinars" element={
+                <ProtectedRoute>
+                  <MyWebinars />
                 </ProtectedRoute>
               } />
 
