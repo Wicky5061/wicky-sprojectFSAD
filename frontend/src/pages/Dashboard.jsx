@@ -4,6 +4,7 @@ import { registrationAPI, webinarAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import WebinarCard from '../components/WebinarCard';
 import { BarChart2, Bell, CheckCircle, Award, Activity, AlertTriangle } from 'lucide-react';
+import ActivityHeatmap from '../components/ActivityHeatmap';
 import toast from 'react-hot-toast';
 import './Dashboard.css';
 
@@ -170,6 +171,8 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+      
+      <ActivityHeatmap registrations={registrations} />
 
       <div className="learning-progress-section card glass mb-12">
         <div className="progress-info">
