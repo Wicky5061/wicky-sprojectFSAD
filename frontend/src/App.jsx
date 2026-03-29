@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast';
@@ -18,6 +19,16 @@ import CreateWebinar from './pages/CreateWebinar';
 import './App.css';
 
 function App() {
+  useEffect(() => {
+    // Keep backend alive on Render free tier (ping every 10 minutes)
+    const API_BASE = import.meta.env.VITE_API_URL || 'https://wicky-sprojectfsad-backend.onrender.com/api';
+    const keepAlive = setInterval(() => {
+      fetch(`${API_BASE}/health`)
+        .catch(() => {});
+    }, 600000);
+    return () => clearInterval(keepAlive);
+  }, []);
+
   return (
     <AuthProvider>
       <Toaster position="top-right" toastOptions={{ duration: 4000, style: { background: '#1e293b', color: '#fff' } }} />
