@@ -22,6 +22,9 @@ public class RegistrationDto {
     private String webinarTitle;
     private LocalDateTime registeredAt;
     private Boolean attended;
+    private LocalDateTime dateTime;
+    private String instructorName;
+    private String webinarStatus;
 
     // Explicit getters and setters
     public Long getId() { return id; }
@@ -40,4 +43,10 @@ public class RegistrationDto {
     public void setRegisteredAt(LocalDateTime registeredAt) { this.registeredAt = registeredAt; }
     public Boolean getAttended() { return attended; }
     public void setAttended(Boolean attended) { this.attended = attended; }
+    public LocalDateTime getDateTime() { return dateTime; }
+    public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
+    public String getInstructorName() { return instructorName; }
+    public void setInstructorName(String instructorName) { this.instructorName = instructorName; }
+    public String getWebinarStatus() { return webinarStatus; }
+    public void setWebinarStatus(String webinarStatus) { this.webinarStatus = webinarStatus; }
 }

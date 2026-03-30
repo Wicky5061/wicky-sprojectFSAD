@@ -148,6 +148,9 @@ public class RegistrationService {
         dto.setUserEmail(registration.getUser().getEmail());
         dto.setWebinarId(registration.getWebinar().getId());
         dto.setWebinarTitle(registration.getWebinar().getTitle());
+        dto.setDateTime(registration.getWebinar().getDateTime());
+        dto.setInstructorName(registration.getWebinar().getInstructor());
+        dto.setWebinarStatus(registration.getWebinar().getStatus().name());
         dto.setRegisteredAt(registration.getRegisteredAt());
         dto.setAttended(registration.getAttended());
         return dto;

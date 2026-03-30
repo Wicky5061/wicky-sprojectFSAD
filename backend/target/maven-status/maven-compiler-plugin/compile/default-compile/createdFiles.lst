@@ -28,6 +28,7 @@ com\webinarhub\platform\dto\RegisterRequest.class
 com\webinarhub\platform\entity\User.class
 com\webinarhub\platform\dto\ResourceDto.class
 com\webinarhub\platform\dto\WebinarDto.class
+com\webinarhub\platform\controller\HealthController.class
 com\webinarhub\platform\exception\ErrorResponse.class
 com\webinarhub\platform\WebinarHubApplication.class
 com\webinarhub\platform\entity\User$Role.class

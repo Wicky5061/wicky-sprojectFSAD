@@ -133,7 +133,7 @@ public class DataSeeder implements CommandLineRunner {
             w4.setTitle("Advanced Cybersecurity & Ethical Hacking");
             w4.setDescription("Protect your digital assets with advanced security techniques. Learn to identify vulnerabilities and defend against modern cyber threats.");
             w4.setInstructor("Sathwik");
-            w4.setDateTime(LocalDateTime.now().minusDays(2).withHour(11).withMinute(0));
+            w4.setDateTime(LocalDateTime.now().minusDays(10).withHour(11).withMinute(0));
             w4.setDurationMinutes(120);
             w4.setStreamUrl("");
             w4.setCoverImageUrl("https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800");
@@ -143,7 +143,22 @@ public class DataSeeder implements CommandLineRunner {
             w4.setReminderSent(true);
             webinarRepository.save(w4);
 
-            System.out.println("✅ Seeded 4 high-quality webinars.");
+            // 5. Data Science
+            Webinar w5 = new Webinar();
+            w5.setTitle("Data Science Roadmap for 2026");
+            w5.setDescription("Master the transition from data analyst to data scientist. Explore machine learning, statistics, and visualization tools.");
+            w5.setInstructor("Rahul");
+            w5.setDateTime(LocalDateTime.now().minusDays(15).withHour(16).withMinute(0));
+            w5.setDurationMinutes(90);
+            w5.setStreamUrl("");
+            w5.setCoverImageUrl("https://images.unsplash.com/photo-1551288049-bbbda536339a?q=80&w=800");
+            w5.setMaxParticipants(2000);
+            w5.setCategory("Data");
+            w5.setStatus(Webinar.WebinarStatus.COMPLETED);
+            w5.setReminderSent(true);
+            webinarRepository.save(w5);
+
+            System.out.println("✅ Seeded 5 high-quality webinars (2 COMPLETED).");
         } else {
             System.out.println("ℹ️ Webinars already present (" + webinarRepository.count() + "). Skipping seeding.");
         }

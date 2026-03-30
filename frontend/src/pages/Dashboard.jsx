@@ -48,37 +48,190 @@ export default function Dashboard() {
   };
 
   const handleDownloadCertificate = (reg) => {
+    const certId = crypto.randomUUID().split('-')[0].toUpperCase();
     const certWindow = window.open('', '_blank');
+    const completionDate = reg.dateTime ? new Date(reg.dateTime).toLocaleDateString() : new Date().toLocaleDateString();
+    
     const content = `
       <html>
         <head>
           <title>Certificate of Completion - ${reg.webinarTitle}</title>
           <style>
-            body { font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f0f4f8; }
-            .cert-card { border: 20px solid #2563eb; padding: 60px; text-align: center; background: white; width: 800px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative; }
-            .branding { font-size: 24px; color: #2563eb; font-weight: 800; margin-bottom: 40px; }
-            h1 { font-size: 48px; margin: 20px 0; color: #1e293b; }
-            .recipient { font-size: 32px; border-bottom: 2px solid #cbd5e1; display: inline-block; padding: 0 40px; }
-            .webinar { font-weight: 700; color: #2563eb; }
-            .date { margin-top: 40px; color: #64748b; }
-            .stamp { position: absolute; bottom: 40px; right: 40px; opacity: 0.2; transform: rotate(-20deg); font-size: 48px; border: 5px solid #2563eb; padding: 10px; color: #2563eb; font-weight: 900; }
+            @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat:wght@300;400;700&display=swap');
+            body { 
+              font-family: 'Montserrat', sans-serif; 
+              display: flex; 
+              align-items: center; 
+              justify-content: center; 
+              height: 100vh; 
+              margin: 0; 
+              background: #f8fafc; 
+            }
+            .cert-outer {
+              padding: 10px;
+              border: 1px solid #e2e8f0;
+              background: white;
+            }
+            .cert-card { 
+              border: 15px double #1e40af; 
+              padding: 60px 80px; 
+              text-align: center; 
+              background: white; 
+              width: 900px; 
+              position: relative; 
+              box-sizing: border-box;
+            }
+            .cert-card::before {
+              content: '';
+              position: absolute;
+              top: 0; left: 0; right: 0; bottom: 0;
+              border: 2px solid #3b82f6;
+              margin: 5px;
+              pointer-events: none;
+            }
+            .branding { 
+              font-family: 'Cinzel', serif;
+              font-size: 28px; 
+              color: #1e3a8a; 
+              margin-bottom: 20px; 
+              letter-spacing: 4px;
+            }
+            .cert-label {
+              text-transform: uppercase;
+              letter-spacing: 5px;
+              color: #64748b;
+              font-size: 14px;
+              margin-bottom: 30px;
+              font-weight: 700;
+            }
+            h1 { 
+              font-family: 'Cinzel', serif;
+              font-size: 54px; 
+              margin: 20px 0; 
+              color: #1e293b; 
+              border-bottom: 2px gold solid;
+              display: inline-block;
+              padding-bottom: 10px;
+            }
+            .recipient { 
+              font-size: 38px; 
+              color: #1e40af;
+              font-weight: 700;
+              margin: 30px 0;
+              padding: 10px 0;
+            }
+            .description {
+              font-size: 18px;
+              color: #475569;
+              max-width: 600px;
+              margin: 0 auto 30px;
+              line-height: 1.6;
+            }
+            .webinar-name {
+              font-size: 24px;
+              font-weight: 700;
+              color: #1e293b;
+            }
+            .instructor {
+              margin-top: 10px;
+              color: #64748b;
+              font-style: italic;
+            }
+            .footer-flex {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-end;
+              margin-top: 60px;
+            }
+            .signature-box {
+              border-top: 1px solid #1e293b;
+              width: 200px;
+              padding-top: 10px;
+            }
+            .signature-text {
+              font-family: 'Cinzel', serif;
+              font-size: 20px;
+              margin-bottom: 5px;
+              color: #1e3a8a;
+            }
+            .date-box {
+              text-align: left;
+            }
+            .cert-id {
+              position: absolute;
+              bottom: 20px;
+              right: 20px;
+              font-size: 10px;
+              color: #94a3b8;
+              font-family: monospace;
+            }
+            .stamp-seal {
+              width: 100px;
+              height: 100px;
+              border: 4px double #1e40af;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 12px;
+              font-weight: 900;
+              color: #1e40af;
+              transform: rotate(-15deg);
+              margin: 0 auto;
+              background: rgba(30, 64, 175, 0.05);
+            }
+            @media print {
+              body { background: white; }
+              .cert-outer { border: none; }
+            }
           </style>
         </head>
         <body>
-          <div class="cert-card">
-            <div class="branding">WebinarHub PLATFORM</div>
-            <p>This is to certify that</p>
-            <div class="recipient">${user.name}</div>
-            <p>has successfully completed the webinar</p>
-            <h2 class="webinar">${reg.webinarTitle}</h2>
-            <div class="date">${new Date().toLocaleDateString()}</div>
-            <div class="stamp">VERIFIED</div>
+          <div class="cert-outer">
+            <div class="cert-card">
+              <div class="branding">WebinarHub Academy</div>
+              <div class="cert-label">Certificate of Completion</div>
+              
+              <p>This academic credential is proudly presented to</p>
+              <div class="recipient">${user.name}</div>
+              
+              <div class="description">
+                For the successful completion of the professional development course
+                <p class="webinar-name">${reg.webinarTitle}</p>
+                <p class="instructor">Led by ${reg.instructorName || 'Academic Panel'}</p>
+              </div>
+
+              <div class="stamp-seal">OFFICIAL<br/>GRADUATE</div>
+
+              <div class="footer-flex">
+                <div class="date-box">
+                  <span style="font-size: 12px; color: #64748b; font-weight: 700;">Issue Date:</span><br/>
+                  <span style="font-weight: 700;">${completionDate}</span>
+                </div>
+                <div class="signature">
+                  <div class="signature-text" style="font-family: cursive; font-size: 24px;">Vivek Vardhan</div>
+                  <div class="signature-box">
+                    <strong>Director of Education</strong><br/>
+                    <small>WebinarHub Platform</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="cert-id">ID: WH-${certId}-${new Date().getFullYear()}</div>
+            </div>
           </div>
-          <script>window.print();</script>
+          <script>
+            window.onload = () => {
+              setTimeout(() => {
+                window.print();
+              }, 500);
+            };
+          </script>
         </body>
       </html>
     `;
     certWindow.document.write(content);
+    certWindow.document.close();
   };
 
   const stats = {
@@ -205,7 +358,7 @@ export default function Dashboard() {
                     </div>
                     <div className="reg-actions-flex">
                       <Link to={`/webinars/${reg.webinarId}`} className="btn btn-sm btn-outline">Details</Link>
-                      {reg.attended && (
+                      {(reg.webinarStatus === 'COMPLETED' || reg.attended) && (
                         <button className="btn btn-sm btn-primary" onClick={() => handleDownloadCertificate(reg)}>
                           Download Certificate
                         </button>
