@@ -102,7 +102,7 @@ public class DataSeeder implements CommandLineRunner {
             Webinar w2 = new Webinar();
             w2.setTitle("AWS Architecture: Scalability & DevOps");
             w2.setDescription("Learn to design resilient, fault-tolerant architectures on Amazon Web Services. Essential for anyone preparing for the Solutions Architect certification.");
-            w2.setInstructor("Viswa");
+            w2.setInstructor("Dr.Viswa");
             w2.setDateTime(LocalDateTime.now().plusDays(7).withHour(10).withMinute(30));
             w2.setDurationMinutes(90);
             w2.setStreamUrl("https://meet.jit.si/webinarhub-aws-arch");
@@ -117,7 +117,7 @@ public class DataSeeder implements CommandLineRunner {
             Webinar w3 = new Webinar();
             w3.setTitle("AI & Generative Language Models");
             w3.setDescription("Dive deep into the mechanics of LLMs and Generative AI. Learn how to leverage prompt engineering and fine-tuning for your enterprise applications.");
-            w3.setInstructor("Siddharth");
+            w3.setInstructor("Dr.Siddharth");
             w3.setDateTime(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0));
             w3.setDurationMinutes(60);
             w3.setStreamUrl("https://meet.jit.si/webinarhub-ai-gen");
@@ -143,22 +143,52 @@ public class DataSeeder implements CommandLineRunner {
             w4.setReminderSent(true);
             webinarRepository.save(w4);
 
-            // 5. Data Science
+            // 5. UX Design
             Webinar w5 = new Webinar();
-            w5.setTitle("Data Science Roadmap for 2026");
-            w5.setDescription("Master the transition from data analyst to data scientist. Explore machine learning, statistics, and visualization tools.");
-            w5.setInstructor("Rahul");
+            w5.setTitle("Premium UI/UX Design Patterns");
+            w5.setDescription("Master the art of creating high-end user experiences. Focus on typography, color theory, and motion design.");
+            w5.setInstructor("Madhavi");
             w5.setDateTime(LocalDateTime.now().minusDays(15).withHour(16).withMinute(0));
             w5.setDurationMinutes(90);
             w5.setStreamUrl("");
             w5.setCoverImageUrl("https://images.unsplash.com/photo-1551288049-bbbda536339a?q=80&w=800");
             w5.setMaxParticipants(2000);
-            w5.setCategory("Data");
+            w5.setCategory("Design");
             w5.setStatus(Webinar.WebinarStatus.COMPLETED);
             w5.setReminderSent(true);
             webinarRepository.save(w5);
 
-            System.out.println("✅ Seeded 5 high-quality webinars (2 COMPLETED).");
+            // 6. Blockchain
+            Webinar w6 = new Webinar();
+            w6.setTitle("Blockchain & Smart Contracts");
+            w6.setDescription("Introduction to decentralized applications and solidity programming.");
+            w6.setInstructor("Sekar");
+            w6.setDateTime(LocalDateTime.now().plusDays(5).withHour(15).withMinute(0));
+            w6.setDurationMinutes(120);
+            w6.setStreamUrl("https://meet.jit.si/webinarhub-blockchain");
+            w6.setCoverImageUrl("https://images.unsplash.com/photo-1516245834210-c4c142787335?q=80&w=800");
+            w6.setMaxParticipants(1200);
+            w6.setCategory("Web3");
+            w6.setStatus(Webinar.WebinarStatus.UPCOMING);
+            w6.setReminderSent(false);
+            webinarRepository.save(w6);
+
+            // 7. Data Engineering
+            Webinar w7 = new Webinar();
+            w7.setTitle("Modern Data Stack & ELT Pipelines");
+            w7.setDescription("Building scalable data infrastructure with dbt, Snowflake and Airflow.");
+            w7.setInstructor("Vivek Vardhan");
+            w7.setDateTime(LocalDateTime.now().plusDays(10).withHour(19).withMinute(0));
+            w7.setDurationMinutes(90);
+            w7.setStreamUrl("https://meet.jit.si/webinarhub-data-eng");
+            w7.setCoverImageUrl("https://images.unsplash.com/photo-1518186285589-2f7649de83e0?q=80&w=800");
+            w7.setMaxParticipants(1800);
+            w7.setCategory("Data");
+            w7.setStatus(Webinar.WebinarStatus.UPCOMING);
+            w7.setReminderSent(false);
+            webinarRepository.save(w7);
+
+            System.out.println("✅ Seeded 7 high-quality webinars with Indian instructor names.");
         } else {
             System.out.println("ℹ️ Webinars already present (" + webinarRepository.count() + "). Skipping seeding.");
         }
