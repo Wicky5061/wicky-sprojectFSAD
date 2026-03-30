@@ -21,29 +21,11 @@ public class CorsConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // Allow all origins for development and production
-        config.setAllowedOrigins(Arrays.asList(
-                "http://localhost:3000",
-                "http://localhost:5173",
-                "http://localhost:5174",
-                "https://wicky-sprojectfsad.netlify.app",
-                "https://wicky-sprojectfsad.vercel.app"
-        ));
-
-        // Also allow any Netlify/Vercel preview deploys
-        config.setAllowedOriginPatterns(List.of(
-                "https://*.netlify.app",
-                "https://*.vercel.app",
-                "https://*.onrender.com"
-        ));
-
+        // Allow all origins via pattern with credentials support
+        config.setAllowedOriginPatterns(Arrays.asList("*"));
         config.setAllowCredentials(true);
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        config.setAllowedHeaders(Arrays.asList(
-                "Origin", "Content-Type", "Accept", "Authorization",
-                "X-Requested-With", "Access-Control-Request-Method",
-                "Access-Control-Request-Headers"
-        ));
+        config.setAllowedHeaders(Arrays.asList("*"));
         config.setExposedHeaders(List.of("Authorization"));
         config.setMaxAge(3600L);
 
