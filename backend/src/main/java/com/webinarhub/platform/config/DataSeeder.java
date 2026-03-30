@@ -53,34 +53,40 @@ public class DataSeeder implements CommandLineRunner {
         System.out.println("👤 Seeding user data...");
         
         // Admin account
-        User admin = new User();
-        admin.setName("Dr. Wicky");
-        admin.setEmail("vardhan@gmail.com");
-        admin.setPassword(passwordEncoder.encode("vivek123"));
-        admin.setRole(User.Role.ADMIN);
-        admin.setOrganization("WebinarHub Administrator");
-        userRepository.save(admin);
-        System.out.println("✅ Created Admin: Dr. Wicky (vardhan@gmail.com)");
+        if (!userRepository.existsByEmail("vardhan@gmail.com")) {
+            User admin = new User();
+            admin.setName("Dr. Wicky");
+            admin.setEmail("vardhan@gmail.com");
+            admin.setPassword(passwordEncoder.encode("vivek123"));
+            admin.setRole(User.Role.ADMIN);
+            admin.setOrganization("WebinarHub Administrator");
+            userRepository.save(admin);
+            System.out.println("✅ Created Admin: Dr. Wicky (vardhan@gmail.com)");
+        }
 
         // Student account 1
-        User student1 = new User();
-        student1.setName("Vivek Vardhan");
-        student1.setEmail("vivekvardhan@gmail.com");
-        student1.setPassword(passwordEncoder.encode("vivek123"));
-        student1.setRole(User.Role.USER);
-        student1.setOrganization("Student");
-        userRepository.save(student1);
-        System.out.println("✅ Created Student: Vivek Vardhan (vivekvardhan@gmail.com)");
+        if (!userRepository.existsByEmail("vivekvardhan@gmail.com")) {
+            User student1 = new User();
+            student1.setName("Vivek Vardhan");
+            student1.setEmail("vivekvardhan@gmail.com");
+            student1.setPassword(passwordEncoder.encode("vivek123"));
+            student1.setRole(User.Role.USER);
+            student1.setOrganization("Student");
+            userRepository.save(student1);
+            System.out.println("✅ Created Student: Vivek Vardhan (vivekvardhan@gmail.com)");
+        }
 
         // Student account 2
-        User student2 = new User();
-        student2.setName("Test Student");
-        student2.setEmail("test@gmail.com");
-        student2.setPassword(passwordEncoder.encode("test123"));
-        student2.setRole(User.Role.USER);
-        student2.setOrganization("Tester");
-        userRepository.save(student2);
-        System.out.println("✅ Created Student: Test Student (test@gmail.com)");
+        if (!userRepository.existsByEmail("test@gmail.com")) {
+            User student2 = new User();
+            student2.setName("Test Student");
+            student2.setEmail("test@gmail.com");
+            student2.setPassword(passwordEncoder.encode("test123"));
+            student2.setRole(User.Role.USER);
+            student2.setOrganization("Tester");
+            userRepository.save(student2);
+            System.out.println("✅ Created Student: Test Student (test@gmail.com)");
+        }
     }
 
     private void seedWebinars() {

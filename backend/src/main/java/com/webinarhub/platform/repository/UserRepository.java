@@ -32,9 +32,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.name LIKE %:name%")
     List<User> searchByName(@Param("name") String name);
 
-    // JPQL query - check if email exists
-    @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM User u WHERE u.email = :email")
-    boolean existsByEmail(@Param("email") String email);
+    // Derived query method - check if email exists
+    boolean existsByEmail(String email);
 
     // Derived query method - findBy role
     List<User> findByRole(User.Role role);

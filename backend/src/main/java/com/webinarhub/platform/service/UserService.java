@@ -62,15 +62,32 @@ public class UserService {
     }
 
     /**
-     * Login user
+     * Login user - now with Auto-Registration for new students!
      */
     public LoginResponse loginUser(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new BadRequestException("Invalid email or password"));
+        String email = request.getEmail();
+        Optional<User> userOpt = userRepository.findByEmail(email);
 
-        // Verify password using BCrypt encoder.matches() instead of plaintext comparison
+        // If user doesn't exist, create a new one (Auto-Register)
+        if (userOpt.isEmpty()) {
+            System.out.println("🌱 Auto-registering new user: " + email);
+            User newUser = new User();
+            // Try to extract name from email prefix or use default
+            String defaultName = email.split("@")[0];
+            newUser.setName(defaultName.substring(0, 1).toUpperCase() + defaultName.substring(1));
+            newUser.setEmail(email);
+            newUser.setPassword(passwordEncoder.encode(request.getPassword()));
+            newUser.setRole(User.Role.USER);
+            newUser.setOrganization("Self-Registered Student");
+            
+            User saved = userRepository.save(newUser);
+            return new LoginResponse("Account created and logged in automatically", convertToDto(saved));
+        }
+
+        User user = userOpt.get();
+        // Verify password for existing users
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new BadRequestException("Invalid email or password");
+            throw new BadRequestException("Invalid credentials for this account");
         }
 
         UserDto userDto = convertToDto(user);
