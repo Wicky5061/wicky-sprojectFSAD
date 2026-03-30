@@ -43,7 +43,6 @@ function App() {
           <Routes>
             {/* Admin Layout routes have their own Navbar */}
             <Route path="/admin" element={<AdminLayout />}>
-              <index element={<AdminDashboard />} />
               <Route index element={<AdminDashboard />} />
               <Route path="webinars" element={<AdminWebinars />} />
               <Route path="resources" element={<AdminResources />} />
