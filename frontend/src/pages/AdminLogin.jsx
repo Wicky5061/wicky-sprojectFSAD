@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { authAPI } from '../services/api';
 import { Shield, Lock, Mail, ArrowLeft, AlertCircle } from 'lucide-react';
 import './Auth.css'; // Reuse some base styles but override with specific ones
 
@@ -20,29 +21,24 @@ const AdminLogin = () => {
 
     const attemptLogin = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
-        });
+        const response = await authAPI.login({ email, password });
+        const data = response.data;
 
-        const data = await response.json();
-
-        if (response.ok) {
-          if (data.user.role === 'ADMIN') {
-            login(data.user);
-            navigate('/admin');
-          } else {
-            setError('Access Denied: Registered account is not an administrator.');
-            setLoading(false);
-          }
+        if (data.user.role === 'ADMIN') {
+          login(data.user);
+          navigate('/admin');
         } else {
-          setError(data.message || 'Invalid admin credentials');
+          setError('Access Denied: Registered account is not an administrator.');
           setLoading(false);
         }
       } catch (err) {
-        setError('Server is waking up, please wait...');
-        setTimeout(attemptLogin, 5000);
+        if (err.code === 'ERR_NETWORK') {
+          setError('Server is waking up, please wait...');
+          setTimeout(attemptLogin, 5000);
+        } else {
+          setError(err.response?.data?.message || 'Invalid admin credentials');
+          setLoading(false);
+        }
       }
     };
 

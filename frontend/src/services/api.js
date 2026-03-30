@@ -5,7 +5,12 @@ import axios from 'axios';
  * In production, points to Render backend. In development, points to localhost.
  * CORS is configured on the backend to allow requests from this origin.
  */
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://wicky-sprojectfsad-backend.onrender.com/api';
+let API_BASE_URL = import.meta.env.VITE_API_URL || 'https://wicky-sprojectfsad-backend.onrender.com/api';
+
+// Ensure /api suffix exists
+if (!API_BASE_URL.endsWith('/api')) {
+  API_BASE_URL = `${API_BASE_URL.replace(/\/$/, '')}/api`;
+}
 
 const API = axios.create({
   baseURL: API_BASE_URL,
