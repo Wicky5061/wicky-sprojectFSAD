@@ -14,9 +14,11 @@ com\webinarhub\platform\repository\ResourceRepository.class
 com\webinarhub\platform\entity\Registration.class
 com\webinarhub\platform\service\EmailService.class
 com\webinarhub\platform\service\UserService.class
+com\webinarhub\platform\controller\AdminWebinarController.class
 com\webinarhub\platform\dto\UserDto.class
 com\webinarhub\platform\config\CorsConfig.class
 com\webinarhub\platform\service\WebinarService.class
+com\webinarhub\platform\controller\AdminResourceController.class
 com\webinarhub\platform\config\AppConfig.class
 com\webinarhub\platform\controller\WebinarController.class
 com\webinarhub\platform\controller\UserController.class

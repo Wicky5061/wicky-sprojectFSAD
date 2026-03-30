@@ -209,21 +209,39 @@ export default function WebinarDetail() {
               </div>
             </div>
 
-            {resources.length > 0 && (
-              <div className="detail-section">
-                <h3>📚 Learning Materials</h3>
+            {webinar.status === 'COMPLETED' && isRegistered && (
+              <div className="detail-section resources-section animate-fade-in">
+                <h3>📚 Resources & Recordings</h3>
+                <p className="description-text mb-3">As a registered participant, you have exclusive access to the session materials below.</p>
                 <div className="resources-grid">
-                  {resources.map((r) => (
-                    <a key={r.id} href={r.fileUrl} target="_blank" rel="noopener noreferrer" className="resource-link card">
-                      <span className="res-icon">{r.fileType === 'PDF' ? '📄' : '🎥'}</span>
+                  {resources.length > 0 ? resources.map((r) => (
+                    <a key={r.id} href={r.fileUrl} target="_blank" rel="noopener noreferrer" className="resource-link-card card">
+                      <div className={`res-icon-box ${r.fileType.toLowerCase()}`}>
+                        {r.fileType === 'PDF' && '📄'}
+                        {r.fileType === 'SLIDE' && '📊'}
+                        {r.fileType === 'LINK' && '🔗'}
+                        {r.fileType === 'VIDEO' && '🎥'}
+                      </div>
                       <div className="res-info">
                         <span className="res-title">{r.title}</span>
-                        <span className="res-type">{r.fileType}</span>
+                        <span className="res-action-label">
+                          {r.fileType === 'PDF' ? 'Download PDF' : 
+                           r.fileType === 'SLIDE' ? 'View Slides' :
+                           r.fileType === 'LINK' ? 'Open Link' : 'Watch Recording'}
+                        </span>
                       </div>
                     </a>
-                  ))}
+                  )) : (
+                    <div className="no-resources">No additional resources have been uploaded for this session yet.</div>
+                  )}
                 </div>
               </div>
+            )}
+
+            {(webinar.status === 'UPCOMING' || webinar.status === 'LIVE') && isRegistered && (
+               <div className="detail-section status-alert bg-primary-glow">
+                 <p className="m-0">✨ <strong>Resources will be available after the session</strong>. Check back here once the webinar is completed!</p>
+               </div>
             )}
 
             {webinar.streamUrl && (webinar.status === 'LIVE' || webinar.status === 'COMPLETED') && (

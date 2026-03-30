@@ -13,15 +13,21 @@ import Webinars from './pages/Webinars';
 import WebinarDetail from './pages/WebinarDetail';
 import Dashboard from './pages/Dashboard';
 import MyWebinars from './pages/MyWebinars';
+
+// Admin Portal Pages
+import AdminLogin from './pages/AdminLogin';
+import AdminLayout from './layouts/AdminLayout';
 import AdminDashboard from './pages/AdminDashboard';
-import CreateWebinar from './pages/CreateWebinar';
+import AdminWebinars from './pages/AdminWebinars';
+import AdminResources from './pages/AdminResources';
+import AdminUsers from './pages/AdminUsers';
 
 import './App.css';
 
 function App() {
   useEffect(() => {
     // Keep backend alive on Render free tier (ping every 10 minutes)
-    const API_BASE = import.meta.env.VITE_API_URL || 'https://wicky-sprojectfsad-backend.onrender.com/api';
+    const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://wicky-sprojectfsad-backend.onrender.com/api';
     const keepAlive = setInterval(() => {
       fetch(`${API_BASE}/health`)
         .catch(() => {});
@@ -34,81 +40,75 @@ function App() {
       <Toaster position="top-right" toastOptions={{ duration: 4000, style: { background: '#1e293b', color: '#fff' } }} />
       <Router>
         <div className="app-container">
-          <Navbar />
-          <main className="main-content">
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<Landing />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/webinars" element={<Webinars />} />
-              <Route path="/webinars/:id" element={<WebinarDetail />} />
+          <Routes>
+            {/* Admin Layout routes have their own Navbar */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <index element={<AdminDashboard />} />
+              <Route index element={<AdminDashboard />} />
+              <Route path="webinars" element={<AdminWebinars />} />
+              <Route path="resources" element={<AdminResources />} />
+              <Route path="users" element={<AdminUsers />} />
+            </Route>
 
-              {/* Protected Routes — Requires Login */}
-              <Route path="/dashboard" element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="/my-webinars" element={
-                <ProtectedRoute>
-                  <MyWebinars />
-                </ProtectedRoute>
-              } />
+            {/* Main Layout routes with regular Navbar */}
+            <Route path="*" element={
+              <>
+                <Navbar />
+                <main className="main-content">
+                  <Routes>
+                    {/* Public Routes */}
+                    <Route path="/" element={<Landing />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/admin-login" element={<AdminLogin />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/webinars" element={<Webinars />} />
+                    <Route path="/webinars/:id" element={<WebinarDetail />} />
 
-              {/* Admin Routes — Requires ADMIN role */}
-              <Route path="/admin" element={
-                <ProtectedRoute requireAdmin>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              } />
-              <Route path="/create-webinar" element={
-                <ProtectedRoute requireAdmin>
-                  <CreateWebinar />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin/webinars/create" element={
-                <ProtectedRoute requireAdmin>
-                  <CreateWebinar />
-                </ProtectedRoute>
-              } />
-              <Route path="/admin/webinars/edit/:id" element={
-                <ProtectedRoute requireAdmin>
-                  <CreateWebinar />
-                </ProtectedRoute>
-              } />
-            </Routes>
-          </main>
-          
-          <footer className="footer shadow-lg">
-            <div className="container">
-              <div className="footer-grid">
-                <div className="footer-info">
-                  <h3 className="gradient-text">WebinarHub</h3>
-                  <p>Elevate your skills with expert-led webinars and interactive workshops.</p>
-                </div>
-                <div className="footer-links">
-                  <h4>Platform</h4>
-                  <ul>
-                    <li><a href="/webinars">Browse Webinars</a></li>
-                    <li><a href="/login">Login</a></li>
-                    <li><a href="/register">Sign Up</a></li>
-                  </ul>
-                </div>
-                <div className="footer-social">
-                  <h4>Connect</h4>
-                  <div className="social-icons">
-                    <span>Twitter</span>
-                    <span>LinkedIn</span>
-                    <span>GitHub</span>
+                    {/* Protected Routes — Requires Login */}
+                    <Route path="/dashboard" element={
+                      <ProtectedRoute>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/my-webinars" element={
+                      <ProtectedRoute>
+                        <MyWebinars />
+                      </ProtectedRoute>
+                    } />
+                  </Routes>
+                </main>
+                <footer className="footer shadow-lg">
+                  <div className="container">
+                    <div className="footer-grid">
+                      <div className="footer-info">
+                        <h3 className="gradient-text">WebinarHub</h3>
+                        <p>Elevate your skills with expert-led webinars and interactive workshops.</p>
+                      </div>
+                      <div className="footer-links">
+                        <h4>Platform</h4>
+                        <ul>
+                          <li><a href="/webinars">Browse Webinars</a></li>
+                          <li><a href="/login">Login</a></li>
+                          <li><a href="/register">Sign Up</a></li>
+                        </ul>
+                      </div>
+                      <div className="footer-social">
+                        <h4>Connect</h4>
+                        <div className="social-icons">
+                          <span>Twitter</span>
+                          <span>LinkedIn</span>
+                          <span>GitHub</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="footer-bottom">
+                      <p>&copy; 2026 WebinarHub. All rights reserved.</p>
+                    </div>
                   </div>
-                </div>
-              </div>
-              <div className="footer-bottom">
-                <p>&copy; 2026 WebinarHub. All rights reserved.</p>
-              </div>
-            </div>
-          </footer>
+                </footer>
+              </>
+            } />
+          </Routes>
         </div>
       </Router>
     </AuthProvider>

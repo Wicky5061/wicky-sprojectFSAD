@@ -2,8 +2,10 @@ package com.webinarhub.platform.config;
 
 import com.webinarhub.platform.entity.User;
 import com.webinarhub.platform.entity.Webinar;
+import com.webinarhub.platform.entity.Resource;
 import com.webinarhub.platform.repository.UserRepository;
 import com.webinarhub.platform.repository.WebinarRepository;
+import com.webinarhub.platform.repository.ResourceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,14 +22,17 @@ public class DataSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final WebinarRepository webinarRepository;
+    private final ResourceRepository resourceRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public DataSeeder(UserRepository userRepository,
                       WebinarRepository webinarRepository,
+                      ResourceRepository resourceRepository,
                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.webinarRepository = webinarRepository;
+        this.resourceRepository = resourceRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -40,29 +45,22 @@ public class DataSeeder implements CommandLineRunner {
             System.out.println("✅ [DataSeeder] Initialization finished successfully.");
         } catch (Exception e) {
             System.err.println("❌ [DataSeeder] Error during seeding: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     private void seedUsers() {
         System.out.println("👤 Checking user data...");
-        // Ensure Master Admin exists
-        if (!userRepository.existsByEmail("admin@webinarhub.com")) {
+        // Ensure Admin exists as per request FSAD-PS38
+        if (!userRepository.existsByEmail("vardhan@gmail.com")) {
             User admin = new User();
-            admin.setName("Vivek Vardhan");
-            admin.setEmail("admin@webinarhub.com");
-            admin.setPassword(passwordEncoder.encode("admin123"));
+            admin.setName("Dr.Wicky");
+            admin.setEmail("vardhan@gmail.com");
+            admin.setPassword(passwordEncoder.encode("vivek123"));
             admin.setRole(User.Role.ADMIN);
-            admin.setOrganization("WebinarHub HQ");
+            admin.setOrganization("WebinarHub Admin Team");
             userRepository.save(admin);
-            System.out.println("✅ Created Master Admin: admin@webinarhub.com / admin123");
-        } else {
-            // Update admin password to ensure access in production
-            User admin = userRepository.findByEmail("admin@webinarhub.com").orElse(null);
-            if (admin != null) {
-                admin.setPassword(passwordEncoder.encode("admin123"));
-                userRepository.save(admin);
-                System.out.println("🔄 Updated existing admin password to 'admin123'");
-            }
+            System.out.println("✅ Created Official Admin: vardhan@gmail.com / vivek123");
         }
 
         // Demo Student
@@ -128,9 +126,9 @@ public class DataSeeder implements CommandLineRunner {
             w3.setReminderSent(false);
             webinarRepository.save(w3);
 
-            // 4. Cybersecurity
+            // 4. Cybersecurity Essentials
             Webinar w4 = new Webinar();
-            w4.setTitle("Advanced Cybersecurity & Ethical Hacking");
+            w4.setTitle("Cybersecurity Essentials");
             w4.setDescription("Protect your digital assets with advanced security techniques. Learn to identify vulnerabilities and defend against modern cyber threats.");
             w4.setInstructor("Sathwik");
             w4.setDateTime(LocalDateTime.now().minusDays(10).withHour(11).withMinute(0));
@@ -143,20 +141,36 @@ public class DataSeeder implements CommandLineRunner {
             w4.setReminderSent(true);
             webinarRepository.save(w4);
 
-            // 5. UX Design
+            Resource r1 = new Resource();
+            r1.setTitle("Session Recording");
+            r1.setFileUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+            r1.setFileType(Resource.ResourceType.VIDEO);
+            r1.setDescription("Full recording of the Cybersecurity Essentials session.");
+            r1.setWebinar(w4);
+            resourceRepository.save(r1);
+
+            // 5. Python for Data Science
             Webinar w5 = new Webinar();
-            w5.setTitle("Premium UI/UX Design Patterns");
-            w5.setDescription("Master the art of creating high-end user experiences. Focus on typography, color theory, and motion design.");
+            w5.setTitle("Python for Data Science");
+            w5.setDescription("Master the transition from data analyst to data scientist. Explore machine learning, statistics, and visualization tools.");
             w5.setInstructor("Madhavi");
             w5.setDateTime(LocalDateTime.now().minusDays(15).withHour(16).withMinute(0));
             w5.setDurationMinutes(90);
             w5.setStreamUrl("");
             w5.setCoverImageUrl("https://images.unsplash.com/photo-1551288049-bbbda536339a?q=80&w=800");
             w5.setMaxParticipants(2000);
-            w5.setCategory("Design");
+            w5.setCategory("Data");
             w5.setStatus(Webinar.WebinarStatus.COMPLETED);
             w5.setReminderSent(true);
             webinarRepository.save(w5);
+
+            Resource r2 = new Resource();
+            r2.setTitle("Course Slides (PDF)");
+            r2.setFileUrl("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf");
+            r2.setFileType(Resource.ResourceType.PDF);
+            r2.setDescription("Complete lesson slides for Python for Data Science.");
+            r2.setWebinar(w5);
+            resourceRepository.save(r2);
 
             // 6. Blockchain
             Webinar w6 = new Webinar();
@@ -188,7 +202,7 @@ public class DataSeeder implements CommandLineRunner {
             w7.setReminderSent(false);
             webinarRepository.save(w7);
 
-            System.out.println("✅ Seeded 7 high-quality webinars with Indian instructor names.");
+            System.out.println("✅ Seeded 7 webinars with official admin and sample resources.");
         } else {
             System.out.println("ℹ️ Webinars already present (" + webinarRepository.count() + "). Skipping seeding.");
         }

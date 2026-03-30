@@ -356,13 +356,18 @@ export default function Dashboard() {
                       <h4 className="reg-title">{reg.webinarTitle}</h4>
                       <p className="reg-meta">📅 {new Date(reg.dateTime).toLocaleDateString()} at {new Date(reg.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                     </div>
-                    <div className="reg-actions-flex">
-                      <Link to={`/webinars/${reg.webinarId}`} className="btn btn-sm btn-outline">Details</Link>
-                      {(reg.webinarStatus === 'COMPLETED' || reg.attended) && (
-                        <button className="btn btn-sm btn-primary" onClick={() => handleDownloadCertificate(reg)}>
-                          Download Certificate
-                        </button>
-                      )}
+                    <div className="reg-actions-flex d-flex gap-2">
+                       <Link to={`/webinars/${reg.webinarId}`} className="btn btn-sm btn-outline">Details</Link>
+                       {reg.webinarStatus === 'COMPLETED' && (
+                         <Link to={`/webinars/${reg.webinarId}#resources`} className="btn btn-sm btn-accent">
+                           Resources
+                         </Link>
+                       )}
+                       {(reg.webinarStatus === 'COMPLETED' || reg.attended) && (
+                         <button className="btn btn-sm btn-primary" onClick={() => handleDownloadCertificate(reg)}>
+                           Certificate
+                         </button>
+                       )}
                     </div>
                   </div>
                 ))}

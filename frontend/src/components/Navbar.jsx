@@ -80,12 +80,12 @@ export default function Navbar() {
               </div>
             </>
           ) : (
-            <div className="nav-auth">
-              <Link to="/login" className="btn btn-outline btn-sm" id="nav-login" onClick={() => setMobileOpen(false)}>
-                Sign In
+            <div className="nav-auth d-flex gap-3 align-items-center">
+              <Link to="/login" className="btn btn-primary btn-sm px-4" id="nav-login-student" onClick={() => setMobileOpen(false)}>
+                Student Login
               </Link>
-              <Link to="/register" className="btn btn-primary btn-sm" id="nav-register" onClick={() => setMobileOpen(false)}>
-                Get Started
+              <Link to="/admin-login" className="btn btn-outline btn-sm px-3 d-flex align-items-center gap-1" id="nav-login-admin" onClick={() => setMobileOpen(false)}>
+                <span>🛡️</span> Admin Login
               </Link>
             </div>
           )}

@@ -86,9 +86,11 @@ export default function Landing() {
             <p className="hero-subtitle">
               Join live webinars, participate in hands-on workshops, and master the technology that matters today. No more learning in silos.
             </p>
-            <div className="hero-actions">
-              <Link to="/webinars" className="btn btn-primary btn-lg shine">Browse Webinars</Link>
-              <Link to="/register" className="btn btn-outline btn-lg">Get Started Free</Link>
+            <div className="hero-actions d-flex gap-3">
+              <Link to="/login" className="btn btn-primary btn-lg shine px-5">Student Login</Link>
+              <Link to="/admin-login" className="btn btn-outline btn-lg px-5 d-flex align-items-center gap-2">
+                <span>🛡️</span> Admin Login
+              </Link>
             </div>
           </div>
           

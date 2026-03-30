@@ -37,6 +37,7 @@ public class SecurityConfig {
             .cors(cors -> {})  // Delegate to CorsConfig bean
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().permitAll()
             );
 

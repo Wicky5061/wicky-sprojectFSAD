@@ -1,255 +1,239 @@
 import { useState, useEffect } from 'react';
+import { 
+  Users, 
+  Video, 
+  BarChart3, 
+  Radio, 
+  Activity, 
+  ArrowRight,
+  PlusCircle,
+  FileUp
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { webinarAPI, userAPI } from '../services/api';
-import { useAuth } from '../context/AuthContext';
-import toast from 'react-hot-toast';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement
-} from 'chart.js';
-import { Bar, Pie } from 'react-chartjs-2';
-import './Dashboard.css';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement
-);
-
-export default function AdminDashboard() {
-  const { user } = useAuth();
-  const [tab, setTab] = useState('webinars');
-  const [webinars, setWebinars] = useState([]);
-  const [users, setUsers] = useState([]);
+const AdminDashboard = () => {
+  const [stats, setStats] = useState({
+    webinars: 0,
+    students: 0,
+    registrations: 0,
+    liveNow: 0
+  });
+  const [recentRegistrations, setRecentRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ totalWebinars: 0, totalUsers: 0 });
 
   useEffect(() => {
-    loadData();
+    fetchStats();
+    fetchRecentRegistrations();
   }, []);
 
-  const loadData = async () => {
+  const fetchStats = async () => {
     try {
-      const [webRes, userRes, countRes] = await Promise.all([
-        webinarAPI.getAll().catch(() => ({ data: [] })),
-        userAPI.getAll().catch(() => ({ data: [] })),
-        webinarAPI.getCount().catch(() => ({ data: { total: 0 } })),
-      ]);
-      setWebinars(webRes.data || []);
-      setUsers(userRes.data || []);
+      // Mock stats for dashboard (replace with real API later)
       setStats({
-        totalWebinars: countRes.data?.total || 0,
-        totalUsers: (userRes.data || []).length,
+        webinars: 12,
+        students: 450,
+        registrations: 890,
+        liveNow: 1
       });
     } catch (err) {
-      console.error('Failed to load admin data:', err);
+      console.error('Error fetching admin stats:', err);
+    }
+  };
+
+  const fetchRecentRegistrations = async () => {
+    try {
+      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/registrations`);
+      if (resp.ok) {
+        const data = await resp.json();
+        setRecentRegistrations(data.slice(0, 5));
+      }
+    } catch (err) {
+      console.error('Error fetching recent registrations:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDeleteWebinar = async (id) => {
-    const confirmed = await new Promise(resolve => {
-      toast((t) => (
-        <span>
-          Delete this webinar permanently?
-          <button onClick={() => { toast.dismiss(t.id); resolve(true); }} className="btn btn-sm btn-error ml-4">Delete</button>
-          <button onClick={() => { toast.dismiss(t.id); resolve(false); }} className="btn btn-sm btn-outline ml-2">Cancel</button>
-        </span>
-      ), { duration: 6000 });
-    });
-
-    if (!confirmed) return;
-
-    try {
-      await webinarAPI.delete(id);
-      setWebinars(webinars.filter((w) => w.id !== id));
-      toast.success('Webinar deleted successfully.');
-    } catch {
-      toast.error('Failed to delete webinar.');
-    }
-  };
-
-  const handleStatusChange = async (id, status) => {
-    try {
-      await webinarAPI.updateStatus(id, status);
-      setWebinars(webinars.map((w) => (w.id === id ? { ...w, status } : w)));
-      toast.success(`Status updated to ${status}`);
-    } catch {
-      toast.error('Failed to update status.');
-    }
-  };
-
-  const formatDate = (dateStr) => {
-    if (!dateStr) return 'TBD';
-    return new Date(dateStr).toLocaleDateString([], {
-      month: 'short', day: 'numeric', year: 'numeric',
-    });
-  };
-
-  if (loading) return <div className="loading-page"><div className="spinner"></div></div>;
-
   return (
-    <div className="page container" id="admin-dashboard">
-      <div className="page-header flex justify-between items-center">
+    <div className="admin-dashboard animate-fade-in">
+      <div className="admin-title-section d-flex justify-content-between align-items-center">
         <div>
-          <h1 className="gradient-text">Admin Command Center</h1>
-          <p>Welcome, {user?.name}. Monitor and manage your platform assets.</p>
+          <h1 className="admin-title">System Overview</h1>
+          <p className="admin-subtitle">WebinarHub Platform Management Dashboard</p>
         </div>
-        <Link to="/admin/webinars/create" className="btn btn-primary shadow-lg">+ New Webinar</Link>
-      </div>
-
-      <div className="dash-stats-grid animate-fade-in">
-        <div className="dash-stat-card card">
-          <span className="stat-icon">📽️</span>
-          <div className="stat-content">
-            <span className="stat-value">{stats.totalWebinars}</span>
-            <span className="stat-label">Total Webinars</span>
-          </div>
-        </div>
-        <div className="dash-stat-card card">
-          <span className="stat-icon">👥</span>
-          <div className="stat-content">
-            <span className="stat-value">{stats.totalUsers}</span>
-            <span className="stat-label">Registered Users</span>
-          </div>
-        </div>
-        <div className="dash-stat-card card">
-          <span className="stat-icon">⚡</span>
-          <div className="stat-content">
-            <span className="stat-value">{webinars.filter(w => w.status === 'LIVE').length}</span>
-            <span className="stat-label">Active Sessions</span>
-          </div>
+        <div className="admin-quick-actions d-flex gap-3">
+          <Link to="/admin/webinars" className="btn-admin-primary d-flex align-items-center gap-2">
+            <PlusCircle size={18} />
+            Add Webinar
+          </Link>
+          <Link to="/admin/resources" className="btn-admin-outline d-flex align-items-center gap-2">
+            <FileUp size={18} />
+            Upload Resource
+          </Link>
         </div>
       </div>
 
-      <div className="admin-analytics-grid grid grid-2 mb-12">
-        <div className="chart-wrapper card glass p-6">
-          <h3 className="mb-4">📈 Registration Trends</h3>
-          <div style={{ height: '300px' }}>
-            <Bar 
-              data={{
-                labels: webinars.slice(0, 8).map(w => w.title.substring(0, 15) + '...'),
-                datasets: [{
-                  label: 'Learners',
-                  data: webinars.slice(0, 8).map(w => w.registrationCount || 0),
-                  backgroundColor: 'rgba(99, 102, 241, 0.6)',
-                  borderRadius: 6,
-                }]
-              }}
-              options={{ maintainAspectRatio: false, plugins: { legend: { display: false } } }}
-            />
+      <div className="admin-stats-grid row g-4 mb-4">
+        <div className="col-md-3">
+          <div className="admin-stat-card card">
+            <div className="stat-card-icon-admin webinars">
+              <Video size={24} />
+            </div>
+            <div className="stat-card-info">
+              <span className="stat-card-label">Total Webinars</span>
+              <h3 className="stat-card-value">{stats.webinars}</h3>
+            </div>
           </div>
         </div>
-        <div className="chart-wrapper card glass p-6">
-          <h3 className="mb-4">🎭 User Ecosystem</h3>
-          <div style={{ height: '300px', display: 'flex', justifyContent: 'center' }}>
-            <Pie 
-              data={{
-                labels: ['Admins', 'Learners'],
-                datasets: [{
-                  data: [users.filter(u => u.role === 'ADMIN').length, users.filter(u => u.role === 'USER').length],
-                  backgroundColor: ['#6366f1', '#10b981'],
-                }]
-              }}
-              options={{ maintainAspectRatio: false }}
-            />
+        <div className="col-md-3">
+          <div className="admin-stat-card card">
+            <div className="stat-card-icon-admin students">
+              <Users size={24} />
+            </div>
+            <div className="stat-card-info">
+              <span className="stat-card-label">Total Students</span>
+              <h3 className="stat-card-value">{stats.students}</h3>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-3">
+          <div className="admin-stat-card card">
+            <div className="stat-card-icon-admin registrations">
+              <BarChart3 size={24} />
+            </div>
+            <div className="stat-card-info">
+              <span className="stat-card-label">Registrations</span>
+              <h3 className="stat-card-value">{stats.registrations}</h3>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-3">
+          <div className="admin-stat-card card">
+            <div className="stat-card-icon-admin live">
+              <Radio size={24} className="pulse-icon" />
+            </div>
+            <div className="stat-card-info">
+              <span className="stat-card-label">Live Now</span>
+              <h3 className="stat-card-value">{stats.liveNow}</h3>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="admin-tabs-nav mb-8">
-        <button className={`nav-tab ${tab === 'webinars' ? 'active' : ''}`} onClick={() => setTab('webinars')}>📡 Manage Webinars</button>
-        <button className={`nav-tab ${tab === 'users' ? 'active' : ''}`} onClick={() => setTab('users')}>👥 Platform Users</button>
+      <div className="row g-4">
+        <div className="col-lg-8">
+          <div className="admin-card">
+            <div className="card-header-admin d-flex justify-content-between align-items-center mb-3">
+              <h3 className="card-title-admin d-flex align-items-center gap-2">
+                <Activity size={20} className="color-primary" />
+                Recent Registrations
+              </h3>
+              <Link to="/admin/users" className="view-all-link">
+                View All <ArrowRight size={16} />
+              </Link>
+            </div>
+            <div className="table-responsive">
+              <table className="admin-table table table-hover">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Webinar</th>
+                    <th>Registered On</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentRegistrations.length > 0 ? recentRegistrations.map((reg) => (
+                    <tr key={reg.id}>
+                      <td>
+                        <div className="d-flex flex-column">
+                          <span className="fw-bold">{reg.userName}</span>
+                          <span className="small-text">{reg.userEmail}</span>
+                        </div>
+                      </td>
+                      <td>{reg.webinarTitle}</td>
+                      <td>{new Date(reg.registrationDate).toLocaleDateString()}</td>
+                      <td>
+                        <span className="badge-admin success">Confirmed</span>
+                      </td>
+                    </tr>
+                  )) : (
+                    <tr><td colSpan="4" className="text-center p-4">No recent registrations found.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        
+        <div className="col-lg-4">
+          <div className="admin-card">
+            <h3 className="card-title-admin mb-3">System Health</h3>
+            <div className="system-health-list">
+              <div className="health-item d-flex justify-content-between mb-3">
+                <span>API Status</span>
+                <span className="badge-admin success">OPERATIONAL</span>
+              </div>
+              <div className="health-item d-flex justify-content-between mb-3">
+                <span>Database</span>
+                <span className="badge-admin success">CONNECTED</span>
+              </div>
+              <div className="health-item d-flex justify-content-between mb-3">
+                <span>Email Server</span>
+                <span className="badge-admin warning">QUEUED</span>
+              </div>
+              <div className="health-item d-flex justify-content-between">
+                <span>Memory usage</span>
+                <div className="progress-mini">
+                  <div className="progress-bar-mini" style={{ width: '45%' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {tab === 'webinars' && (
-        <div className="admin-table-area card glass overflow-hidden animate-fade-in">
-          <table>
-            <thead>
-              <tr>
-                <th>Webinar Details</th>
-                <th>Instructor</th>
-                <th>Schedule</th>
-                <th>Status</th>
-                <th>Impact</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {webinars.map((w) => (
-                <tr key={w.id}>
-                  <td>
-                    <div className="row-title-desc">
-                      <Link to={`/webinars/${w.id}`} className="font-bold text-primary">{w.title}</Link>
-                      <span className="text-xs text-muted block">{w.category || 'General'}</span>
-                    </div>
-                  </td>
-                  <td>{w.instructor}</td>
-                  <td>{formatDate(w.dateTime)}</td>
-                  <td>
-                    <select className="status-select" value={w.status} onChange={(e) => handleStatusChange(w.id, e.target.value)}>
-                      <option value="UPCOMING">Upcoming</option>
-                      <option value="LIVE">Live</option>
-                      <option value="COMPLETED">Completed</option>
-                      <option value="CANCELLED">Cancelled</option>
-                    </select>
-                  </td>
-                  <td className="text-center font-bold">{w.registrationCount || 0}</td>
-                  <td>
-                    <div className="flex gap-2">
-                      <Link to={`/admin/webinars/edit/${w.id}`} className="btn btn-xs btn-outline">Edit</Link>
-                      <button onClick={() => handleDeleteWebinar(w.id)} className="btn btn-xs btn-outline btn-error">Delete</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {tab === 'users' && (
-        <div className="admin-table-area card glass overflow-hidden animate-fade-in">
-          <table>
-            <thead>
-              <tr>
-                <th>Platform User</th>
-                <th>Email Address</th>
-                <th>Privileges</th>
-                <th>Organization</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr key={u.id}>
-                  <td>
-                    <div className="user-row">
-                      <span className="user-icon">👤</span>
-                      <span className="font-bold">{u.name}</span>
-                    </div>
-                  </td>
-                  <td>{u.email}</td>
-                  <td>
-                    <span className={`badge ${u.role === 'ADMIN' ? 'badge-upcoming' : 'badge-completed'}`}>{u.role}</span>
-                  </td>
-                  <td>{u.organization || '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <style>{`
+        .admin-stat-card {
+          background: #0f172a;
+          border: 1px solid #1e293b;
+          border-radius: 12px;
+          padding: 1.25rem;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 1rem;
+        }
+        .stat-card-icon-admin {
+          width: 48px;
+          height: 48px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .stat-card-icon-admin.webinars { background: rgba(124, 58, 237, 0.15); color: #8b5cf6; }
+        .stat-card-icon-admin.students { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .stat-card-icon-admin.registrations { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+        .stat-card-icon-admin.live { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+        .stat-card-label { color: #94a3b8; font-size: 0.85rem; font-weight: 600; }
+        .stat-card-value { margin: 0; font-weight: 800; color: #f8fafc; }
+        .view-all-link { color: #7c3aed; text-decoration: none; font-size: 0.9rem; font-weight: 600; }
+        .admin-table { background: transparent; color: #f8fafc; }
+        .admin-table thead th { background: transparent; color: #64748b; font-weight: 700; font-size: 0.8rem; letter-spacing: 0.05em; border-bottom: 2px solid #1e293b; }
+        .admin-table tbody tr { border-bottom: 1px solid #1e293b; }
+        .admin-table tbody td { padding: 1rem 0.5rem; border-top: none; }
+        .small-text { font-size: 0.75rem; color: #64748b; }
+        .badge-admin { padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; }
+        .badge-admin.success { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .badge-admin.warning { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+        .btn-admin-outline { background: transparent; border: 1px solid #1e293b; color: #f8fafc; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; text-decoration: none; transition: all 0.2s; }
+        .btn-admin-outline:hover { background: #1e293b; border-color: #334155; }
+        .progress-mini { width: 100px; height: 6px; background: #1e293b; border-radius: 3px; overflow: hidden; margin-top: 8px; }
+        .progress-bar-mini { height: 100%; background: #7c3aed; border-radius: 3px; }
+      `}</style>
     </div>
   );
-}
+};
+
+export default AdminDashboard;

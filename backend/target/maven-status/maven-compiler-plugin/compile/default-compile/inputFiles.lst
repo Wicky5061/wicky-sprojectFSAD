@@ -13,6 +13,7 @@ C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platfo
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\exception\ErrorResponse.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\config\CorsConfig.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\dto\LoginRequest.java
+C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\controller\AdminWebinarController.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\config\DataSeeder.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\dto\WebinarDto.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\WebinarHubApplication.java
@@ -36,6 +37,7 @@ C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platfo
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\repository\RatingRepository.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\dto\UserDto.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\controller\ResourceController.java
+C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\controller\AdminResourceController.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\service\UserService.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\repository\WebinarRepository.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\repository\ResourceRepository.java
