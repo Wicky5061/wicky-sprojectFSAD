@@ -22,11 +22,11 @@ export default function ActivityHeatmap({ registrations = [] }) {
   const SVG_HEIGHT = TOP_PADDING + (ROWS * CELL_TOTAL) + 30;
 
   const COLORS = {
-    0: '#2d333b',
-    1: '#0e4429',
-    2: '#006d32',
-    3: '#26a641',
-    4: '#39d353'
+    0: '#1a1033',
+    1: '#2d1b69',
+    2: '#4c1d95',
+    3: '#7c3aed',
+    4: '#a78bfa'
   };
 
   // 1. Process registrations

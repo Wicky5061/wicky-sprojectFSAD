@@ -4,6 +4,8 @@
 
 .landing-page {
   overflow-x: hidden;
+  background: var(--gradient-main);
+  min-height: 100vh;
 }
 
 /* Background Utility */

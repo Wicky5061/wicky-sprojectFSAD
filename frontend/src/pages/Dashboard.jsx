@@ -288,7 +288,7 @@ export default function Dashboard() {
 
       <div className="dash-stats-grid animate-fade-in">
         <div className="dash-stat-card card hover-up shadow-sm">
-          <div className="stat-icon" style={{ backgroundColor: 'rgba(59, 130, 246, 0.12)', color: '#3b82f6' }}>
+          <div className="stat-icon" style={{ backgroundColor: 'rgba(124, 58, 237, 0.12)', color: '#7c3aed' }}>
             <BarChart2 size={32} />
           </div>
           <div className="stat-content">
@@ -297,7 +297,7 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="dash-stat-card card hover-up shadow-sm">
-          <div className="stat-icon" style={{ backgroundColor: 'rgba(245, 158, 11, 0.12)', color: '#f59e0b' }}>
+          <div className="stat-icon" style={{ backgroundColor: 'rgba(139, 92, 246, 0.12)', color: '#8b5cf6' }}>
             <Bell size={32} />
           </div>
           <div className="stat-content">
@@ -306,7 +306,7 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="dash-stat-card card hover-up shadow-sm">
-          <div className="stat-icon" style={{ backgroundColor: 'rgba(16, 185, 129, 0.12)', color: '#10b981' }}>
+          <div className="stat-icon" style={{ backgroundColor: 'rgba(167, 139, 250, 0.12)', color: '#a78bfa' }}>
             <CheckCircle size={32} />
           </div>
           <div className="stat-content">
@@ -315,7 +315,7 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="dash-stat-card card hover-up shadow-sm">
-          <div className="stat-icon" style={{ backgroundColor: 'rgba(139, 92, 246, 0.12)', color: '#8b5cf6' }}>
+          <div className="stat-icon" style={{ backgroundColor: 'rgba(109, 40, 217, 0.12)', color: '#c084fc' }}>
             <Award size={32} />
           </div>
           <div className="stat-content">
