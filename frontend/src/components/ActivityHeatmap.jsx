@@ -16,7 +16,7 @@ export default function ActivityHeatmap({ registrations = [] }) {
   const ROWS = 7;
   const LEFT_PADDING = 40;
   const TOP_PADDING = 25;
-  const DAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
+  const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   const SVG_WIDTH = LEFT_PADDING + (COLS * CELL_TOTAL) + 20;
   const SVG_HEIGHT = TOP_PADDING + (ROWS * CELL_TOTAL) + 30;
@@ -45,7 +45,6 @@ export default function ActivityHeatmap({ registrations = [] }) {
   const { grid, months, totalActive, currentStreak } = useMemo(() => {
     const today = new Date();
     const resultGrid = [];
-    const resultMonths = [];
     let activeCount = 0;
     
     // Start date: 52 weeks ago, aligned to Sunday
@@ -62,14 +61,6 @@ export default function ActivityHeatmap({ registrations = [] }) {
         const count = activityMap[dateKey] || 0;
         if (count > 0) activeCount++;
 
-        // Detect month start (first 7 days of month)
-        if (cursor.getDate() <= 7 && d === 0) {
-            const mName = cursor.toLocaleString('default', { month: 'short' });
-            if (!resultMonths.some(m => m.name === mName)) {
-                resultMonths.push({ name: mName, weekIndex: w });
-            }
-        }
-
         week.push({
             date: new Date(cursor),
             dateKey,
@@ -80,6 +71,22 @@ export default function ActivityHeatmap({ registrations = [] }) {
       }
       resultGrid.push(week);
     }
+
+    // Find the first week index where each month starts
+    const monthPositions = [];
+    let currentMonth = -1;
+    const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    resultGrid.forEach((week, weekIndex) => {
+      const firstDayOfWeek = week.find(d => d !== null);
+      if (firstDayOfWeek) {
+        const month = firstDayOfWeek.date.getMonth();
+        if (month !== currentMonth) {
+          currentMonth = month;
+          monthPositions.push({ name: MONTH_NAMES[month], weekIndex });
+        }
+      }
+    });
 
     // Streak logic
     let streak = 0;
@@ -101,7 +108,7 @@ export default function ActivityHeatmap({ registrations = [] }) {
         }
     }
 
-    return { grid: resultGrid, months: resultMonths, totalActive: activeCount, currentStreak: streak };
+    return { grid: resultGrid, months: monthPositions, totalActive: activeCount, currentStreak: streak };
   }, [activityMap]);
 
   const handleMouseEnter = (e, day) => {
@@ -144,18 +151,16 @@ export default function ActivityHeatmap({ registrations = [] }) {
 
           {/* Day Labels */}
           {DAY_LABELS.map((label, i) => (
-            label && (
-                <text 
-                  key={i} 
-                  x={LEFT_PADDING - 8} 
-                  y={TOP_PADDING + (i * CELL_TOTAL) + 10} 
-                  textAnchor="end"
-                  fontSize="10"
-                  fill="var(--text-muted)"
-                >
-                  {label}
-                </text>
-            )
+            <text 
+              key={i} 
+              x={LEFT_PADDING - 8} 
+              y={TOP_PADDING + (i * CELL_TOTAL) + 10} 
+              textAnchor="end"
+              fontSize="10"
+              fill="var(--text-muted)"
+            >
+              {label}
+            </text>
           ))}
 
           {/* Grid Cells */}
