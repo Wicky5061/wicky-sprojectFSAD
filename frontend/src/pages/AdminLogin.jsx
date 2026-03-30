@@ -14,34 +14,39 @@ const AdminLogin = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setError('');
     setLoading(true);
 
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+    const attemptLogin = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (response.ok) {
-        if (data.user.role === 'ADMIN') {
-          login(data.user);
-          navigate('/admin');
+        if (response.ok) {
+          if (data.user.role === 'ADMIN') {
+            login(data.user);
+            navigate('/admin');
+          } else {
+            setError('Access Denied: Registered account is not an administrator.');
+            setLoading(false);
+          }
         } else {
-          setError('Access Denied: Registered account is not an administrator.');
+          setError(data.message || 'Invalid admin credentials');
+          setLoading(false);
         }
-      } else {
-        setError(data.message || 'Invalid admin credentials');
+      } catch (err) {
+        setError('Server is waking up, please wait...');
+        setTimeout(attemptLogin, 5000);
       }
-    } catch (err) {
-      setError('Connection failed. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
+    };
+
+    attemptLogin();
   };
 
   return (
@@ -94,12 +99,6 @@ const AdminLogin = () => {
             </div>
           </div>
 
-          <div className="admin-hint">
-            <p><strong>System Hint:</strong></p>
-            <code>Email: vardhan@gmail.com</code>
-            <code>Pass: vivek123</code>
-          </div>
-
           <button 
             type="submit" 
             className="btn-admin-access"
@@ -144,16 +143,6 @@ const AdminLogin = () => {
           padding: 2px;
           color: #10b981;
         }
-        .admin-hint {
-          background: rgba(124, 58, 237, 0.1);
-          border: 1px dashed rgba(124, 58, 237, 0.3);
-          border-radius: 8px;
-          padding: 1rem;
-          margin-bottom: 1.5rem;
-          font-size: 0.85rem;
-        }
-        .admin-hint p { margin-bottom: 0.5rem; color: #a78bfa; }
-        .admin-hint code { display: block; color: #8b5cf6; font-family: monospace; }
         .btn-admin-access {
           width: 100%;
           padding: 1rem;
