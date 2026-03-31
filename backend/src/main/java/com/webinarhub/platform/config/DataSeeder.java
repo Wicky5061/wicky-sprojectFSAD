@@ -12,6 +12,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -43,13 +44,10 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     @Override
+    @Transactional
     public void run(String... args) {
         System.out.println("🚀 [DataSeeder] Initializing database seeding check...");
         try {
-            // Ensure target emails have ROLE_ADMIN
-            jdbcTemplate.execute("UPDATE users SET role = 'ROLE_ADMIN' WHERE email IN ('vardhan@gmail.com', 'vivekvmekala11@gmail.com')");
-            System.out.println("✅ [DataSeeder] Ensured Admin roles in database via SQL.");
-            
             seedUsers();
             seedWebinars();
             System.out.println("✅ [DataSeeder] Initialization finished successfully.");
@@ -60,35 +58,13 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedUsers() {
-        System.out.println("👤 Seeding user data...");
+        System.out.println("👤 Seeding/Updating user data...");
         
-        // Admin account 1
-        User admin1 = userRepository.findByEmail("vardhan@gmail.com").orElse(null);
-        if (admin1 == null) {
-            admin1 = new User();
-            admin1.setName("Dr. Wicky");
-            admin1.setEmail("vardhan@gmail.com");
-            admin1.setPassword(passwordEncoder.encode("vivek123"));
-            admin1.setRole(User.Role.ADMIN);
-            admin1.setOrganization("WebinarHub Administrator");
-            userRepository.save(admin1);
-            System.out.println("✅ Created Admin 1: Dr. Wicky (vardhan@gmail.com)");
-        }
-        log.info("Admin user email: " + admin1.getEmail());
-
-        // Admin account 2
-        User admin2 = userRepository.findByEmail("vivekvmekala11@gmail.com").orElse(null);
-        if (admin2 == null) {
-            admin2 = new User();
-            admin2.setName("Dr. Wicky");
-            admin2.setEmail("vivekvmekala11@gmail.com");
-            admin2.setPassword(passwordEncoder.encode("vivek123"));
-            admin2.setRole(User.Role.ADMIN);
-            admin2.setOrganization("WebinarHub Administrator");
-            userRepository.save(admin2);
-            System.out.println("✅ Created Admin 2: Dr. Wicky (vivekvmekala11@gmail.com)");
-        }
-        log.info("Admin user email: " + admin2.getEmail());
+        // Force update or create Admin 1
+        forceUpdateAdmin("vardhan@gmail.com", "Dr. Wicky");
+        
+        // Force update or create Admin 2
+        forceUpdateAdmin("vivekvmekala11@gmail.com", "Dr. Wicky");
 
         // Student account 1
         if (!userRepository.existsByEmail("vivekvardhan@gmail.com")) {
@@ -113,6 +89,18 @@ public class DataSeeder implements CommandLineRunner {
             userRepository.save(student2);
             System.out.println("✅ Created Student: Test Student (test@gmail.com)");
         }
+    }
+
+    private void forceUpdateAdmin(String email, String name) {
+        User admin = userRepository.findByEmail(email).orElse(new User());
+        admin.setName(name);
+        admin.setEmail(email);
+        admin.setPassword(passwordEncoder.encode("vivek123")); // Always force set/re-hash correct password
+        admin.setRole(User.Role.ADMIN);                        // Always force ADMIN role
+        admin.setOrganization("WebinarHub Administrator");
+        userRepository.save(admin);
+        System.out.println("✅ Forced update/create Admin: " + name + " (" + email + ")");
+        log.info("Admin user email: " + admin.getEmail());
     }
 
     private void seedWebinars() {
