@@ -1,6 +1,5 @@
 package com.webinarhub.platform.config;
 
-import com.webinarhub.platform.entity.User;
 import com.webinarhub.platform.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
