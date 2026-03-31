@@ -9,7 +9,6 @@ import com.webinarhub.platform.repository.ResourceRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,19 +27,16 @@ public class DataSeeder implements CommandLineRunner {
     private final WebinarRepository webinarRepository;
     private final ResourceRepository resourceRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
     public DataSeeder(UserRepository userRepository,
                       WebinarRepository webinarRepository,
                       ResourceRepository resourceRepository,
-                      PasswordEncoder passwordEncoder,
-                      JdbcTemplate jdbcTemplate) {
+                      PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.webinarRepository = webinarRepository;
         this.resourceRepository = resourceRepository;
         this.passwordEncoder = passwordEncoder;
-        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
