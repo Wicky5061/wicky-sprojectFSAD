@@ -28,6 +28,7 @@ const AdminLogin = () => {
       try {
         const response = await authAPI.login({ email, password });
         const data = response.data;
+        console.log('Login response:', data);
 
         // Check if role contains ADMIN (supporting both 'ADMIN' and 'ROLE_ADMIN')
         if (data.user.role === 'ADMIN' || data.user.role === 'ROLE_ADMIN') {

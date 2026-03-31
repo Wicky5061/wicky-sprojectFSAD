@@ -6,8 +6,10 @@ import com.webinarhub.platform.entity.Resource;
 import com.webinarhub.platform.repository.UserRepository;
 import com.webinarhub.platform.repository.WebinarRepository;
 import com.webinarhub.platform.repository.ResourceRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +19,7 @@ import java.time.LocalDateTime;
  * Data Seeder — Seeds initial users AND webinars on application startup.
  * Ensured it always checks if data exists before seeding, even if tables already exist.
  */
+@Slf4j
 @Component
 public class DataSeeder implements CommandLineRunner {
 
@@ -24,22 +27,29 @@ public class DataSeeder implements CommandLineRunner {
     private final WebinarRepository webinarRepository;
     private final ResourceRepository resourceRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
     public DataSeeder(UserRepository userRepository,
                       WebinarRepository webinarRepository,
                       ResourceRepository resourceRepository,
-                      PasswordEncoder passwordEncoder) {
+                      PasswordEncoder passwordEncoder,
+                      JdbcTemplate jdbcTemplate) {
         this.userRepository = userRepository;
         this.webinarRepository = webinarRepository;
         this.resourceRepository = resourceRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
     public void run(String... args) {
         System.out.println("🚀 [DataSeeder] Initializing database seeding check...");
         try {
+            // Ensure target emails have ROLE_ADMIN
+            jdbcTemplate.execute("UPDATE users SET role = 'ROLE_ADMIN' WHERE email IN ('vardhan@gmail.com', 'vivekvmekala11@gmail.com')");
+            System.out.println("✅ [DataSeeder] Ensured Admin roles in database via SQL.");
+            
             seedUsers();
             seedWebinars();
             System.out.println("✅ [DataSeeder] Initialization finished successfully.");
@@ -52,17 +62,33 @@ public class DataSeeder implements CommandLineRunner {
     private void seedUsers() {
         System.out.println("👤 Seeding user data...");
         
-        // Admin account
-        if (!userRepository.existsByEmail("vardhan@gmail.com")) {
-            User admin = new User();
-            admin.setName("Dr. Wicky");
-            admin.setEmail("vardhan@gmail.com");
-            admin.setPassword(passwordEncoder.encode("vivek123"));
-            admin.setRole(User.Role.ADMIN);
-            admin.setOrganization("WebinarHub Administrator");
-            userRepository.save(admin);
-            System.out.println("✅ Created Admin: Dr. Wicky (vardhan@gmail.com)");
+        // Admin account 1
+        User admin1 = userRepository.findByEmail("vardhan@gmail.com").orElse(null);
+        if (admin1 == null) {
+            admin1 = new User();
+            admin1.setName("Dr. Wicky");
+            admin1.setEmail("vardhan@gmail.com");
+            admin1.setPassword(passwordEncoder.encode("vivek123"));
+            admin1.setRole(User.Role.ADMIN);
+            admin1.setOrganization("WebinarHub Administrator");
+            userRepository.save(admin1);
+            System.out.println("✅ Created Admin 1: Dr. Wicky (vardhan@gmail.com)");
         }
+        log.info("Admin user email: " + admin1.getEmail());
+
+        // Admin account 2
+        User admin2 = userRepository.findByEmail("vivekvmekala11@gmail.com").orElse(null);
+        if (admin2 == null) {
+            admin2 = new User();
+            admin2.setName("Dr. Wicky");
+            admin2.setEmail("vivekvmekala11@gmail.com");
+            admin2.setPassword(passwordEncoder.encode("vivek123"));
+            admin2.setRole(User.Role.ADMIN);
+            admin2.setOrganization("WebinarHub Administrator");
+            userRepository.save(admin2);
+            System.out.println("✅ Created Admin 2: Dr. Wicky (vivekvmekala11@gmail.com)");
+        }
+        log.info("Admin user email: " + admin2.getEmail());
 
         // Student account 1
         if (!userRepository.existsByEmail("vivekvardhan@gmail.com")) {
@@ -75,7 +101,7 @@ public class DataSeeder implements CommandLineRunner {
             userRepository.save(student1);
             System.out.println("✅ Created Student: Vivek Vardhan (vivekvardhan@gmail.com)");
         }
-
+        
         // Student account 2
         if (!userRepository.existsByEmail("test@gmail.com")) {
             User student2 = new User();
