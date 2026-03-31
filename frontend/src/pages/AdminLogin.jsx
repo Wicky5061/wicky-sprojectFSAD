@@ -72,7 +72,7 @@ const AdminLogin = () => {
               <input
                 id="email"
                 type="email"
-                placeholder="vardhan@gmail.com"
+                placeholder="Enter admin email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -102,6 +102,7 @@ const AdminLogin = () => {
           >
             {loading ? 'Verifying...' : 'Access Admin Portal'}
           </button>
+          <div className="hint">Demo: vardhan@gmail.com / vivek123</div>
         </form>
 
         <div className="auth-footer">
@@ -158,6 +159,17 @@ const AdminLogin = () => {
         .btn-admin-access:disabled {
           background: #4c1d95;
           cursor: not-allowed;
+        }
+        .hint {
+          text-align: center;
+          margin-top: 1.5rem;
+          color: #94a3b8;
+          font-size: 0.85rem;
+          font-family: 'JetBrains Mono', monospace;
+          background: rgba(124, 58, 237, 0.05);
+          padding: 0.5rem;
+          border-radius: 6px;
+          border: 1px dashed rgba(124, 58, 237, 0.2);
         }
       `}</style>
     </div>
