@@ -29,6 +29,7 @@ C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platfo
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\exception\ResourceNotFoundException.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\service\ResourceService.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\repository\UserRepository.java
+C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\config\JwtAuthenticationFilter.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\dto\LoginResponse.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\config\AppConfig.java
 C:\Users\vivek\Documents\tungbhaimvv\backend\src\main\java\com\webinarhub\platform\service\RatingService.java

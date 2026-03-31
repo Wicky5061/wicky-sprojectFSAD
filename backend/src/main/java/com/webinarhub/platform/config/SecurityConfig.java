@@ -1,54 +1,79 @@
 package com.webinarhub.platform.config;
 
+import com.webinarhub.platform.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
- * Spring Security Configuration.
- * Demonstrates:
- * - @EnableWebSecurity for enabling Spring Security
- * - SecurityFilterChain for configuring HTTP security
- * - BCryptPasswordEncoder for password hashing
- * - Stateless session management (no server-side sessions)
- * - CSRF disabled for REST API usage
- *
- * All endpoints are permitted (no role-based access control at API level).
- * Auth is handled via the custom Bearer token mechanism in controllers.
+ * Spring Security Configuration for Spring Boot 3.
+ * Configured for stateless JWT authentication to avoid standard form-login behavior.
  */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    @Autowired
+    private JwtAuthenticationFilter jwtFilter;
+
+    @Autowired
+    private UserRepository userRepository;
+
     /**
-     * SecurityFilterChain — permits all API requests.
-     * CSRF is disabled because this is a stateless REST API consumed by a React SPA.
-     * CORS is handled by the existing CorsConfig bean.
+     * SecurityFilterChain - sets up stateless REST API security.
+     * - Disables CSRF (REST is stateless)
+     * - Enables CORS delegation
+     * - Configures stateless session management
+     * - Permits auth endpoints (register/login)
+     * - Secures admin routes with Role-based access
+     * - Adds the JWT filter before standard password auth
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
-            .cors(cors -> {})  // Delegate to CorsConfig bean
+            .cors(cors -> {}) // Handled by CorsConfig filter
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(ex -> ex
+                // Ensure REST behavior (JSON) instead of HTML redirect on 401
+                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+            )
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .anyRequest().permitAll()
-            );
+                .anyRequest().authenticated()
+            )
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     /**
-     * BCryptPasswordEncoder bean for secure password hashing.
-     * BCrypt uses a random salt and configurable cost factor (default 10 rounds).
-     * This replaces the plaintext password storage used previously.
+     * UserDetailsService bean using the platform's UserRepository.
+     * Providing this bean stops Spring Boot from generating a random security password.
      */
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return email -> userRepository.findByEmail(email)
+                .map(user -> org.springframework.security.core.userdetails.User
+                        .withUsername(user.getEmail())
+                        .password(user.getPassword())
+                        .authorities("ROLE_" + user.getRole().name())
+                        .build())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+    }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
