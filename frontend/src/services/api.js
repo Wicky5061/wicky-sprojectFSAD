@@ -19,17 +19,23 @@ const API = axios.create({
   },
 });
 
-// Add request interceptor to attach Bearer token (userId) for authentication
+// Add request interceptor to attach Bearer token for authentication
 API.interceptors.request.use((config) => {
-  const stored = localStorage.getItem('webinarhub_user');
-  if (stored) {
-    try {
-      const user = JSON.parse(stored);
-      if (user && user.id) {
-        config.headers.Authorization = `Bearer ${user.id}`;
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  } else {
+    // Fallback to webinarhub_user if token is not found (backwards compatibility)
+    const stored = localStorage.getItem('webinarhub_user');
+    if (stored) {
+      try {
+        const user = JSON.parse(stored);
+        if (user && user.id) {
+          config.headers.Authorization = `Bearer ${user.id}`;
+        }
+      } catch {
+        localStorage.removeItem('webinarhub_user');
       }
-    } catch {
-      localStorage.removeItem('webinarhub_user');
     }
   }
   return config;

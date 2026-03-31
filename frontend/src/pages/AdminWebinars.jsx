@@ -239,10 +239,10 @@ const AdminWebinars = () => {
                           <div className="d-flex align-items-center gap-3">
                             <div className="webinar-thumb-wrapper overflow-hidden rounded-lg bg-slate-800" style={{ width: '64px', height: '40px' }}>
                               <img 
-                                src={webinar?.coverImageUrl || 'https://via.placeholder.com/64x40/1a1a1a/ffffff?text=Webinar'} 
+                                src={webinar?.coverImageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(webinar?.title || 'Webinar')}&background=1a1a1a&color=fff`} 
                                 alt="" 
                                 className="w-100 h-100 object-fit-cover" 
-                                onError={(e) => {e.target.src = 'https://via.placeholder.com/64x40/1a1a1a/ffffff?text=Error'}}
+                                onError={(e) => {e.target.src = 'https://ui-avatars.com/api/?name=Error&background=rose&color=fff'}}
                               />
                             </div>
                             <div className="d-flex flex-column">

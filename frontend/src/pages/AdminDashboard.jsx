@@ -25,10 +25,16 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/webinars`);
+      const token = localStorage.getItem('token');
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
+
+      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/webinars`, { headers });
       const webinarData = await resp.json();
       
-      const studentsResp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/registrations`);
+      const studentsResp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/registrations`, { headers });
       const registrationData = await studentsResp.json();
       
       // Count unique students (emails)
@@ -49,7 +55,13 @@ const AdminDashboard = () => {
 
   const fetchRecentRegistrations = async () => {
     try {
-      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/registrations`);
+      const token = localStorage.getItem('token');
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
+
+      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/registrations`, { headers });
       if (resp.ok) {
         const data = await resp.json();
         setRecentRegistrations(data.slice(0, 5));
