@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   Users, Search, Download, Mail, Calendar, Filter, 
-  CheckCircle, Clock, ArrowRight, UserCheck, Shield, ChevronDown
+  CheckCircle, Clock, ArrowRight, UserCheck, Shield, ChevronDown, RefreshCw, AlertTriangle
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import './Admin.css';
@@ -12,10 +12,46 @@ const AdminUsers = () => {
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingWebinars, setLoadingWebinars] = useState(true);
+  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const fetchWebinars = useCallback(async () => {
+    setLoadingWebinars(true);
+    setError(null);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+    try {
+      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/webinars`, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (resp.ok) {
+        setWebinars(await resp.json());
+      } else {
+        throw new Error('Sync failed');
+      }
+    } catch (err) {
+      setError(err.name === 'AbortError' ? 'Targeted platform is not responding (Timed out)' : 'Failed to retrieve participant metrics index.');
+    } finally {
+      setLoadingWebinars(false);
+    }
+  }, []);
 
   useEffect(() => {
     fetchWebinars();
+  }, [fetchWebinars]);
+
+  const fetchRegistrations = useCallback(async (id) => {
+    setLoading(true);
+    try {
+      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/registrations/webinar/${id}`);
+      if (resp.ok) {
+        setRegistrations(await resp.json());
+      }
+    } catch (err) {
+      toast.error('Metrics retrieval failed');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -24,57 +60,30 @@ const AdminUsers = () => {
     } else {
       setRegistrations([]);
     }
-  }, [selectedWebinarId]);
-
-  const fetchWebinars = async () => {
-    try {
-      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/webinars`);
-      if (resp.ok) {
-        setWebinars(await resp.json());
-      }
-    } catch (err) {
-      toast.error('Failed to load webinar index');
-    } finally {
-      setLoadingWebinars(false);
-    }
-  };
-
-  const fetchRegistrations = async (id) => {
-    setLoading(true);
-    try {
-      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/registrations/webinar/${id}`);
-      if (resp.ok) {
-        setRegistrations(await resp.json());
-      }
-    } catch (err) {
-      toast.error('Could not retrieve attendees');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [selectedWebinarId, fetchRegistrations]);
 
   const exportCSV = () => {
     if (registrations.length === 0) return;
     
-    const selectedWebinar = webinars.find(w => w.id.toString() === selectedWebinarId.toString());
+    const selectedWebinar = webinars.find(w => w?.id?.toString() === selectedWebinarId.toString());
     const header = "Name,Email,Registered On,Status\n";
-    const rows = registrations.map(reg => 
-      `${reg.userName},${reg.userEmail},${new Date(reg.registrationDate).toLocaleDateString()},Confirmed`
+    const rows = (Array.isArray(registrations) ? registrations : []).map(reg => 
+      `${reg?.userName || 'Anon'},${reg?.userEmail || 'N/A'},${reg?.registrationDate ? new Date(reg.registrationDate).toLocaleDateString() : 'TBD'},Confirmed`
     ).join("\n");
     
     const blob = new Blob([header + rows], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Attendees_${selectedWebinar?.title.replace(/ /g, '_')}.csv`;
+    a.download = `Audit_Report_${(selectedWebinar?.title || 'Unknown').replace(/ /g, '_')}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
     toast.success('Attendee report exported');
   };
 
-  const filteredRegistrations = registrations.filter(reg => 
-    reg.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    reg.userEmail.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredRegistrations = (Array.isArray(registrations) ? registrations : []).filter(reg => 
+    (reg?.userName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (reg?.userEmail || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -84,149 +93,161 @@ const AdminUsers = () => {
         <div className="breadcrumbs">
           <span className="breadcrumb-item">Admin</span>
           <span className="breadcrumb-separator">/</span>
-          <span className="breadcrumb-item text-white">Student Hub</span>
+          <span className="breadcrumb-item text-white">Audience Hub</span>
         </div>
         <div className="admin-page-title-row">
           <div>
-            <h1 className="admin-page-title">Growth Analytics</h1>
-            <p className="admin-page-subtitle">Track registrants, engagement metrics, and audience demographics.</p>
+            <h1 className="admin-page-title text-violet-100">Participant Intelligence</h1>
+            <p className="admin-page-subtitle">Track enrollments, demographic clusters, and session participation.</p>
           </div>
           {selectedWebinarId && registrations.length > 0 && (
             <button onClick={exportCSV} className="btn-admin-primary d-flex align-items-center gap-2">
               <Download size={18} />
-              <span>Export CSV Report</span>
+              <span>Full Audit Export</span>
             </button>
           )}
         </div>
       </div>
 
       <div className="admin-page-content">
-        <div className="row g-4 mb-4">
-          <div className="col-md-6">
-            <div className="premium-card p-3 h-100 flex items-center bg-slate-900 border-slate-800">
-               <div className="search-wrapper flex-grow-1 position-relative">
-                  <Filter size={20} className="search-icon-table" />
-                  <select 
-                    className="premium-input ps-5 appearance-none bg-transparent" 
-                    value={selectedWebinarId}
-                    onChange={(e) => setSelectedWebinarId(e.target.value)}
-                  >
-                    <option value="">-- Targeted Webinar --</option>
-                    {webinars.map(w => (
-                      <option key={w.id} value={w.id}>{w.title} ({new Date(w.dateTime).toLocaleDateString()})</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="position-absolute end-4 top-50 translate-middle-y opacity-30" size={18} />
-               </div>
-            </div>
+        {error ? (
+          <div className="premium-card p-5 text-center min-vh-50 flex flex-col justify-center items-center border-rose-500/20">
+             <AlertTriangle size={60} className="text-rose-500 mb-4 mx-auto" />
+             <h3 className="fs-3 fw-bold mb-3">Sync Error</h3>
+             <p className="text-slate-400 mb-5">{error}</p>
+             <button onClick={fetchWebinars} className="btn-admin-primary px-5 py-3 d-flex items-center gap-2 mx-auto">
+               <RefreshCw size={18} /> Retry Connection
+             </button>
           </div>
-          <div className="col-md-6">
-            <div className="premium-card p-3 h-100 flex items-center bg-slate-900 border-slate-800">
-              <div className="search-wrapper flex-grow-1 position-relative">
-                <Search size={20} className="search-icon-table" />
-                <input 
-                  type="text" 
-                  placeholder="Instant student lookup..." 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="premium-input ps-5 w-full"
-                  disabled={!selectedWebinarId}
-                />
+        ) : (
+          <>
+            <div className="row g-4 mb-4">
+              <div className="col-md-6">
+                <div className="premium-card p-3 h-100 flex items-center bg-slate-900 border-slate-800">
+                  <div className="search-wrapper flex-grow-1 position-relative">
+                      <Filter size={20} className="search-icon-table" />
+                      <select 
+                        className="premium-input ps-5 appearance-none bg-transparent w-full" 
+                        value={selectedWebinarId}
+                        onChange={(e) => setSelectedWebinarId(e.target.value)}
+                        disabled={loadingWebinars}
+                      >
+                        <option value="">-- Targeted Session --</option>
+                        {webinars.map(w => (
+                          <option key={w?.id} value={w?.id}>{w?.title} ({w?.dateTime ? new Date(w.dateTime).toLocaleDateString() : 'TBD'})</option>
+                        ))}
+                      </select>
+                      {loadingWebinars ? (
+                         <div className="position-absolute end-4 top-50 translate-middle-y">
+                            <div className="spinner-border text-violet-500 w-4 h-4"></div>
+                         </div>
+                      ) : (
+                        <ChevronDown className="position-absolute end-4 top-50 translate-middle-y opacity-30" size={18} />
+                      )}
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-6">
+                <div className="premium-card p-3 h-100 flex items-center bg-slate-900 border-slate-800">
+                  <div className="search-wrapper flex-grow-1 position-relative">
+                    <Search size={20} className="search-icon-table" />
+                    <input 
+                      type="text" 
+                      placeholder="Neural lookup by name or email..." 
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="premium-input ps-5 w-full"
+                      disabled={!selectedWebinarId || loading}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        <div className="premium-table-container min-vh-50">
-          {loading ? (
-            <div className="p-5">
-               {[1,2,3,4].map(i => <div key={i} className="skeleton h-16 w-full mb-3 rounded-xl"></div>)}
-               <p className="text-center text-slate-500 mt-4">Synthesizing audience data...</p>
+            <div className="premium-table-container min-vh-50">
+              {loading ? (
+                <div className="p-4 d-flex flex-grow-1 flex-col justify-center items-center py-24">
+                   <div className="spinner-border text-violet-500 w-12 h-12 mb-3"></div>
+                   <span className="text-slate-400">Aggregating participation data...</span>
+                </div>
+              ) : !selectedWebinarId ? (
+                <div className="text-center p-5 opacity-40 d-flex flex-column align-items-center justify-center py-24">
+                  <div className="p-5 bg-violet-900/10 rounded-full mb-4 ring-1 ring-violet-500/20">
+                    <UserCheck size={64} className="text-violet-500" />
+                  </div>
+                  <h3 className="fs-3 fw-bold text-slate-300">Terminal Standby</h3>
+                  <p className="text-slate-500 max-w-sm">Please select a session coordinate to analyze student pulse and registration metrics.</p>
+                </div>
+              ) : filteredRegistrations.length > 0 ? (
+                <div className="table-responsive">
+                  <table className="premium-table">
+                    <thead>
+                      <tr>
+                        <th>Node Profile</th>
+                        <th>Email Vector</th>
+                        <th>Temporal Log</th>
+                        <th>Status Pulse</th>
+                        <th>Node Type</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredRegistrations.map((reg) => (
+                        <tr key={reg?.id}>
+                          <td>
+                            <div className="d-flex align-items-center gap-3">
+                              <div className="admin-avatar-lg bg-gradient-to-br from-violet-600 to-indigo-700">
+                                {reg?.userName?.charAt(0) || 'A'}
+                              </div>
+                              <div className="d-flex flex-column">
+                                <span className="fw-bold text-white fs-6">{reg?.userName || 'Anon'}</span>
+                                <span className="small opacity-50">ID: {reg?.id?.toString().slice(-4) || '----'}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="d-flex align-items-center gap-2 text-slate-300">
+                              <Mail size={16} className="text-violet-400 opacity-60" />
+                              <span>{reg?.userEmail || 'N/A'}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="d-flex align-items-center gap-2 text-slate-300">
+                              <Calendar size={16} className="text-emerald-400 opacity-60" />
+                              <span>{reg?.registrationDate ? new Date(reg.registrationDate).toLocaleDateString() : 'TBD'}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <span className="badge-premium badge-green">ACTIVE</span>
+                          </td>
+                          <td>
+                            <div className="d-flex align-items-center gap-1 text-slate-400 small">
+                               <Shield size={14} /> Student Node
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center p-5 opacity-40 py-24">
+                   <Users size={48} className="mx-auto mb-3" />
+                   <p className="fs-4 fw-bold">Zero Hits Recorded</p>
+                   <p className="small">No neural patterns matched your current filter criteria.</p>
+                </div>
+              )}
             </div>
-          ) : !selectedWebinarId ? (
-            <div className="text-center p-5 opacity-40 d-flex flex-column align-items-center justify-center py-24">
-              <div className="p-5 bg-violet-900/10 rounded-full mb-4 ring-1 ring-violet-500/20">
-                <UserCheck size={64} className="text-violet-500" />
-              </div>
-              <h3 className="fs-3 fw-bold text-slate-300">Audience Selection</h3>
-              <p className="text-slate-500 max-w-sm">Please select a session from the dropdown above to analyze student participation and registration metrics.</p>
-            </div>
-          ) : filteredRegistrations.length > 0 ? (
-            <div className="table-responsive">
-              <table className="premium-table">
-                <thead>
-                  <tr>
-                    <th>Student Profile</th>
-                    <th>Email Address</th>
-                    <th>Registration Date</th>
-                    <th>Engagement Status</th>
-                    <th>Role</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredRegistrations.map((reg) => (
-                    <tr key={reg.id}>
-                      <td>
-                        <div className="d-flex align-items-center gap-3">
-                          <div className="admin-avatar-lg">
-                            {reg.userName.charAt(0)}
-                          </div>
-                          <div className="d-flex flex-column">
-                            <span className="fw-bold text-white fs-6">{reg.userName}</span>
-                            <span className="small opacity-50">ID: {reg.id.toString().slice(-4)}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="d-flex align-items-center gap-2 text-slate-300">
-                          <Mail size={16} className="text-violet-400 opacity-60" />
-                          <span>{reg.userEmail}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="d-flex align-items-center gap-2 text-slate-300">
-                          <Calendar size={16} className="text-emerald-400 opacity-60" />
-                          <span>{new Date(reg.registrationDate).toLocaleDateString()}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <span className="badge-premium badge-green">VERIFIED</span>
-                      </td>
-                      <td>
-                        <div className="d-flex align-items-center gap-1 text-slate-400 small">
-                           <Shield size={14} /> Student
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="text-center p-5 opacity-40 py-24">
-               <Users size={48} className="mx-auto mb-3" />
-               <p className="fs-4 fw-bold">{searchQuery ? "Student Not Found" : "No Registrations Recorded"}</p>
-               <p className="small">We couldn't find any results matching your current filters.</p>
-            </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
 
       <style>{`
         .admin-avatar-lg {
-          width: 44px;
-          height: 44px;
-          background: linear-gradient(135deg, #7c3aed, #4c1d95);
-          color: white;
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 800;
-          font-size: 1.1rem;
-          box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+          width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+          color: white; border-radius: 12px; font-weight: 800; font-size: 1.1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
         .min-vh-50 { min-height: 50vh; }
+        .spinner-border { border-width: 0.25em; border-right-color: transparent !important; }
       `}</style>
     </div>
   );

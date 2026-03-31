@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   FileUp, Trash2, Plus, Search, ExternalLink, FileText, 
   Layout, Video, AlertCircle, RefreshCw, Layers, Calendar, ChevronRight
@@ -12,6 +12,7 @@ const AdminResources = () => {
   const [selectedWebinarId, setSelectedWebinarId] = useState('');
   const [loadingWebinars, setLoadingWebinars] = useState(true);
   const [loadingResources, setLoadingResources] = useState(false);
+  const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -21,8 +22,45 @@ const AdminResources = () => {
     description: ''
   });
 
+  const fetchWebinars = useCallback(async () => {
+    setLoadingWebinars(true);
+    setError(null);
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), 12000);
+
+    try {
+      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/webinars`, { signal: controller.signal });
+      clearTimeout(id);
+      if (resp.ok) {
+        const data = await resp.json();
+        const completed = (Array.isArray(data) ? data : []).filter(w => w.status === 'COMPLETED');
+        setWebinars(completed);
+      } else {
+        throw new Error('Sync failed');
+      }
+    } catch (err) {
+      setError(err.name === 'AbortError' ? 'Targeted platform is not responding (Timed out)' : 'Failed to retrieve completed sessions.');
+    } finally {
+      setLoadingWebinars(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchWebinars();
+  }, [fetchWebinars]);
+
+  const fetchResources = useCallback(async (id) => {
+    setLoadingResources(true);
+    try {
+      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/resources/webinar/${id}`);
+      if (resp.ok) {
+        setResources(await resp.json());
+      }
+    } catch (err) {
+      toast.error('Material retrieval failed');
+    } finally {
+      setLoadingResources(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -31,39 +69,7 @@ const AdminResources = () => {
     } else {
       setResources([]);
     }
-  }, [selectedWebinarId]);
-
-  const fetchWebinars = async () => {
-    setLoadingWebinars(true);
-    try {
-      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/webinars`);
-      if (resp.ok) {
-        const data = await resp.json();
-        const completed = data.filter(w => w.status === 'COMPLETED');
-        setWebinars(completed);
-      } else {
-        toast.error('Could not load completed webinars');
-      }
-    } catch (err) {
-      toast.error('Network error while fetching webinars');
-    } finally {
-      setLoadingWebinars(false);
-    }
-  };
-
-  const fetchResources = async (id) => {
-    setLoadingResources(true);
-    try {
-      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/resources/webinar/${id}`);
-      if (resp.ok) {
-        setResources(await resp.json());
-      }
-    } catch (err) {
-      toast.error('Failed to load resources for this webinar');
-    } finally {
-      setLoadingResources(false);
-    }
-  };
+  }, [selectedWebinarId, fetchResources]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -82,14 +88,12 @@ const AdminResources = () => {
       });
 
       if (resp.ok) {
-        toast.success('Resource attached successfully!');
+        toast.success('Asset Uploaded Successfully');
         setFormData({ title: '', fileType: 'PDF', fileUrl: '', description: '' });
         fetchResources(selectedWebinarId);
-      } else {
-        toast.error('Failed to attach resource');
       }
     } catch (err) {
-      toast.error('Server error');
+      toast.error('Sync failure with data center');
     } finally {
       setSaving(false);
     }
@@ -104,11 +108,11 @@ const AdminResources = () => {
       });
 
       if (resp.ok) {
-        toast.success('Resource removed');
+        toast.success('Asset Purged');
         fetchResources(selectedWebinarId);
       }
     } catch (err) {
-      toast.error('Deletion failed');
+      toast.error('De-linking failed');
     }
   };
 
@@ -129,12 +133,12 @@ const AdminResources = () => {
         <div className="breadcrumbs">
           <span className="breadcrumb-item">Admin</span>
           <span className="breadcrumb-separator">/</span>
-          <span className="breadcrumb-item text-white">Resource Center</span>
+          <span className="breadcrumb-item text-white">Vault Index</span>
         </div>
         <div className="admin-page-title-row">
           <div>
-            <h1 className="admin-page-title text-violet-100">Learning Materials</h1>
-            <p className="admin-page-subtitle">Upload and link educational assets to completed webinar sessions</p>
+            <h1 className="admin-page-title text-violet-100">Resource Repository</h1>
+            <p className="admin-page-subtitle">Upload and categorize intellectual assets for finalized sessions.</p>
           </div>
           <button onClick={fetchWebinars} className="nav-icon-btn border border-slate-700 bg-slate-800 text-white p-3 hover:bg-slate-700">
             <RefreshCw size={20} className={loadingWebinars ? 'animate-spin' : ''} />
@@ -143,175 +147,178 @@ const AdminResources = () => {
       </div>
 
       <div className="admin-page-content">
-        <div className="row g-5">
-          {/* LEFT: Selection & Form */}
-          <div className="col-lg-5">
-            <div className="premium-card mb-4 bg-gradient-to-br from-slate-900 to-slate-950">
-              <h3 className="card-title-admin mb-4 d-flex align-items-center gap-3 fs-5">
-                <div className="p-2 bg-violet-600 rounded-lg"><Search size={22} className="text-white" /></div>
-                Target Webinar
-              </h3>
-              
-              <div className="premium-form-group">
-                <label className="premium-label">Select Completed Webinar</label>
-                <div className="relative">
-                  {loadingWebinars ? (
-                     <div className="skeleton h-12 w-full"></div>
-                  ) : (
-                    <select 
-                      className="premium-input d-block w-full appearance-none bg-slate-800" 
-                      value={selectedWebinarId}
-                      onChange={(e) => setSelectedWebinarId(e.target.value)}
-                    >
-                      <option value="">-- Choose Webinar --</option>
-                      {webinars.map(w => (
-                        <option key={w.id} value={w.id}>{w.title} ({new Date(w.dateTime).toLocaleDateString()})</option>
-                      ))}
-                    </select>
-                  )}
-                </div>
-                {!loadingWebinars && webinars.length === 0 && (
-                   <p className="small text-warning mt-2 d-flex align-items-center gap-2">
-                     <AlertCircle size={14} /> No completed webinars found to attach resources.
-                   </p>
-                )}
-              </div>
-            </div>
-
-            {selectedWebinarId && (
-              <div className="premium-card animate-fade-in bg-gradient-to-br from-violet-900/20 to-transparent border-violet-500/30">
+        {error ? (
+          <div className="premium-card p-5 text-center min-vh-50 flex flex-col justify-center items-center border-rose-500/20">
+             <AlertCircle size={60} className="text-rose-500 mb-4 mx-auto" />
+             <h3 className="fs-3 fw-bold mb-3">Sync Error</h3>
+             <p className="text-slate-400 mb-5">{error}</p>
+             <button onClick={fetchWebinars} className="btn-admin-primary px-5 py-3 d-flex items-center gap-2 mx-auto">
+               <RefreshCw size={18} /> Retry Connection
+             </button>
+          </div>
+        ) : (
+          <div className="row g-5">
+            <div className="col-lg-5">
+              <div className="premium-card mb-4 bg-gradient-to-br from-slate-900 to-slate-950">
                 <h3 className="card-title-admin mb-4 d-flex align-items-center gap-3 fs-5">
-                  <div className="p-2 bg-emerald-600 rounded-lg"><FileUp size={22} className="text-white" /></div>
-                  Attach Material
+                  <div className="p-2 bg-violet-600 rounded-lg"><Search size={22} className="text-white" /></div>
+                  Vault Target
                 </h3>
                 
-                <form onSubmit={handleSubmit}>
-                  <div className="premium-form-group">
-                    <label className="premium-label">Resource Title</label>
-                    <input 
-                      type="text" 
-                      required 
-                      placeholder="e.g. Master Class Deep-dive Slides"
-                      className="premium-input bg-slate-800 border-slate-700" 
-                      value={formData.title}
-                      onChange={(e) => setFormData({...formData, title: e.target.value})}
-                    />
-                  </div>
-                  
-                  <div className="row">
-                    <div className="col-md-6 mb-3">
-                      <label className="premium-label">Type</label>
+                <div className="premium-form-group">
+                  <label className="premium-label">Select Source Webinar</label>
+                  <div className="relative">
+                    {loadingWebinars ? (
+                      <div className="skeleton h-12 w-full rounded-xl"></div>
+                    ) : (
                       <select 
-                        className="premium-input bg-slate-800 border-slate-700"
-                        value={formData.fileType}
-                        onChange={(e) => setFormData({...formData, fileType: e.target.value})}
+                        className="premium-input d-block w-full appearance-none bg-slate-800" 
+                        value={selectedWebinarId}
+                        onChange={(e) => setSelectedWebinarId(e.target.value)}
                       >
-                        <option value="PDF">PDF Document</option>
-                        <option value="SLIDE">Slides Presentation</option>
-                        <option value="VIDEO">Video Recording</option>
-                        <option value="LINK">External Link</option>
+                        <option value="">-- Terminal Choice --</option>
+                        {webinars.map(w => (
+                          <option key={w?.id} value={w?.id}>{w?.title} ({new Date(w?.dateTime).toLocaleDateString()})</option>
+                        ))}
                       </select>
-                    </div>
-                    <div className="col-md-6 mb-3">
-                      <label className="premium-label">Material URL</label>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {selectedWebinarId && (
+                <div className="premium-card animate-fade-in bg-gradient-to-br from-violet-900/20 to-transparent border-violet-500/30">
+                  <h3 className="card-title-admin mb-4 d-flex align-items-center gap-3 fs-5">
+                    <div className="p-2 bg-emerald-600 rounded-lg"><FileUp size={22} className="text-white" /></div>
+                    Inject Matrix
+                  </h3>
+                  
+                  <form onSubmit={handleSubmit}>
+                    <div className="premium-form-group">
+                      <label className="premium-label">Asset Token (Title)</label>
                       <input 
-                        type="url" 
+                        type="text" 
                         required 
-                        placeholder="https://..."
+                        placeholder="e.g. Protocol Documentation"
                         className="premium-input bg-slate-800 border-slate-700" 
-                        value={formData.fileUrl}
-                        onChange={(e) => setFormData({...formData, fileUrl: e.target.value})}
+                        value={formData.title}
+                        onChange={(e) => setFormData({...formData, title: e.target.value})}
                       />
                     </div>
-                  </div>
-
-                  <div className="premium-form-group mt-2">
-                    <label className="premium-label">Detailed Notes (Optional)</label>
-                    <textarea 
-                      rows="3" 
-                      className="premium-input bg-slate-800 border-slate-700" 
-                      placeholder="Key takeaways from this resource..."
-                      value={formData.description}
-                      onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    ></textarea>
-                  </div>
-                  <button type="submit" disabled={saving} className="btn-admin-primary w-100 py-3 mt-2 d-flex align-items-center justify-content-center gap-2">
-                    {saving ? <div className="spinner-border spinner-border-sm"></div> : <><Plus size={20} /> Attach Resource</>}
-                  </button>
-                </form>
-              </div>
-            )}
-          </div>
-
-          {/* RIGHT: List Content */}
-          <div className="col-lg-7">
-            <div className="premium-card min-vh-75 h-100 border-dashed border-slate-800 bg-transparent flex flex-col">
-              <h3 className="card-title-admin mb-4 d-flex align-items-center gap-3 fs-5">
-                <div className="p-2 bg-slate-800 rounded-lg text-slate-400"><Layers size={22} /></div>
-                Vault Repository
-              </h3>
-              
-              {!selectedWebinarId ? (
-                <div className="flex-1 d-flex flex-column items-center justify-center text-center p-5 opacity-40">
-                  <div className="p-5 bg-slate-900 rounded-full mb-4 border border-slate-800 shadow-2xl">
-                    <Layout size={64} className="text-slate-500" />
-                  </div>
-                  <h4 className="text-xl font-bold text-slate-300">Vault Empty</h4>
-                  <p className="text-slate-400 max-w-sm">Select a finalized webinar on the left to browse and manage high-quality student materials.</p>
-                </div>
-              ) : loadingResources ? (
-                <div className="p-4">
-                  {[1,2,3].map(i => <div key={i} className="skeleton h-24 w-full mb-3 rounded-2xl"></div>)}
-                </div>
-              ) : resources.length > 0 ? (
-                <div className="resource-list-premium d-flex flex-column gap-3 overflow-y-auto pr-2 custom-scrollbar">
-                  {resources.map(res => (
-                    <div key={res.id} className="resource-tile-admin d-flex justify-content-between align-items-center p-4 rounded-2xl bg-slate-900 border border-slate-800 hover:border-violet-500/50 transition-all">
-                      <div className="d-flex align-items-center gap-4">
-                        <div className={`resource-glyph-box ${res.fileType.toLowerCase()}`}>
-                          {getResourceTypeIcon(res.fileType)}
+                    
+                    <div className="row">
+                        <div className="col-md-6 mb-3">
+                        <label className="premium-label">Data Type</label>
+                        <select 
+                            className="premium-input bg-slate-800 border-slate-700 w-full"
+                            value={formData.fileType}
+                            onChange={(e) => setFormData({...formData, fileType: e.target.value})}
+                        >
+                            <option value="PDF">PDF</option>
+                            <option value="SLIDE">SLIDES</option>
+                            <option value="VIDEO">VIDEO</option>
+                            <option value="LINK">EXTERNAL URL</option>
+                        </select>
                         </div>
-                        <div className="d-flex flex-column">
-                          <span className="fw-bold text-white fs-5">{res.title}</span>
-                          <span className="small text-slate-500 hover:text-violet-400 cursor-pointer d-flex gap-1 items-center mt-1">
-                            <Calendar size={12} /> {new Date().toLocaleDateString()} • {res.fileType}
-                          </span>
+                        <div className="col-md-6 mb-3">
+                        <label className="premium-label">Data Vector (URL)</label>
+                        <input 
+                            type="url" 
+                            required 
+                            className="premium-input bg-slate-800 border-slate-700 h-100" 
+                            value={formData.fileUrl}
+                            onChange={(e) => setFormData({...formData, fileUrl: e.target.value})}
+                        />
                         </div>
-                      </div>
-                      <div className="d-flex gap-2">
-                        <a href={res.fileUrl} target="_blank" rel="noreferrer" className="nav-icon-btn border hover:bg-emerald-600/20 hover:text-emerald-400" title="Open Link">
-                          <ExternalLink size={18} />
-                        </a>
-                        <button onClick={() => handleDelete(res.id)} className="nav-icon-btn border border-rose-500/30 text-rose-500 hover:bg-rose-600 hover:text-white" title="Trash Material">
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex-1 d-flex flex-column items-center justify-center text-center p-5 opacity-40">
-                   <AlertCircle size={40} className="mb-3" />
-                   <p className="fs-5 font-bold">No assets found</p>
-                   <p className="small">Begin uploading materials to support your students' growth.</p>
+
+                    <div className="premium-form-group mt-2">
+                        <label className="premium-label">Neural Notes (Optional)</label>
+                        <textarea 
+                            rows="3" 
+                            className="premium-input bg-slate-800 border-slate-700" 
+                            value={formData.description}
+                            onChange={(e) => setFormData({...formData, description: e.target.value})}
+                        ></textarea>
+                    </div>
+                    <button type="submit" disabled={saving} className="btn-admin-primary w-100 py-3 mt-2 d-flex align-items-center justify-content-center gap-2">
+                        {saving ? <div className="spinner-border spinner-border-sm"></div> : <><Plus size={20} /> Deploy Asset</>}
+                    </button>
+                  </form>
                 </div>
               )}
             </div>
+
+            <div className="col-lg-7">
+              <div className="premium-card min-vh-75 h-100 border-dashed border-slate-800 bg-transparent flex flex-col">
+                <h3 className="card-title-admin mb-4 d-flex align-items-center gap-3 fs-5">
+                  <div className="p-2 bg-slate-800 rounded-lg text-slate-400"><Layers size={22} /></div>
+                  Encrypted Vault
+                </h3>
+                
+                {!selectedWebinarId ? (
+                  <div className="flex-1 d-flex flex-column items-center justify-center text-center p-5 opacity-40">
+                    <div className="p-5 bg-slate-900 rounded-full mb-4 border border-slate-800">
+                      <Layout size={64} className="text-slate-500" />
+                    </div>
+                    <h4 className="text-xl font-bold">Terminal ID Waiting</h4>
+                    <p className="max-w-sm">Select a finalized session on the left to activate the vault interface.</p>
+                  </div>
+                ) : loadingResources ? (
+                  <div className="p-4 d-flex flex-grow-1 flex-col justify-center items-center">
+                    <div className="spinner-border text-violet-500 w-12 h-12 mb-3"></div>
+                    <span className="text-slate-400">Decrypting assets...</span>
+                  </div>
+                ) : resources.length > 0 ? (
+                  <div className="resource-list-premium d-flex flex-column gap-3 overflow-y-auto pr-2 custom-scrollbar">
+                    {resources.map(res => (
+                      <div key={res?.id} className="resource-tile-admin d-flex justify-content-between align-items-center p-4 rounded-2xl bg-slate-900 border border-slate-800 hover:border-violet-500/50 transition-all">
+                        <div className="d-flex align-items-center gap-4">
+                          <div className={`resource-glyph-box ${res?.fileType?.toLowerCase()}`}>
+                            {getResourceTypeIcon(res?.fileType)}
+                          </div>
+                          <div className="d-flex flex-column">
+                            <span className="fw-bold text-white fs-5">{res?.title || 'Void Asset'}</span>
+                            <span className="small text-slate-500 d-flex gap-1 items-center mt-1">
+                              <Calendar size={12} /> {res?.fileType} • Active
+                            </span>
+                          </div>
+                        </div>
+                        <div className="d-flex gap-2">
+                          <a href={res?.fileUrl} target="_blank" rel="noreferrer" className="nav-icon-btn border hover:bg-violet-600/20" title="Access">
+                            <ExternalLink size={18} />
+                          </a>
+                          <button onClick={() => handleDelete(res?.id)} className="nav-icon-btn border text-rose-500 hover:bg-rose-600 hover:text-white" title="Purge">
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex-1 d-flex flex-column items-center justify-center text-center p-5 opacity-40">
+                     <AlertCircle size={40} className="mb-3" />
+                     <p className="fs-5 font-bold">Zero Assets Detected</p>
+                     <p className="small">Begin deployment to populate this terminal.</p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <style>{`
         .min-vh-75 { min-height: 75vh; }
-        .resource-glyph-box { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: 1px solid rgba(255,255,255,0.05); }
-        .resource-glyph-box.pdf { background: rgba(244, 63, 94, 0.15); color: #fb7185; }
-        .resource-glyph-box.slide { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
-        .resource-glyph-box.video { background: rgba(139, 92, 246, 0.15); color: #a78bfa; }
-        .resource-glyph-box.link { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
-        .resource-tile-admin { transform-origin: left center; }
-        .resource-tile-admin:hover { transform: scale(1.02); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); }
+        .resource-glyph-box { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .resource-glyph-box.pdf { background: rgba(244, 63, 94, 0.1); color: #fb7185; }
+        .resource-glyph-box.slide { background: rgba(245, 158, 11, 0.1); color: #fbbf24; }
+        .resource-glyph-box.video { background: rgba(139, 92, 246, 0.1); color: #a78bfa; }
+        .resource-glyph-box.link { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
+        .resource-tile-admin:hover { transform: scale(1.01); background: #131b2e; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        .spinner-border { width: 3rem; height: 3rem; border-width: 0.3em; border-right-color: transparent !important; }
       `}</style>
     </div>
   );

@@ -4,8 +4,6 @@ import {
   Video, 
   FileText, 
   Users, 
-  Settings,
-  HelpCircle,
   ShieldCheck,
   ChevronRight,
   LogOut
@@ -20,11 +18,6 @@ const AdminSidebar = () => {
     { title: 'Webinars', icon: <Video size={20} />, path: '/admin/webinars' },
     { title: 'Resources', icon: <FileText size={20} />, path: '/admin/resources' },
     { title: 'Users', icon: <Users size={20} />, path: '/admin/users' },
-  ];
-
-  const bottomItems = [
-    { title: 'Settings', icon: <Settings size={20} />, path: '/admin/settings' },
-    { title: 'Help Center', icon: <HelpCircle size={20} />, path: '/admin/help' },
   ];
 
   return (
@@ -47,19 +40,6 @@ const AdminSidebar = () => {
             <span className="sidebar-link-icon">{item.icon}</span>
             <span className="sidebar-link-title">{item.title}</span>
             <ChevronRight className="sidebar-chevron ms-auto" size={14} />
-          </NavLink>
-        ))}
-
-        <div className="sidebar-divider my-4 border-t border-slate-800 opacity-50"></div>
-
-        {bottomItems.map((item) => (
-          <NavLink 
-            key={item.path} 
-            to={item.path} 
-            className={({isActive}) => isActive ? 'sidebar-link active' : 'sidebar-link'}
-          >
-            <span className="sidebar-link-icon">{item.icon}</span>
-            <span className="sidebar-link-title">{item.title}</span>
           </NavLink>
         ))}
       </nav>
