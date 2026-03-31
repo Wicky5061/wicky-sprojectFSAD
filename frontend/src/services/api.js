@@ -74,7 +74,7 @@ export const registrationAPI = {
   cancel: (id) => API.delete(`/registrations/${id}`),
   cancelByWebinar: (webinarId) => API.post(`/registrations/cancel/${webinarId}`),
   markAttendance: (id) => API.put(`/registrations/${id}/attend`),
-  checkRegistration: (webinarId) => API.get(`/registrations/check?webinarId=${webinarId}`),
+  checkRegistration: (webinarId) => API.get(`/registrations/check/${webinarId}`),
   getCount: (webinarId) => API.get(`/registrations/count/${webinarId}`),
 };
 

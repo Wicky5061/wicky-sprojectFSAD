@@ -104,15 +104,15 @@ public class RegistrationController {
         return ResponseEntity.ok(registration);
     }
 
-    /**
-     * GET /api/registrations/check - Check if user is registered
-     */
-    @GetMapping("/check")
-    public ResponseEntity<Map<String, Boolean>> checkRegistration(@RequestHeader(value = "Authorization", required = false) String token, @RequestParam("webinarId") Long webinarId) {
+    @GetMapping("/check/{webinarId}")
+    public ResponseEntity<Map<String, Object>> checkRegistration(@RequestHeader(value = "Authorization", required = false) String token, @PathVariable("webinarId") Long webinarId) {
         Long userId = extractUserIdFromToken(token);
-        boolean isRegistered = registrationService.isUserRegistered(userId, webinarId);
-        Map<String, Boolean> response = new HashMap<>();
-        response.put("registered", isRegistered);
+        java.util.Optional<RegistrationDto> registration = registrationService.getRegistrationByUserAndWebinar(userId, webinarId);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("registered", registration.isPresent());
+        registration.ifPresent(reg -> response.put("id", reg.getId()));
+        
         return ResponseEntity.ok(response);
     }
 

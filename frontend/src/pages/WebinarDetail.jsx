@@ -14,6 +14,7 @@ export default function WebinarDetail() {
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isRegistered, setIsRegistered] = useState(false);
+  const [registrationId, setRegistrationId] = useState(null);
   const [regLoading, setRegLoading] = useState(false);
   const [ratings, setRatings] = useState([]);
   const [avgRating, setAvgRating] = useState(0);
@@ -44,8 +45,10 @@ export default function WebinarDetail() {
         try {
           const checkRes = await registrationAPI.checkRegistration(id);
           setIsRegistered(checkRes.data.registered);
+          setRegistrationId(checkRes.data.id || null);
         } catch {
           setIsRegistered(false);
+          setRegistrationId(null);
         }
       }
     } catch (err) {
@@ -87,8 +90,9 @@ export default function WebinarDetail() {
     }
     setRegLoading(true);
     try {
-      await registrationAPI.register(webinar.id);
+      const resp = await registrationAPI.register(webinar.id);
       setIsRegistered(true);
+      setRegistrationId(resp.data.id);
       toast.success('Successfully registered! Check your email for details.');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to register.');
@@ -98,12 +102,18 @@ export default function WebinarDetail() {
   };
 
   const handleCancelRegistration = async () => {
+    if (!registrationId) {
+        toast.error('Registration token missing. Refreshing...');
+        loadWebinar();
+        return;
+    }
     if (!window.confirm('Are you sure you want to cancel your registration?')) return;
     
     setRegLoading(true);
     try {
-      await registrationAPI.cancelByWebinar(id);
+      await registrationAPI.cancel(registrationId);
       setIsRegistered(false);
+      setRegistrationId(null);
       toast.success('Registration cancelled successfully');
       // Refresh component state
       loadWebinar();
