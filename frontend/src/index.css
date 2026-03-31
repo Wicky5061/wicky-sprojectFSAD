@@ -268,8 +268,8 @@ h1, h2, h3 {
 .gradient-text {
   background: linear-gradient(135deg, var(--primary), var(--accent));
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 /* ---------- Mobile Responsiveness ---------- */
@@ -412,8 +412,8 @@ code, pre, .mono {
   background: var(--gradient-hero);
   background-size: 200% auto;
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 .page-header p {
   color: var(--text-secondary);
