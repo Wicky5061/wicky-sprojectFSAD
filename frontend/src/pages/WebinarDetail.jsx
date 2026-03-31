@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { webinarAPI, registrationAPI, resourceAPI, ratingAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -21,11 +21,8 @@ export default function WebinarDetail() {
   const [userRating, setUserRating] = useState({ stars: 5, comment: '' });
   const [submittingRating, setSubmittingRating] = useState(false);
 
-  useEffect(() => {
-    loadWebinar();
-  }, [id]);
-
-  const loadWebinar = async () => {
+  const loadWebinar = useCallback(async (isInitialLoad = true) => {
+    if (isInitialLoad) setLoading(true);
     try {
       const [webRes, resRes, ratingRes] = await Promise.all([
         webinarAPI.getById(id),
@@ -41,23 +38,27 @@ export default function WebinarDetail() {
         setAvgRating(avg.toFixed(1));
       }
 
+      // SILENT checking for registration - ONLY show toast on explicit action.
       if (user) {
         try {
           const checkRes = await registrationAPI.checkRegistration(id);
-          setIsRegistered(checkRes.data.registered);
-          setRegistrationId(checkRes.data.id || null);
-        } catch {
-          setIsRegistered(false);
-          setRegistrationId(null);
+          setIsRegistered(!!checkRes.data?.registered);
+          setRegistrationId(checkRes.data?.id || null);
+        } catch (silentErr) {
+          console.warn("Silent registration check skipped or failed.", silentErr);
         }
       }
     } catch (err) {
-      console.error('Failed to load webinar:', err);
-      toast.error('Failed to load webinar details.');
+      console.error('Failed to load webinar details:', err);
+      if (isInitialLoad) toast.error('Could not sync webinar metadata.');
     } finally {
-      setLoading(false);
+      if (isInitialLoad) setLoading(false);
     }
-  };
+  }, [id, user]);
+
+  useEffect(() => {
+    loadWebinar(true);
+  }, [loadWebinar]);
 
   const handleRatingSubmit = async (e) => {
     e.preventDefault();
@@ -90,12 +91,22 @@ export default function WebinarDetail() {
     }
     setRegLoading(true);
     try {
-      const resp = await registrationAPI.register(webinar.id);
+      const resp = await registrationAPI.register(id);
       setIsRegistered(true);
       setRegistrationId(resp.data.id);
-      toast.success('Successfully registered! Check your email for details.');
+      toast.success('Access confirmed! Welcome to the session.');
+      // Refresh webinar data for incremented counts
+      loadWebinar(false);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to register.');
+        const errMsg = err.response?.data?.message || "";
+        if (errMsg.toLowerCase().includes("already registered")) {
+            // Self-repair: update UI since backend confirms registration
+            setIsRegistered(true);
+            toast.success("You're already on the list! Resyncing...");
+            loadWebinar(false);
+        } else {
+            toast.error(errMsg || 'Terminal registration failure.');
+        }
     } finally {
       setRegLoading(false);
     }
@@ -103,8 +114,8 @@ export default function WebinarDetail() {
 
   const handleCancelRegistration = async () => {
     if (!registrationId) {
-        toast.error('Registration token missing. Refreshing...');
-        loadWebinar();
+        toast.error('Local registration ID out of sync. Please wait...');
+        loadWebinar(false);
         return;
     }
     if (!window.confirm('Are you sure you want to cancel your registration?')) return;
@@ -114,11 +125,10 @@ export default function WebinarDetail() {
       await registrationAPI.cancel(registrationId);
       setIsRegistered(false);
       setRegistrationId(null);
-      toast.success('Registration cancelled successfully');
-      // Refresh component state
-      loadWebinar();
+      toast.success('Session registration terminated.');
+      loadWebinar(false);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to cancel registration.');
+      toast.error(err.response?.data?.message || 'Cancellation failed.');
     } finally {
       setRegLoading(false);
     }
@@ -244,10 +254,7 @@ export default function WebinarDetail() {
                   {resources.length > 0 ? resources.map((r) => (
                     <a key={r.id} href={r.fileUrl} target="_blank" rel="noopener noreferrer" className="resource-link-card card">
                       <div className={`res-icon-box ${r.fileType.toLowerCase()}`}>
-                        {r.fileType === 'PDF' && '📄'}
-                        {r.fileType === 'SLIDE' && '📊'}
-                        {r.fileType === 'LINK' && '🔗'}
-                        {r.fileType === 'VIDEO' && '🎥'}
+                        {getResourceIcon(r.fileType)}
                       </div>
                       <div className="res-info">
                         <span className="res-title">{r.title}</span>
@@ -397,4 +404,14 @@ export default function WebinarDetail() {
       </div>
     </div>
   );
+}
+
+function getResourceIcon(type) {
+    switch(type) {
+        case 'PDF': return '📄';
+        case 'SLIDE': return '📊';
+        case 'LINK': return '🔗';
+        case 'VIDEO': return '🎥';
+        default: return '📎';
+    }
 }

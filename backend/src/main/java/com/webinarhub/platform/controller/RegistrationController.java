@@ -1,6 +1,7 @@
 package com.webinarhub.platform.controller;
 
 import com.webinarhub.platform.dto.RegistrationDto;
+import com.webinarhub.platform.exception.BadRequestException;
 import com.webinarhub.platform.service.RegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Registration REST Controller.
@@ -31,10 +33,10 @@ public class RegistrationController {
             try {
                 return Long.parseLong(token.substring(7));
             } catch (NumberFormatException e) {
-                throw new com.webinarhub.platform.exception.BadRequestException("Invalid token format");
+                throw new BadRequestException("Invalid token format");
             }
         }
-        throw new com.webinarhub.platform.exception.BadRequestException("Missing or invalid Authorization header");
+        throw new BadRequestException("Missing or invalid Authorization header");
     }
 
     /**
@@ -106,12 +108,23 @@ public class RegistrationController {
 
     @GetMapping("/check/{webinarId}")
     public ResponseEntity<Map<String, Object>> checkRegistration(@RequestHeader(value = "Authorization", required = false) String token, @PathVariable("webinarId") Long webinarId) {
-        Long userId = extractUserIdFromToken(token);
-        java.util.Optional<RegistrationDto> registration = registrationService.getRegistrationByUserAndWebinar(userId, webinarId);
-        
         Map<String, Object> response = new HashMap<>();
-        response.put("registered", registration.isPresent());
-        registration.ifPresent(reg -> response.put("id", reg.getId()));
+        
+        if (token == null || !token.startsWith("Bearer ")) {
+            response.put("registered", false);
+            return ResponseEntity.ok(response);
+        }
+
+        try {
+            Long userId = extractUserIdFromToken(token);
+            Optional<RegistrationDto> registration = registrationService.getRegistrationByUserAndWebinar(userId, webinarId);
+            
+            response.put("registered", registration.isPresent());
+            registration.ifPresent(reg -> response.put("id", reg.getId()));
+        } catch (Exception e) {
+            response.put("registered", false);
+            response.put("error", "Session expired or invalid");
+        }
         
         return ResponseEntity.ok(response);
     }
