@@ -97,6 +97,23 @@ export default function WebinarDetail() {
     }
   };
 
+  const handleCancelRegistration = async () => {
+    if (!window.confirm('Are you sure you want to cancel your registration?')) return;
+    
+    setRegLoading(true);
+    try {
+      await registrationAPI.cancelByWebinar(id);
+      setIsRegistered(false);
+      toast.success('Registration cancelled successfully');
+      // Refresh component state
+      loadWebinar();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to cancel registration.');
+    } finally {
+      setRegLoading(false);
+    }
+  };
+
   const formatDate = (dateStr) => {
     if (!dateStr) return 'TBD';
     return new Date(dateStr).toLocaleDateString([], {
@@ -348,12 +365,22 @@ export default function WebinarDetail() {
                   {webinar.status === 'CANCELLED' && !isAdmin() && (
                     <button className="btn btn-outline btn-lg w-full" disabled>Event Cancelled</button>
                   )}
-                  {isRegistered && webinar.status === 'UPCOMING' && (
-                    <div className="reg-status-pill">✅ You are Registered</div>
+                  {isRegistered && (
+                    <div className="registration-status-group">
+                      <div className="reg-status-pill">✅ You are Registered</div>
+                      {webinar.status === 'UPCOMING' && (
+                        <button 
+                          className="btn btn-outline btn-sm w-full mt-3 text-danger border-danger hover:bg-danger/10"
+                          onClick={handleCancelRegistration}
+                        >
+                          Cancel Registration
+                        </button>
+                      )}
+                    </div>
                   )}
                 </>
               )}
-              {isAdmin() && <Link to={`/admin/webinars/edit/${webinar.id}`} className="btn btn-outline w-full">Edit Webinar Details</Link>}
+              {isAdmin() && <Link to={`/admin/webinars`} className="btn btn-outline w-full">Manage In Admin Portal</Link>}
             </div>
           </div>
         </aside>

@@ -75,12 +75,21 @@ public class RegistrationController {
         return ResponseEntity.ok(registrations);
     }
 
-    /**
-     * DELETE /api/registrations/{id} - Cancel registration
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> cancelRegistration(@PathVariable("id") Long id) {
         registrationService.cancelRegistration(id);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Registration cancelled successfully");
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * POST /api/registrations/cancel/{webinarId} - Cancel registration by webinar ID
+     */
+    @PostMapping("/cancel/{webinarId}")
+    public ResponseEntity<Map<String, String>> cancelByWebinarId(@RequestHeader(value = "Authorization", required = false) String token, @PathVariable("webinarId") Long webinarId) {
+        Long userId = extractUserIdFromToken(token);
+        registrationService.cancelByUserAndWebinar(userId, webinarId);
         Map<String, String> response = new HashMap<>();
         response.put("message", "Registration cancelled successfully");
         return ResponseEntity.ok(response);

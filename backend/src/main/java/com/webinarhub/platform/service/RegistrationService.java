@@ -100,15 +100,22 @@ public class RegistrationService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Cancel registration
-     */
     @Transactional
     public void cancelRegistration(Long registrationId) {
         if (!registrationRepository.existsById(registrationId)) {
             throw new ResourceNotFoundException("Registration", registrationId);
         }
         registrationRepository.deleteById(registrationId);
+    }
+
+    /**
+     * Cancel registration by user and webinar IDs
+     */
+    @Transactional
+    public void cancelByUserAndWebinar(Long userId, Long webinarId) {
+        Registration reg = registrationRepository.findByUserIdAndWebinarId(userId, webinarId)
+                .orElseThrow(() -> new ResourceNotFoundException("Registration not found for this user and webinar"));
+        registrationRepository.delete(reg);
     }
 
     /**
@@ -129,12 +136,18 @@ public class RegistrationService {
         return registrationRepository.countByWebinarId(webinarId);
     }
 
-    /**
-     * Check if user is registered for a webinar
-     */
     @Transactional(readOnly = true)
     public boolean isUserRegistered(Long userId, Long webinarId) {
         return registrationRepository.findByUserIdAndWebinarId(userId, webinarId).isPresent();
+    }
+
+    /**
+     * Get registration by user and webinar
+     */
+    @Transactional(readOnly = true)
+    public Optional<RegistrationDto> getRegistrationByUserAndWebinar(Long userId, Long webinarId) {
+        return registrationRepository.findByUserIdAndWebinarId(userId, webinarId)
+                .map(this::convertToDto);
     }
 
     /**
