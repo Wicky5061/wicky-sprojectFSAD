@@ -8,11 +8,16 @@ import './Auth.css'; // Reuse some base styles but override with specific ones
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [mfaCode, setMfaCode] = useState('');
+  const [step, setStep] = useState(1); // 1: Login, 2: MFA
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [tempUserData, setTempUserData] = useState(null);
   
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  const validMFACodes = ['1001', '1002', '1003', '1004', '1005', '1006'];
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
@@ -24,11 +29,13 @@ const AdminLogin = () => {
         const response = await authAPI.login({ email, password });
         const data = response.data;
 
-        if (data.user.role === 'ADMIN') {
-          login(data.user);
-          navigate('/admin');
+        // Check if role contains ADMIN (supporting both 'ADMIN' and 'ROLE_ADMIN')
+        if (data.user.role === 'ADMIN' || data.user.role === 'ROLE_ADMIN') {
+          setTempUserData(data.user);
+          setStep(2); // Move to MFA step
+          setLoading(false);
         } else {
-          setError('Access Denied: Registered account is not an administrator.');
+          setError('Access denied. Admin privileges required.');
           setLoading(false);
         }
       } catch (err) {
@@ -45,6 +52,18 @@ const AdminLogin = () => {
     attemptLogin();
   };
 
+  const handleMFASubmit = (e) => {
+    if (e) e.preventDefault();
+    setError('');
+    
+    if (validMFACodes.includes(mfaCode)) {
+      login(tempUserData);
+      navigate('/admin');
+    } else {
+      setError('Invalid MFA code');
+    }
+  };
+
   return (
     <div className="auth-container admin-portal">
       <div className="auth-card animate-slide-up">
@@ -54,7 +73,7 @@ const AdminLogin = () => {
             <Lock size={20} className="admin-lock" />
           </div>
           <h1>Admin Portal</h1>
-          <p>Authorized Personnel Only</p>
+          <p>{step === 1 ? 'Authorized Personnel Only' : 'MFA Verification'}</p>
         </div>
 
         {error && (
@@ -64,46 +83,89 @@ const AdminLogin = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          <div className="form-group">
-            <label htmlFor="email">Administrator Email</label>
-            <div className="input-with-icon">
-              <Mail size={20} />
-              <input
-                id="email"
-                type="email"
-                placeholder="Enter admin email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+        {step === 1 ? (
+          <form onSubmit={handleSubmit} className="auth-form">
+            <div className="form-group">
+              <label htmlFor="email">Administrator Email</label>
+              <div className="input-with-icon">
+                <Mail size={20} />
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="Enter admin email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
             </div>
-          </div>
 
-          <div className="form-group">
-            <label htmlFor="password">Security Password</label>
-            <div className="input-with-icon">
-              <Lock size={20} />
-              <input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+            <div className="form-group">
+              <label htmlFor="password">Security Password</label>
+              <div className="input-with-icon">
+                <Lock size={20} />
+                <input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
             </div>
-          </div>
 
-          <button 
-            type="submit" 
-            className="btn-admin-access"
-            disabled={loading}
-          >
-            {loading ? 'Verifying...' : 'Access Admin Portal'}
-          </button>
-          <div className="hint">Demo: vardhan@gmail.com / vivek123</div>
-        </form>
+            <button 
+              type="submit" 
+              className="btn-admin-access"
+              disabled={loading}
+            >
+              {loading ? 'Verifying...' : 'Access Admin Portal'}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleMFASubmit} className="auth-form">
+            <div className="form-group">
+              <label htmlFor="mfa">Enter 4-digit MFA Code</label>
+              <div className="input-with-icon">
+                <Shield size={20} />
+                <input
+                  id="mfa"
+                  type="text"
+                  maxLength="4"
+                  placeholder="0000"
+                  value={mfaCode}
+                  onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
+                  required
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            <button 
+              type="submit" 
+              className="btn-admin-access"
+            >
+              Verify & Enter
+            </button>
+            <button 
+              type="button" 
+              className="btn-back-to-login"
+              onClick={() => setStep(1)}
+              style={{
+                marginTop: '1rem',
+                background: 'transparent',
+                border: 'none',
+                color: '#94a3b8',
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                width: '100%'
+              }}
+            >
+              Back to Login
+            </button>
+          </form>
+        )}
 
         <div className="auth-footer">
           <Link to="/" className="back-link">
@@ -159,17 +221,6 @@ const AdminLogin = () => {
         .btn-admin-access:disabled {
           background: #4c1d95;
           cursor: not-allowed;
-        }
-        .hint {
-          text-align: center;
-          margin-top: 1.5rem;
-          color: #94a3b8;
-          font-size: 0.85rem;
-          font-family: 'JetBrains Mono', monospace;
-          background: rgba(124, 58, 237, 0.05);
-          padding: 0.5rem;
-          border-radius: 6px;
-          border: 1px dashed rgba(124, 58, 237, 0.2);
         }
       `}</style>
     </div>
