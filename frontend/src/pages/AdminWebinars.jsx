@@ -1,18 +1,11 @@
 import { useState, useEffect } from 'react';
 import { 
-  Plus, 
-  Search, 
-  Edit2, 
-  Trash2, 
-  Users, 
-  FileUp, 
-  CheckCircle, 
-  Clock, 
-  Play,
-  X,
-  AlertTriangle
+  Plus, Search, Edit2, Trash2, Users, FileUp, CheckCircle, 
+  Clock, Play, X, AlertTriangle, Calendar, Filter, MoreVertical,
+  ChevronRight, ExternalLink, Download, ArrowUpDown
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-hot-toast';
+import './Admin.css';
 
 const AdminWebinars = () => {
   const [webinars, setWebinars] = useState([]);
@@ -21,11 +14,15 @@ const AdminWebinars = () => {
   const [showModal, setShowModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [currentWebinar, setCurrentWebinar] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  // Form State with split date and time
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     instructor: '',
-    dateTime: '',
+    date: '',
+    time: '',
     durationMinutes: 60,
     category: 'Development',
     maxParticipants: 100,
@@ -42,11 +39,11 @@ const AdminWebinars = () => {
     try {
       const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/webinars`);
       if (resp.ok) {
-        const data = await resp.json();
-        setWebinars(data);
+        setWebinars(await resp.json());
       }
     } catch (err) {
-      console.error('Error fetching webinars:', err);
+      toast.error('Failed to load webinars');
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -58,7 +55,8 @@ const AdminWebinars = () => {
       title: '',
       description: '',
       instructor: '',
-      dateTime: '',
+      date: '',
+      time: '',
       durationMinutes: 60,
       category: 'Development',
       maxParticipants: 100,
@@ -71,15 +69,17 @@ const AdminWebinars = () => {
 
   const handleOpenEditModal = (webinar) => {
     setCurrentWebinar(webinar);
-    // Format date for datetime-local input
-    const date = new Date(webinar.dateTime);
-    const formattedDate = date.toISOString().slice(0, 16);
+    const dt = new Date(webinar.dateTime);
+    // Properly format for inputs
+    const dateStr = dt.toISOString().split('T')[0];
+    const timeStr = dt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     
     setFormData({
       title: webinar.title,
       description: webinar.description,
       instructor: webinar.instructor,
-      dateTime: formattedDate,
+      date: dateStr,
+      time: timeStr,
       durationMinutes: webinar.durationMinutes,
       category: webinar.category || 'Development',
       maxParticipants: webinar.maxParticipants,
@@ -92,12 +92,22 @@ const AdminWebinars = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSaving(true);
+
     const url = currentWebinar 
       ? `${import.meta.env.VITE_API_BASE_URL}/api/admin/webinars/${currentWebinar.id}`
       : `${import.meta.env.VITE_API_BASE_URL}/api/admin/webinars`;
     
     const method = currentWebinar ? 'PUT' : 'POST';
     const { user } = JSON.parse(localStorage.getItem('webinarhub_user') || '{}');
+
+    // Combine date and time
+    const combinedDateTime = new Date(`${formData.date}T${formData.time}:00`).toISOString();
+
+    const payload = {
+      ...formData,
+      dateTime: combinedDateTime
+    };
 
     try {
       const resp = await fetch(url, {
@@ -106,15 +116,20 @@ const AdminWebinars = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${user?.id}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       });
 
       if (resp.ok) {
+        toast.success(currentWebinar ? 'Webinar updated successfully!' : 'Webinar created successfully!');
         setShowModal(false);
         fetchWebinars();
+      } else {
+        toast.error('Failed to save webinar. Check credentials.');
       }
     } catch (err) {
-      console.error('Error saving webinar:', err);
+      toast.error('Network error. Operation failed.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -127,20 +142,21 @@ const AdminWebinars = () => {
       });
 
       if (resp.ok) {
+        toast.success('Webinar deleted permanently');
         setShowDeleteConfirm(false);
         fetchWebinars();
       }
     } catch (err) {
-      console.error('Error deleting webinar:', err);
+      toast.error('Deletion failed');
     }
   };
 
   const getStatusBadge = (status) => {
     switch (status) {
-      case 'LIVE': return <span className="badge-admin live">LIVE</span>;
-      case 'UPCOMING': return <span className="badge-admin upcoming">UPCOMING</span>;
-      case 'COMPLETED': return <span className="badge-admin completed">COMPLETED</span>;
-      default: return <span className="badge-admin cancelled">CANCELLED</span>;
+      case 'LIVE': return <span className="badge-premium badge-red animate-pulse">LIVE</span>;
+      case 'UPCOMING': return <span className="badge-premium badge-blue">UPCOMING</span>;
+      case 'COMPLETED': return <span className="badge-premium badge-purple">COMPLETED</span>;
+      default: return <span className="badge-premium badge-purple opacity-50">CANCELLED</span>;
     }
   };
 
@@ -149,207 +165,264 @@ const AdminWebinars = () => {
     w.instructor.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  if (loading) {
+    return (
+      <div className="admin-page-header animate-fade-in">
+        <div className="skeleton-title skeleton mb-4"></div>
+        <div className="grid grid-cols-1 gap-6">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="premium-card h-24 mb-3 flex items-center gap-4">
+              <div className="skeleton-avatar skeleton"></div>
+              <div className="flex-1">
+                <div className="skeleton-text skeleton w-1/2"></div>
+                <div className="skeleton-text skeleton w-1/4"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="admin-webinars-page animate-fade-in">
-      <div className="admin-title-section d-flex justify-content-between align-items-center">
-        <div>
-          <h1 className="admin-title">Manage Webinars</h1>
-          <p className="admin-subtitle">Create, monitor and maintain all webinar sessions</p>
+      {/* Page Header */}
+      <div className="admin-page-header">
+        <div className="breadcrumbs">
+          <span className="breadcrumb-item">Admin</span>
+          <span className="breadcrumb-separator">/</span>
+          <span className="breadcrumb-item text-white">Webinars</span>
         </div>
-        <button onClick={handleOpenAddModal} className="btn-admin-primary d-flex align-items-center gap-2">
-          <Plus size={20} />
-          Create New Webinar
-        </button>
-      </div>
-
-      <div className="admin-filters-bar d-flex gap-3 mb-4">
-        <div className="search-wrapper flex-grow-1">
-          <Search size={20} className="search-icon" />
-          <input 
-            type="text" 
-            placeholder="Search by title or instructor..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="admin-search-input"
-          />
+        <div className="admin-page-title-row">
+          <div>
+            <h1 className="admin-page-title">Manage Webinars</h1>
+            <p className="admin-page-subtitle">Create, monitor and maintain all webinar sessions</p>
+          </div>
+          <button onClick={handleOpenAddModal} className="btn-admin-primary d-flex align-items-center gap-2">
+            <Plus size={20} />
+            <span>Create Webinar</span>
+          </button>
         </div>
       </div>
 
-      <div className="admin-card">
-        <div className="table-responsive">
-          <table className="admin-table table align-middle">
-            <thead>
-              <tr>
-                <th>Webinar Title</th>
-                <th>Instructor</th>
-                <th>Schedule</th>
-                <th>Status</th>
-                <th>Registered</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredWebinars.length > 0 ? filteredWebinars.map((webinar) => (
-                <tr key={webinar.id}>
-                  <td>
-                    <div className="d-flex align-items-center gap-3">
-                      {webinar.coverImageUrl && (
-                        <img src={webinar.coverImageUrl} alt="" className="admin-thumb" />
-                      )}
-                      <span className="fw-bold">{webinar.title}</span>
-                    </div>
-                  </td>
-                  <td>{webinar.instructor}</td>
-                  <td>
-                    <div className="d-flex flex-column">
-                      <span>{new Date(webinar.dateTime).toLocaleDateString()}</span>
-                      <span className="small-detail">{new Date(webinar.dateTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                    </div>
-                  </td>
-                  <td>{getStatusBadge(webinar.status)}</td>
-                  <td className="text-center">{webinar.registeredCount || 0}</td>
-                  <td>
-                    <div className="admin-actions d-flex gap-2">
-                      <button onClick={() => handleOpenEditModal(webinar)} className="btn-icon-admin edit" title="Edit">
-                        <Edit2 size={16} />
-                      </button>
-                      <button onClick={() => { setCurrentWebinar(webinar); setShowDeleteConfirm(true); }} className="btn-icon-admin delete" title="Delete">
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
+      {/* Filters Table Card */}
+      <div className="admin-page-content">
+        <div className="premium-table-container">
+          <div className="table-header-actions">
+            <div className="search-wrapper position-relative flex-grow-1" style={{ maxWidth: '400px' }}>
+              <Search size={18} className="search-icon-table" />
+              <input 
+                type="text" 
+                placeholder="Search by title, instructor..." 
+                className="premium-input ps-5"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <div className="d-flex gap-2">
+              <button className="nav-icon-btn border"><Filter size={18} /></button>
+              <button className="nav-icon-btn border"><Download size={18} /></button>
+              <button className="btn-admin-primary px-3"><ArrowUpDown size={18} /></button>
+            </div>
+          </div>
+
+          <div className="table-responsive">
+            <table className="premium-table">
+              <thead>
+                <tr>
+                  <th>Webinar Details</th>
+                  <th>Instructor</th>
+                  <th>Schedule</th>
+                  <th>Status</th>
+                  <th>Audience</th>
+                  <th>Actions</th>
                 </tr>
-              )) : (
-                <tr><td colSpan="6" className="text-center p-5">No webinars found matching your search.</td></tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredWebinars.length > 0 ? filteredWebinars.map((webinar) => (
+                  <tr key={webinar.id}>
+                    <td>
+                      <div className="d-flex align-items-center gap-3">
+                        <div className="webinar-thumb-wrapper overflow-hidden rounded-lg bg-slate-800" style={{ width: '64px', height: '40px' }}>
+                          <img src={webinar.coverImageUrl || 'https://via.placeholder.com/64x40'} alt="" className="w-100 h-100 object-fit-cover" />
+                        </div>
+                        <div className="d-flex flex-column">
+                          <span className="fw-bold text-white fs-6">{webinar.title}</span>
+                          <span className="small opacity-50">{webinar.category}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="text-slate-200">{webinar.instructor}</span>
+                    </td>
+                    <td>
+                      <div className="d-flex flex-column">
+                        <span className="fw-medium text-slate-200">{new Date(webinar.dateTime).toLocaleDateString()}</span>
+                        <span className="small opacity-50">{new Date(webinar.dateTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                      </div>
+                    </td>
+                    <td>{getStatusBadge(webinar.status)}</td>
+                    <td>
+                      <div className="d-flex align-items-center gap-2">
+                        <Users size={14} className="text-violet-400" />
+                        <span className="fw-bold">{webinar.registeredCount || 0}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="d-flex gap-2">
+                        <button onClick={() => handleOpenEditModal(webinar)} className="nav-icon-btn border hover:bg-violet-500">
+                          <Edit2 size={16} />
+                        </button>
+                        <button onClick={() => { setCurrentWebinar(webinar); setShowDeleteConfirm(true); }} className="nav-icon-btn border hover:bg-rose-500 text-rose-400">
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )) : (
+                  <tr>
+                    <td colSpan="6" className="text-center p-5">
+                      <div className="opacity-30 mb-3"><Video size={48} className="mx-auto" /></div>
+                      <p className="text-slate-400">No webinars found matching your search criteria.</p>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      {/* Modal - Create/Edit */}
+      {/* Modern Modal Overlay */}
       {showModal && (
         <div className="admin-modal-overlay">
-          <div className="admin-modal animate-slide-up">
-            <div className="modal-header-admin">
-              <h2>{currentWebinar ? 'Edit Webinar' : 'Create New Webinar'}</h2>
-              <button onClick={() => setShowModal(false)} className="close-btn-admin"><X size={24} /></button>
+          <div className="premium-card w-full max-w-3xl animate-fade-in p-0 overflow-visible" style={{ maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+            <div className="modal-header-admin p-4 border-b border-slate-800 d-flex justify-content-between align-items-center bg-slate-900 rounded-t-[20px]">
+              <h2 className="text-xl font-bold mb-0">{currentWebinar ? 'Edit Webinar Details' : 'Initialize New Webinar'}</h2>
+              <button onClick={() => setShowModal(false)} className="close-btn-admin opacity-60 hover:opacity-100"><X size={24} /></button>
             </div>
-            <form onSubmit={handleSubmit} className="modal-form-admin">
-              <div className="row g-3">
-                <div className="col-12">
-                  <label className="admin-label">Webinar Title</label>
-                  <input 
-                    type="text" 
-                    required 
-                    className="admin-input" 
-                    value={formData.title}
-                    onChange={(e) => setFormData({...formData, title: e.target.value})}
-                  />
+            
+            <div className="modal-body-scrollable p-4 overflow-y-auto">
+              <form onSubmit={handleSubmit} className="premium-form">
+                <div className="row g-4">
+                  <div className="col-12">
+                    <label className="premium-label">Webinar Title</label>
+                    <input 
+                      type="text" 
+                      required 
+                      className="premium-input" 
+                      placeholder="e.g., Advanced Microservices with Spring Boot"
+                      value={formData.title}
+                      onChange={(e) => setFormData({...formData, title: e.target.value})}
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="premium-label">Lead Instructor</label>
+                    <input 
+                      type="text" 
+                      required 
+                      className="premium-input" 
+                      value={formData.instructor}
+                      onChange={(e) => setFormData({...formData, instructor: e.target.value})}
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="premium-label">Category</label>
+                    <select 
+                      className="premium-input d-block w-100"
+                      value={formData.category}
+                      onChange={(e) => setFormData({...formData, category: e.target.value})}
+                    >
+                      {['Development', 'Design', 'AI', 'Cloud', 'Security', 'Data', 'Web3'].map(c => <option key={c}>{c}</option>)}
+                    </select>
+                  </div>
+                  
+                  {/* Split Date & Time Inputs */}
+                  <div className="col-md-6">
+                    <label className="premium-label">Scheduled Date</label>
+                    <input 
+                      type="date" 
+                      required 
+                      className="premium-input" 
+                      value={formData.date}
+                      onChange={(e) => setFormData({...formData, date: e.target.value})}
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="premium-label">Start Time</label>
+                    <input 
+                      type="time" 
+                      required 
+                      className="premium-input" 
+                      value={formData.time}
+                      onChange={(e) => setFormData({...formData, time: e.target.value})}
+                    />
+                  </div>
+
+                  <div className="col-md-6">
+                    <label className="premium-label">Duration (minutes)</label>
+                    <input 
+                      type="number" 
+                      required 
+                      className="premium-input" 
+                      value={formData.durationMinutes}
+                      onChange={(e) => setFormData({...formData, durationMinutes: e.target.value})}
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="premium-label">Status</label>
+                    <select 
+                      className="premium-input"
+                      value={formData.status}
+                      onChange={(e) => setFormData({...formData, status: e.target.value})}
+                    >
+                      <option value="UPCOMING">UPCOMING</option>
+                      <option value="LIVE">LIVE</option>
+                      <option value="COMPLETED">COMPLETED</option>
+                      <option value="CANCELLED">CANCELLED</option>
+                    </select>
+                  </div>
+                  <div className="col-12">
+                    <label className="premium-label">Cover Image URL</label>
+                    <input 
+                      type="url" 
+                      className="premium-input" 
+                      placeholder="https://images.unsplash.com/..."
+                      value={formData.coverImageUrl}
+                      onChange={(e) => setFormData({...formData, coverImageUrl: e.target.value})}
+                    />
+                  </div>
+                  <div className="col-12">
+                    <label className="premium-label">Broadcast/Meeting URL</label>
+                    <input 
+                      type="url" 
+                      className="premium-input" 
+                      placeholder="https://zoom.us/j/..."
+                      value={formData.streamUrl}
+                      onChange={(e) => setFormData({...formData, streamUrl: e.target.value})}
+                    />
+                  </div>
+                  <div className="col-12">
+                    <label className="premium-label">Description & Syllabus</label>
+                    <textarea 
+                      rows="4" 
+                      required 
+                      className="premium-input" 
+                      placeholder="Outline what students will learn..."
+                      value={formData.description}
+                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    ></textarea>
+                  </div>
                 </div>
-                <div className="col-md-6">
-                  <label className="admin-label">Instructor Name</label>
-                  <input 
-                    type="text" 
-                    required 
-                    className="admin-input" 
-                    value={formData.instructor}
-                    onChange={(e) => setFormData({...formData, instructor: e.target.value})}
-                  />
+                
+                <div className="modal-footer-admin p-4 border-t border-slate-800 d-flex justify-content-end gap-3 bg-slate-900 rounded-b-[20px] mt-4">
+                  <button type="button" onClick={() => setShowModal(false)} className="btn-admin-secondary px-5 bg-transparent border-slate-700">Cancel</button>
+                  <button type="submit" disabled={saving} className="btn-admin-primary px-5 d-flex align-items-center gap-2">
+                    {saving ? <div className="spinner-border spinner-border-sm" role="status"></div> : (currentWebinar ? 'Update Session' : 'Create Webinar')}
+                  </button>
                 </div>
-                <div className="col-md-6">
-                  <label className="admin-label">Category</label>
-                  <select 
-                    className="admin-input"
-                    value={formData.category}
-                    onChange={(e) => setFormData({...formData, category: e.target.value})}
-                  >
-                    <option>Development</option>
-                    <option>Design</option>
-                    <option>AI</option>
-                    <option>Cloud</option>
-                    <option>Security</option>
-                    <option>Data</option>
-                    <option>Web3</option>
-                  </select>
-                </div>
-                <div className="col-md-6">
-                  <label className="admin-label">Date & Time</label>
-                  <input 
-                    type="datetime-local" 
-                    required 
-                    className="admin-input" 
-                    value={formData.dateTime}
-                    onChange={(e) => setFormData({...formData, dateTime: e.target.value})}
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label className="admin-label">Duration (minutes)</label>
-                  <input 
-                    type="number" 
-                    required 
-                    className="admin-input" 
-                    value={formData.durationMinutes}
-                    onChange={(e) => setFormData({...formData, durationMinutes: e.target.value})}
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label className="admin-label">Max Participants</label>
-                  <input 
-                    type="number" 
-                    required 
-                    className="admin-input" 
-                    value={formData.maxParticipants}
-                    onChange={(e) => setFormData({...formData, maxParticipants: e.target.value})}
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label className="admin-label">Status</label>
-                  <select 
-                    className="admin-input"
-                    value={formData.status}
-                    onChange={(e) => setFormData({...formData, status: e.target.value})}
-                  >
-                    <option value="UPCOMING">UPCOMING</option>
-                    <option value="LIVE">LIVE</option>
-                    <option value="COMPLETED">COMPLETED</option>
-                    <option value="CANCELLED">CANCELLED</option>
-                  </select>
-                </div>
-                <div className="col-12">
-                  <label className="admin-label">Thumbnail URL</label>
-                  <input 
-                    type="url" 
-                    className="admin-input" 
-                    value={formData.coverImageUrl}
-                    onChange={(e) => setFormData({...formData, coverImageUrl: e.target.value})}
-                  />
-                </div>
-                <div className="col-12">
-                  <label className="admin-label">Meeting URL</label>
-                  <input 
-                    type="url" 
-                    className="admin-input" 
-                    value={formData.streamUrl}
-                    onChange={(e) => setFormData({...formData, streamUrl: e.target.value})}
-                  />
-                </div>
-                <div className="col-12">
-                  <label className="admin-label">Description</label>
-                  <textarea 
-                    rows="3" 
-                    required 
-                    className="admin-input" 
-                    value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  ></textarea>
-                </div>
-              </div>
-              <div className="modal-footer-admin mt-4 d-flex justify-content-end gap-3">
-                <button type="button" onClick={() => setShowModal(false)} className="btn-admin-secondary">Cancel</button>
-                <button type="submit" className="btn-admin-primary">Save Webinar</button>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
         </div>
       )}
@@ -357,42 +430,31 @@ const AdminWebinars = () => {
       {/* Delete Confirmation */}
       {showDeleteConfirm && (
         <div className="admin-modal-overlay">
-          <div className="admin-modal confirm-modal animate-slide-up">
-            <div className="confirm-icon-admin"><AlertTriangle size={36} /></div>
-            <h2>Delete Webinar?</h2>
-            <p className="text-center mb-4">Are you sure you want to delete <strong>{currentWebinar?.title}</strong>? This action cannot be undone and will remove all registrations.</p>
+          <div className="premium-card max-w-md animate-fade-in text-center p-5">
+            <div className="confirm-icon mb-4"><AlertTriangle size={64} className="text-rose-500 mx-auto" /></div>
+            <h2 className="text-2xl font-bold mb-3">Delete Webinar?</h2>
+            <p className="text-slate-400 mb-5">This will permanently remove <strong>{currentWebinar?.title}</strong> and all associated registrations. This action is IRREVERSIBLE.</p>
             <div className="d-flex justify-content-center gap-3">
-              <button onClick={() => setShowDeleteConfirm(false)} className="btn-admin-secondary">Cancel</button>
-              <button onClick={handleDelete} className="btn-admin-danger">Permanently Delete</button>
+              <button onClick={() => setShowDeleteConfirm(false)} className="btn-admin-secondary flex-1 border-slate-700 bg-transparent py-3">No, Cancel</button>
+              <button 
+                onClick={handleDelete} 
+                className="btn-admin-danger flex-1 bg-rose-600 hover:bg-rose-700 text-white rounded-xl py-3 border-0"
+              >
+                Yes, Delete
+              </button>
             </div>
           </div>
         </div>
       )}
 
       <style>{`
-        .admin-thumb { width: 48px; height: 32px; border-radius: 4px; object-fit: cover; background: #1e293b; }
-        .small-detail { font-size: 0.75rem; color: #64748b; }
-        .admin-actions .btn-icon-admin { width: 32px; height: 32px; border-radius: 6px; border: 1px solid #1e293b; color: #94a3b8; display: flex; align-items: center; justify-content: center; transition: all 0.2s; background: transparent; }
-        .btn-icon-admin.edit:hover { background: rgba(59, 130, 246, 0.15); color: #3b82f6; border-color: #3b82f6; }
-        .btn-icon-admin.delete:hover { background: rgba(239, 68, 68, 0.15); color: #ef4444; border-color: #ef4444; }
-        /* Modal Styles */
-        .admin-modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 2rem; }
-        .admin-modal { background: #0f172a; border: 1px solid #1e293b; border-radius: 16px; width: 100%; max-width: 650px; padding: 2rem; max-height: 90vh; overflow-y: auto; }
-        .admin-modal.confirm-modal { max-width: 400px; text-align: center; }
-        .modal-header-admin { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-        .modal-header-admin h2 { margin: 0; font-size: 1.5rem; color: #f8fafc; font-weight: 800; }
-        .close-btn-admin { background: transparent; border: none; color: #94a3b8; cursor: pointer; transition: color 0.2s; }
-        .close-btn-admin:hover { color: #f8fafc; }
-        .admin-label { display: block; font-size: 0.85rem; font-weight: 600; color: #94a3b8; margin-bottom: 0.5rem; }
-        .admin-input { width: 100%; background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 0.75rem 1rem; color: #f8fafc; font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
-        .admin-input:focus { border-color: #7c3aed; }
-        .btn-admin-secondary { background: transparent; border: 1px solid #334155; color: #f8fafc; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; }
-        .btn-admin-danger { background: #ef4444; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; }
-        .confirm-icon-admin { color: #f59e0b; margin-bottom: 1.5rem; }
-        .badge-admin.upcoming { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
-        .badge-admin.live { background: rgba(239, 68, 68, 0.15); color: #ef4444; font-weight: 800; }
-        .badge-admin.completed { background: rgba(16, 185, 129, 0.15); color: #10b981; }
-        .badge-admin.cancelled { background: rgba(100, 116, 139, 0.15); color: #64748b; }
+        .search-icon-table { position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%); color: #64748b; }
+        .modal-body-scrollable { scrollbar-width: thin; scrollbar-color: #334155 #0f172a; }
+        .btn-admin-primary { background: #7c3aed; color: white; border: none; border-radius: 12px; font-weight: 700; transition: all 0.2s; padding: 0.75rem 1.5rem; }
+        .btn-admin-primary:hover { background: #6d28d9; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4); }
+        .btn-admin-secondary { border-radius: 12px; font-weight: 600; padding: 0.75rem; border: 1px solid #1e293b; color: white; }
+        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .7; } }
       `}</style>
     </div>
   );
