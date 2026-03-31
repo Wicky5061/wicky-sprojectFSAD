@@ -4,6 +4,7 @@ import com.webinarhub.platform.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -18,7 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 /**
  * Spring Security Configuration for Spring Boot 3.
- * Configured for stateless JWT authentication to avoid standard form-login behavior.
+ * Configured for stateless Bearer token authentication.
  */
 @Configuration
 @EnableWebSecurity
@@ -32,26 +33,33 @@ public class SecurityConfig {
 
     /**
      * SecurityFilterChain - sets up stateless REST API security.
-     * - Disables CSRF (REST is stateless)
-     * - Enables CORS delegation
-     * - Configures stateless session management
-     * - Permits auth endpoints (register/login)
-     * - Secures admin routes with Role-based access
-     * - Adds the JWT filter before standard password auth
+     * Restricts admin routes and ensures JSON responses for auth errors.
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
-            .cors(cors -> {}) // Handled by CorsConfig filter
+            .cors(cors -> {}) // CORS handled by CorsConfig bean
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(ex -> ex
-                // Ensure REST behavior (JSON) instead of HTML redirect on 401
+                // Ensure REST behavior: return JSON/401 instead of HTML redirect
                 .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
             )
             .authorizeHttpRequests(auth -> auth
+                // Public auth endpoints
                 .requestMatchers("/api/auth/**").permitAll()
+                
+                // Explicit Admin REST permissions
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/users/**").hasRole("ADMIN")
+                
+                // These endpoints are needed by both Students and Admins
+                .requestMatchers(HttpMethod.GET, "/api/webinars").permitAll() 
+                .requestMatchers(HttpMethod.GET, "/api/webinars/{id}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/resources/**").hasAnyRole("ADMIN", "USER")
+                .requestMatchers(HttpMethod.GET, "/api/registrations/**").hasAnyRole("ADMIN", "USER")
+                
+                // Fallback: all other requests must be authenticated
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -60,8 +68,7 @@ public class SecurityConfig {
     }
 
     /**
-     * UserDetailsService bean using the platform's UserRepository.
-     * Providing this bean stops Spring Boot from generating a random security password.
+     * Providing UserDetailsService stops Spring Boot from generating a random security password.
      */
     @Bean
     public UserDetailsService userDetailsService() {

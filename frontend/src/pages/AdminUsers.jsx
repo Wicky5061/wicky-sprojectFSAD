@@ -4,6 +4,7 @@ import {
   CheckCircle, Clock, ArrowRight, UserCheck, Shield, ChevronDown, RefreshCw, AlertTriangle
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { webinarAPI, registrationAPI } from '../services/api';
 import './Admin.css';
 
 const AdminUsers = () => {
@@ -18,19 +19,11 @@ const AdminUsers = () => {
   const fetchWebinars = useCallback(async () => {
     setLoadingWebinars(true);
     setError(null);
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000);
-
     try {
-      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/webinars`, { signal: controller.signal });
-      clearTimeout(timeoutId);
-      if (resp.ok) {
-        setWebinars(await resp.json());
-      } else {
-        throw new Error('Sync failed');
-      }
+      const resp = await webinarAPI.getAdminWebinars();
+      setWebinars(resp.data);
     } catch (err) {
-      setError(err.name === 'AbortError' ? 'Targeted platform is not responding (Timed out)' : 'Failed to retrieve participant metrics index.');
+      setError('Failed to retrieve participant metrics index from platform.');
     } finally {
       setLoadingWebinars(false);
     }
@@ -43,10 +36,8 @@ const AdminUsers = () => {
   const fetchRegistrations = useCallback(async (id) => {
     setLoading(true);
     try {
-      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/registrations/webinar/${id}`);
-      if (resp.ok) {
-        setRegistrations(await resp.json());
-      }
+      const resp = await registrationAPI.getWebinarRegistrations(id);
+      setRegistrations(resp.data);
     } catch (err) {
       toast.error('Metrics retrieval failed');
     } finally {

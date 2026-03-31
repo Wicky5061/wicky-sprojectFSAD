@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,6 +24,15 @@ public class AdminWebinarController {
     @Autowired
     public AdminWebinarController(WebinarService webinarService) {
         this.webinarService = webinarService;
+    }
+
+    /**
+     * GET /api/admin/webinars - Get all webinars for administration
+     */
+    @GetMapping
+    public ResponseEntity<List<WebinarDto>> getAllWebinars() {
+        List<WebinarDto> webinars = webinarService.getAllWebinars();
+        return ResponseEntity.ok(webinars);
     }
 
     /**

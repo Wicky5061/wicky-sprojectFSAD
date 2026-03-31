@@ -5,6 +5,7 @@ import {
   ChevronRight, ExternalLink, Download, ArrowUpDown, RefreshCw
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { webinarAPI } from '../services/api';
 import './Admin.css';
 
 const AdminWebinars = () => {
@@ -35,30 +36,12 @@ const AdminWebinars = () => {
   const fetchWebinars = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
-    // Timeout logic (10 seconds)
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 seconds to be safe
-
     try {
-      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/webinars`, {
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-
-      if (resp.ok) {
-        const data = await resp.json();
-        setWebinars(Array.isArray(data) ? data : []);
-      } else {
-        throw new Error(`Platform returned ${resp.status}`);
-      }
+      const resp = await webinarAPI.getAdminWebinars();
+      setWebinars(Array.isArray(resp.data) ? resp.data : []);
     } catch (err) {
       console.error('Webinar fetch error:', err);
-      if (err.name === 'AbortError') {
-        setError('Server is taking too long to respond. It might be waking up from cold start.');
-      } else {
-        setError('Connection to platform failed. Verify backend infrastructure.');
-      }
+      setError('Connection to platform failed. Verify backend infrastructure and token validity.');
     } finally {
       setLoading(false);
     }
@@ -115,13 +98,6 @@ const AdminWebinars = () => {
     e.preventDefault();
     setSaving(true);
 
-    const url = currentWebinar 
-      ? `${import.meta.env.VITE_API_BASE_URL}/api/admin/webinars/${currentWebinar.id}`
-      : `${import.meta.env.VITE_API_BASE_URL}/api/admin/webinars`;
-    
-    const method = currentWebinar ? 'PUT' : 'POST';
-    const { user } = JSON.parse(localStorage.getItem('webinarhub_user') || '{}');
-
     // Safe combination of date and time
     let combinedDateTime;
     try {
@@ -138,22 +114,14 @@ const AdminWebinars = () => {
     };
 
     try {
-      const resp = await fetch(url, {
-        method,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user?.id}`
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (resp.ok) {
-        toast.success(currentWebinar ? 'Webinar Session Synchronized' : 'Webinar Session Initialized');
-        setShowModal(false);
-        fetchWebinars();
+      if (currentWebinar) {
+        await webinarAPI.update(currentWebinar.id, payload);
       } else {
-        throw new Error('Push failed');
+        await webinarAPI.create(payload);
       }
+      toast.success(currentWebinar ? 'Webinar Session Synchronized' : 'Webinar Session Initialized');
+      setShowModal(false);
+      fetchWebinars();
     } catch (err) {
       toast.error('Failed to sync changes with backend');
     } finally {
@@ -164,17 +132,10 @@ const AdminWebinars = () => {
   const handleDelete = async () => {
     if (!currentWebinar) return;
     try {
-      const { user } = JSON.parse(localStorage.getItem('webinarhub_user') || '{}');
-      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/webinars/${currentWebinar.id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${user?.id}` }
-      });
-
-      if (resp.ok) {
-        toast.success('Session Terminated Successfully');
-        setShowDeleteConfirm(false);
-        fetchWebinars();
-      }
+      await webinarAPI.delete(currentWebinar.id);
+      toast.success('Session Terminated Successfully');
+      setShowDeleteConfirm(false);
+      fetchWebinars();
     } catch (err) {
       toast.error('Network failure during termination');
     }

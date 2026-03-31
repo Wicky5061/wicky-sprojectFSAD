@@ -64,6 +64,7 @@ export const webinarAPI = {
   getByCategory: (category) => API.get(`/webinars/category/${encodeURIComponent(category)}`),
   getCount: () => API.get('/webinars/count'),
   updateStatus: (id, status) => API.put(`/webinars/${id}/status?status=${encodeURIComponent(status)}`),
+  getAdminWebinars: () => API.get('/admin/webinars'),
 };
 
 // ==================== REGISTRATION API ====================

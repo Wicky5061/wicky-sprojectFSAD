@@ -4,6 +4,7 @@ import {
   Layout, Video, AlertCircle, RefreshCw, Layers, Calendar, ChevronRight
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import API, { webinarAPI, resourceAPI } from '../services/api';
 import './Admin.css';
 
 const AdminResources = () => {
@@ -25,21 +26,12 @@ const AdminResources = () => {
   const fetchWebinars = useCallback(async () => {
     setLoadingWebinars(true);
     setError(null);
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), 12000);
-
     try {
-      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/webinars`, { signal: controller.signal });
-      clearTimeout(id);
-      if (resp.ok) {
-        const data = await resp.json();
-        const completed = (Array.isArray(data) ? data : []).filter(w => w.status === 'COMPLETED');
-        setWebinars(completed);
-      } else {
-        throw new Error('Sync failed');
-      }
+      const resp = await webinarAPI.getAdminWebinars();
+      const completed = (Array.isArray(resp.data) ? resp.data : []).filter(w => w.status === 'COMPLETED');
+      setWebinars(completed);
     } catch (err) {
-      setError(err.name === 'AbortError' ? 'Targeted platform is not responding (Timed out)' : 'Failed to retrieve completed sessions.');
+      setError('Failed to retrieve completed sessions from admin portal.');
     } finally {
       setLoadingWebinars(false);
     }
@@ -52,10 +44,8 @@ const AdminResources = () => {
   const fetchResources = useCallback(async (id) => {
     setLoadingResources(true);
     try {
-      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/resources/webinar/${id}`);
-      if (resp.ok) {
-        setResources(await resp.json());
-      }
+      const resp = await resourceAPI.getByWebinar(id);
+      setResources(resp.data);
     } catch (err) {
       toast.error('Material retrieval failed');
     } finally {
@@ -77,21 +67,11 @@ const AdminResources = () => {
 
     setSaving(true);
     try {
-      const { user } = JSON.parse(localStorage.getItem('webinarhub_user') || '{}');
-      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/resources`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user?.id}`
-        },
-        body: JSON.stringify({ ...formData, webinarId: selectedWebinarId })
-      });
-
-      if (resp.ok) {
-        toast.success('Asset Uploaded Successfully');
-        setFormData({ title: '', fileType: 'PDF', fileUrl: '', description: '' });
-        fetchResources(selectedWebinarId);
-      }
+      const payload = { ...formData, webinarId: selectedWebinarId };
+      const resp = await API.post('/admin/resources', payload);
+      toast.success('Asset Uploaded Successfully');
+      setFormData({ title: '', fileType: 'PDF', fileUrl: '', description: '' });
+      fetchResources(selectedWebinarId);
     } catch (err) {
       toast.error('Sync failure with data center');
     } finally {
@@ -101,16 +81,9 @@ const AdminResources = () => {
 
   const handleDelete = async (id) => {
     try {
-      const { user } = JSON.parse(localStorage.getItem('webinarhub_user') || '{}');
-      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/resources/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${user?.id}` }
-      });
-
-      if (resp.ok) {
-        toast.success('Asset Purged');
-        fetchResources(selectedWebinarId);
-      }
+      await API.delete(`/admin/resources/${id}`);
+      toast.success('Asset Purged');
+      fetchResources(selectedWebinarId);
     } catch (err) {
       toast.error('De-linking failed');
     }
