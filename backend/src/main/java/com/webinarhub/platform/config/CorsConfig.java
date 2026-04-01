@@ -21,11 +21,16 @@ public class CorsConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // Allow all origins via pattern with credentials support
-        config.setAllowedOriginPatterns(Arrays.asList("*"));
+        // Allow specific origins
+        config.setAllowedOrigins(Arrays.asList(
+            "http://localhost:5173",
+            "https://wickyswenhub.netlify.app",
+            "https://wickyswebhub.netlify.app",
+            "https://wickywebinars-fsad.netlify.app"
+        ));
         config.setAllowCredentials(true);
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        config.setAllowedHeaders(Arrays.asList("*"));
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         config.setExposedHeaders(List.of("Authorization"));
         config.setMaxAge(3600L);
 
