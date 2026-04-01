@@ -114,10 +114,29 @@ const AdminWebinars = () => {
     };
 
     try {
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
+      // Determine base URL dynamically (using Vite environment or default relative path)
+      const baseUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'https://wicky-sprojectfsad-backend.onrender.com';
+      const urlPrefix = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
+
       if (currentWebinar) {
-        await webinarAPI.update(currentWebinar.id, payload);
+        const response = await fetch(`${urlPrefix}/webinars/${currentWebinar.id}`, {
+          method: 'PUT',
+          headers: headers,
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error('Update failed');
       } else {
-        await webinarAPI.create(payload);
+        const response = await fetch(`${urlPrefix}/webinars`, {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error('Create failed');
       }
       toast.success(currentWebinar ? 'Webinar Session Synchronized' : 'Webinar Session Initialized');
       setShowModal(false);
@@ -132,7 +151,20 @@ const AdminWebinars = () => {
   const handleDelete = async () => {
     if (!currentWebinar) return;
     try {
-      await webinarAPI.delete(currentWebinar.id);
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
+      const baseUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'https://wicky-sprojectfsad-backend.onrender.com';
+      const urlPrefix = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
+
+      const response = await fetch(`${urlPrefix}/webinars/${currentWebinar.id}`, {
+        method: 'DELETE',
+        headers: headers
+      });
+      if (!response.ok) throw new Error('Delete failed');
+
       toast.success('Session Terminated Successfully');
       setShowDeleteConfirm(false);
       fetchWebinars();
@@ -216,7 +248,7 @@ const AdminWebinars = () => {
                     <th>Temporal Coordinate</th>
                     <th>Stability Status</th>
                     <th>Audience</th>
-                    <th>Interface</th>
+                    <th style={{ minWidth: '100px', whiteSpace: 'nowrap' }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -270,8 +302,8 @@ const AdminWebinars = () => {
                             <span className="fw-bold">{webinar?.registeredCount || 0}</span>
                           </div>
                         </td>
-                        <td>
-                          <div className="d-flex gap-2">
+                        <td style={{ minWidth: '100px', whiteSpace: 'nowrap' }}>
+                          <div className="d-flex gap-2" style={{ flexWrap: 'nowrap' }}>
                             <button onClick={() => handleOpenEditModal(webinar)} className="nav-icon-btn border hover:bg-violet-500">
                               <Edit2 size={16} />
                             </button>

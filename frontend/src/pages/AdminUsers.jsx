@@ -20,8 +20,18 @@ const AdminUsers = () => {
     setLoadingWebinars(true);
     setError(null);
     try {
-      const resp = await webinarAPI.getAdminWebinars();
-      setWebinars(resp.data);
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
+      const baseUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'https://wicky-sprojectfsad-backend.onrender.com';
+      const urlPrefix = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
+
+      const resp = await fetch(`${urlPrefix}/admin/webinars`, { headers });
+      if (!resp.ok) throw new Error('Failed to fetch');
+      const data = await resp.json();
+      setWebinars(data);
     } catch (err) {
       setError('Failed to retrieve participant metrics index from platform.');
     } finally {
@@ -36,8 +46,18 @@ const AdminUsers = () => {
   const fetchRegistrations = useCallback(async (id) => {
     setLoading(true);
     try {
-      const resp = await registrationAPI.getWebinarRegistrations(id);
-      setRegistrations(resp.data);
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
+      const baseUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'https://wicky-sprojectfsad-backend.onrender.com';
+      const urlPrefix = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
+
+      const resp = await fetch(`${urlPrefix}/registrations/webinar/${id}`, { headers });
+      if (!resp.ok) throw new Error('Failed to fetch metrics');
+      const data = await resp.json();
+      setRegistrations(data);
     } catch (err) {
       toast.error('Metrics retrieval failed');
     } finally {

@@ -27,8 +27,18 @@ const AdminResources = () => {
     setLoadingWebinars(true);
     setError(null);
     try {
-      const resp = await webinarAPI.getAdminWebinars();
-      const completed = (Array.isArray(resp.data) ? resp.data : []).filter(w => w.status === 'COMPLETED');
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
+      const baseUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'https://wicky-sprojectfsad-backend.onrender.com';
+      const urlPrefix = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
+
+      const resp = await fetch(`${urlPrefix}/admin/webinars`, { headers });
+      if (!resp.ok) throw new Error('Failed to fetch');
+      const data = await resp.json();
+      const completed = (Array.isArray(data) ? data : []).filter(w => w.status === 'COMPLETED');
       setWebinars(completed);
     } catch (err) {
       setError('Failed to retrieve completed sessions from admin portal.');
@@ -44,8 +54,18 @@ const AdminResources = () => {
   const fetchResources = useCallback(async (id) => {
     setLoadingResources(true);
     try {
-      const resp = await resourceAPI.getByWebinar(id);
-      setResources(resp.data);
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
+      const baseUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'https://wicky-sprojectfsad-backend.onrender.com';
+      const urlPrefix = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
+
+      const resp = await fetch(`${urlPrefix}/resources/webinar/${id}`, { headers });
+      if (!resp.ok) throw new Error('Failed to fetch resources');
+      const data = await resp.json();
+      setResources(data);
     } catch (err) {
       toast.error('Material retrieval failed');
     } finally {
@@ -67,8 +87,21 @@ const AdminResources = () => {
 
     setSaving(true);
     try {
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
+      const baseUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'https://wicky-sprojectfsad-backend.onrender.com';
+      const urlPrefix = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
+
       const payload = { ...formData, webinarId: selectedWebinarId };
-      const resp = await API.post('/admin/resources', payload);
+      const resp = await fetch(`${urlPrefix}/admin/resources`, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(payload)
+      });
+      if (!resp.ok) throw new Error('Failed to create resource');
       toast.success('Asset Uploaded Successfully');
       setFormData({ title: '', fileType: 'PDF', fileUrl: '', description: '' });
       fetchResources(selectedWebinarId);
@@ -81,7 +114,19 @@ const AdminResources = () => {
 
   const handleDelete = async (id) => {
     try {
-      await API.delete(`/admin/resources/${id}`);
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      };
+      const baseUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'https://wicky-sprojectfsad-backend.onrender.com';
+      const urlPrefix = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
+
+      const resp = await fetch(`${urlPrefix}/admin/resources/${id}`, {
+        method: 'DELETE',
+        headers: headers
+      });
+      if (!resp.ok) throw new Error('Failed to delete resource');
       toast.success('Asset Purged');
       fetchResources(selectedWebinarId);
     } catch (err) {

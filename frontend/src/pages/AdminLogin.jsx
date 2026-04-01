@@ -32,7 +32,7 @@ const AdminLogin = () => {
 
         // Check if role contains ADMIN (supporting both 'ADMIN' and 'ROLE_ADMIN')
         if (data.user.role === 'ADMIN' || data.user.role === 'ROLE_ADMIN') {
-          setTempUserData(data.user);
+          setTempUserData({ ...data.user, token: data.token });
           setStep(2); // Move to MFA step
           setLoading(false);
         } else {
@@ -58,6 +58,11 @@ const AdminLogin = () => {
     setError('');
     
     if (validMFACodes.includes(mfaCode)) {
+      if (tempUserData?.token) {
+        localStorage.setItem('adminToken', tempUserData.token);
+      } else if (tempUserData?.id) {
+        localStorage.setItem('adminToken', tempUserData.id.toString());
+      }
       login(tempUserData);
       navigate('/admin');
     } else {

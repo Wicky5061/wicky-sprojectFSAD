@@ -25,6 +25,11 @@ export default function Login() {
     try {
       const res = await authAPI.login(form);
       const userData = res.data.user || res.data;
+      if (res.data.token) {
+        localStorage.setItem('token', res.data.token);
+      } else if (userData.id) {
+        localStorage.setItem('token', userData.id.toString());
+      }
       login(userData);
       toast.success(`Welcome back, ${userData.name}!`);
       const role = userData.role;
