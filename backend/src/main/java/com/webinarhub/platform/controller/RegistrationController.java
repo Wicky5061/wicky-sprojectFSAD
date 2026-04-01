@@ -50,6 +50,23 @@ public class RegistrationController {
     }
 
     /**
+     * GET /api/registrations - Admin query all registrations securely
+     */
+    @GetMapping
+    public ResponseEntity<List<RegistrationDto>> getAllRegistrations() {
+        try {
+            List<RegistrationDto> allRegistrations = registrationService.getAllRegistrations();
+            if (allRegistrations == null) {
+                return ResponseEntity.ok(java.util.Collections.emptyList());
+            }
+            return ResponseEntity.ok(allRegistrations);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.ok(java.util.Collections.emptyList());
+        }
+    }
+
+    /**
      * GET /api/registrations/user/me - Get current user's registrations
      */
     @GetMapping("/user/me")

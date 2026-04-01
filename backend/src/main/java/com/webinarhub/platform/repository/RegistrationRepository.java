@@ -40,4 +40,8 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     // JPQL - count attendees for a webinar
     @Query("SELECT COUNT(r) FROM Registration r WHERE r.webinar.id = :webinarId AND r.attended = true")
     Long countAttendeesByWebinarId(@Param("webinarId") Long webinarId);
+
+    // JPQL - fetch all registrations safely avoiding N+1 and nulls
+    @Query("SELECT r FROM Registration r LEFT JOIN FETCH r.user LEFT JOIN FETCH r.webinar")
+    List<Registration> findAllWithDetails();
 }

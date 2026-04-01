@@ -79,6 +79,25 @@ public class RegistrationService {
     }
 
     /**
+     * Get all global registrations safely avoiding N+1 faults
+     */
+    @Transactional(readOnly = true)
+    public List<RegistrationDto> getAllRegistrations() {
+        try {
+            List<Registration> registrations = registrationRepository.findAllWithDetails();
+            if (registrations == null || registrations.isEmpty()) {
+                return java.util.Collections.emptyList();
+            }
+            return registrations.stream()
+                    .map(this::convertToDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("Database fetch error for registrations: " + e.getMessage());
+            return java.util.Collections.emptyList();
+        }
+    }
+
+    /**
      * Get registrations by user ID
      */
     @Transactional(readOnly = true)

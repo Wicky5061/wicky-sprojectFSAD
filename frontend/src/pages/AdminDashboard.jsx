@@ -26,34 +26,21 @@ const AdminDashboard = () => {
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
-      console.log('Token found:', token ? 'YES - ' + token.substring(0,20) + '...' : 'NO TOKEN');
-      console.log('All localStorage keys:', Object.keys(localStorage));
-      console.log('API URL:', import.meta.env.VITE_API_URL);
-
       const headers = {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       };
 
-      const resp = await fetch(`${import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'https://wicky-sprojectfsad-backend.onrender.com'}/api/webinars`, { headers });
-      console.log('Response status:', resp.status);
-      console.log('Response headers:', resp.headers.get('content-type'));
-      const text = await resp.text();
-      console.log('Raw response:', text.substring(0, 200));
+      const resp = await fetch(`${import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'https://wicky-sprojectfsad-backend.onrender.com'}/api/admin/stats`, { headers });
+      const data = await resp.json();
 
-      const webinarData = JSON.parse(text);
-      
-      const studentsResp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/registrations`, { headers });
-      const registrationData = await studentsResp.json();
-      
-      // Count unique students (emails)
-      const uniqueStudents = new Set(registrationData.map(r => r.userEmail)).size;
-      
+      if (!data || Array.isArray(data)) return;
+
       setStats({
-        webinars: webinarData.length,
-        students: uniqueStudents,
-        registrations: registrationData.length,
-        liveNow: webinarData.filter(w => w.status === 'LIVE').length
+        webinars: data.totalWebinars || 0,
+        students: data.totalUsers || 0,
+        registrations: data.totalRegistrations || 0,
+        liveNow: data.liveWebinars || 0
       });
     } catch (err) {
       console.error('Error fetching admin stats:', err);
