@@ -67,7 +67,7 @@ export default function WebinarCard({ webinar }) {
     >
       <div className="webinar-card-header">
         {webinar.coverImageUrl ? (
-          <img src={webinar.coverImageUrl} alt={webinar.title} className="webinar-cover" />
+          <img src={webinar.coverImageUrl} crossOrigin="anonymous" alt={webinar.title} className="webinar-cover" />
         ) : (
           <div className="webinar-cover-placeholder">⚡</div>
         )}
@@ -117,6 +117,7 @@ export default function WebinarCard({ webinar }) {
         <div className="instructor-chip">
           <img 
             src={`https://ui-avatars.com/api/?name=${encodeURIComponent(webinar.instructor)}&background=random&color=fff`} 
+            crossOrigin="anonymous"
             alt={webinar.instructor} 
             className="instructor-avatar-sm"
           />

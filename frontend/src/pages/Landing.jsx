@@ -154,7 +154,7 @@ export default function Landing() {
           <div className="speakers-grid">
             {speakers.map(speaker => (
               <div key={speaker.id} className="speaker-card card">
-                <img src={speaker.image} alt={speaker.name} className="speaker-image" />
+                <img src={speaker.image} crossOrigin="anonymous" alt={speaker.name} className="speaker-image" />
                 <h3>{speaker.name}</h3>
                 <p className="speaker-title">{speaker.title}</p>
                 <span className="speaker-expertise">{speaker.expertise}</span>
@@ -202,7 +202,7 @@ export default function Landing() {
                 <div className="rating">{'★'.repeat(t.rating)}</div>
                 <p>"{t.text}"</p>
                 <div className="testimonial-user">
-                  <img src={t.photo} alt={t.name} />
+                  <img src={t.photo} crossOrigin="anonymous" alt={t.name} />
                   <span>{t.name}</span>
                 </div>
               </div>

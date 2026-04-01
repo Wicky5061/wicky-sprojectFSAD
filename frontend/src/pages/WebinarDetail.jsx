@@ -167,7 +167,7 @@ export default function WebinarDetail() {
         <div className="detail-main">
           <div className="detail-cover shadow-xl">
             {webinar.coverImageUrl ? (
-              <img src={webinar.coverImageUrl} alt={webinar.title} />
+              <img src={webinar.coverImageUrl} crossOrigin="anonymous" alt={webinar.title} />
             ) : (
               <div className="detail-cover-placeholder">⚡</div>
             )}
@@ -183,6 +183,7 @@ export default function WebinarDetail() {
                 <div className="instructor-info">
                   <img 
                     src={`https://ui-avatars.com/api/?name=${encodeURIComponent(webinar.instructor)}&background=random&color=fff&size=64`} 
+                    crossOrigin="anonymous"
                     alt={webinar.instructor} 
                     className="instructor-avatar-lg"
                   />
