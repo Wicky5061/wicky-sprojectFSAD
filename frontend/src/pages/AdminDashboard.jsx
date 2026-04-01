@@ -26,13 +26,22 @@ const AdminDashboard = () => {
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+      console.log('Token found:', token ? 'YES - ' + token.substring(0,20) + '...' : 'NO TOKEN');
+      console.log('All localStorage keys:', Object.keys(localStorage));
+      console.log('API URL:', import.meta.env.VITE_API_URL);
+
       const headers = {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       };
 
-      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/webinars`, { headers });
-      const webinarData = await resp.json();
+      const resp = await fetch(`${import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'https://wicky-sprojectfsad-backend.onrender.com'}/api/webinars`, { headers });
+      console.log('Response status:', resp.status);
+      console.log('Response headers:', resp.headers.get('content-type'));
+      const text = await resp.text();
+      console.log('Raw response:', text.substring(0, 200));
+
+      const webinarData = JSON.parse(text);
       
       const studentsResp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/registrations`, { headers });
       const registrationData = await studentsResp.json();
