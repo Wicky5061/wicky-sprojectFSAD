@@ -1,13 +1,19 @@
 import { Link } from 'react-router-dom';
 import { useRef, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import './WebinarCard.css';
 
 export default function WebinarCard({ webinar }) {
+  const { user } = useAuth();
   const cardRef = useRef(null);
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
   
   const statusClass = webinar.status?.toLowerCase() || 'upcoming';
+  
+  // Check if user has attended this webinar (from localStorage cache or backend)
+  const attendedWebinars = JSON.parse(localStorage.getItem('attended_webinars') || '[]');
+  const isCompletedByUser = attendedWebinars.includes(webinar.id) || webinar.attended;
 
   const formatDate = (dateStr) => {
     if (!dateStr) return 'TBD';
@@ -73,10 +79,23 @@ export default function WebinarCard({ webinar }) {
         <span className={`badge badge-${statusClass}`} style={{ position: 'absolute', top: '15px', right: '15px' }}>
           {webinar.status}
         </span>
+
+        {isCompletedByUser && (
+          <span className="badge badge-completed-success" style={{ position: 'absolute', top: '15px', left: '15px' }}>
+            ✅ Completed
+          </span>
+        )}
       </div>
 
       <div className="webinar-card-body">
-        <h3 className="webinar-title">{webinar.title}</h3>
+        <div className="d-flex justify-content-between align-items-start mb-2">
+           <h3 className="webinar-title m-0">{webinar.title}</h3>
+           {webinar.avgRating > 0 && (
+             <div className="card-rating">
+               ⭐ {webinar.avgRating.toFixed(1)}
+             </div>
+           )}
+        </div>
         
         <div className="webinar-meta">
           <div className="webinar-meta-item">

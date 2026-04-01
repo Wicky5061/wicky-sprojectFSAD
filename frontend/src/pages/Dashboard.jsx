@@ -241,7 +241,8 @@ export default function Dashboard() {
     certificates: Array.isArray(registrations) ? registrations.filter(r => r?.attended).length : 0
   };
 
-  const recentActivity = Array.isArray(registrations) ? registrations.slice(0, 3) : [];
+  const recentAttended = Array.isArray(registrations) ? registrations.filter(r => r.webinarStatus === 'COMPLETED' || r.attended).slice(0, 3) : [];
+  const inProgress = Array.isArray(registrations) ? registrations.filter(r => r.webinarStatus === 'LIVE' || (r.webinarStatus === 'UPCOMING' && new Date(r.dateTime) < new Date(Date.now() + 86400000))).slice(0, 3) : [];
   const upcomingReminders = Array.isArray(registrations)
     ? registrations
         .filter(r => {
@@ -342,42 +343,61 @@ export default function Dashboard() {
 
       <div className="dashboard-grid-main">
         <div className="dashboard-main-col">
-          <section className="dash-section" id="my-registrations">
+          <section className="dash-section" id="continue-learning">
             <div className="section-header-flex mb-6">
-              <h3>Registered Webinars</h3>
-              {registrations.length > 0 && <span className="item-count">{registrations.length} Total</span>}
+              <h3>Continue Learning</h3>
+              <span className="item-count">{inProgress.length} Priority</span>
             </div>
             
-            {registrations.length > 0 ? (
+            {inProgress.length > 0 ? (
               <div className="registrations-list grid grid-1">
-                {registrations.map((reg) => (
-                  <div key={reg.id} className="registration-item-full card glass shadow-sm">
+                {inProgress.map((reg) => (
+                  <div key={reg.id} className="registration-item-full card glass shadow-sm border-left-priority">
                     <div className="reg-info">
-                      <h4 className="reg-title">{reg.webinarTitle}</h4>
-                      <p className="reg-meta">📅 {new Date(reg.dateTime).toLocaleDateString()} at {new Date(reg.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                      <div className="d-flex align-items-center gap-2">
+                        <h4 className="reg-title m-0">{reg.webinarTitle}</h4>
+                        {reg.webinarStatus === 'LIVE' && <span className="pulse-dot"></span>}
+                      </div>
+                      <p className="reg-meta">📅 Next session: {new Date(reg.dateTime).toLocaleDateString()}</p>
                     </div>
                     <div className="reg-actions-flex d-flex gap-2">
-                       <Link to={`/webinars/${reg.webinarId}`} className="btn btn-sm btn-outline">Details</Link>
-                       {reg.webinarStatus === 'COMPLETED' && (
-                         <Link to={`/webinars/${reg.webinarId}#resources`} className="btn btn-sm btn-accent">
-                           Resources
-                         </Link>
-                       )}
-                       {(reg.webinarStatus === 'COMPLETED' || reg.attended) && (
-                         <button className="btn btn-sm btn-primary" onClick={() => handleDownloadCertificate(reg)}>
-                           Certificate
-                         </button>
-                       )}
+                       <Link to={`/webinars/${reg.webinarId}`} className="btn btn-sm btn-primary">
+                         {reg.webinarStatus === 'LIVE' ? 'Join Now ' : 'View Details'}
+                       </Link>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="empty-dashboard-state glass">
-                <h3>Start Your Journey</h3>
-                <p>Register for your first webinar to see it here.</p>
-                <Link to="/webinars" className="btn btn-primary">Discover Webinars</Link>
+                <p>No active sessions today. Browse upcoming webinars to start learning!</p>
+                <Link to="/webinars" className="btn btn-sm btn-outline">Browse All</Link>
               </div>
+            )}
+          </section>
+
+          <section className="dash-section mt-12" id="recently-attended">
+            <div className="section-header-flex mb-6">
+              <h3>Recently Attended</h3>
+              <Link to="/my-webinars" className="btn btn-sm btn-outline">View History</Link>
+            </div>
+            
+            {recentAttended.length > 0 ? (
+              <div className="grid grid-2">
+                {recentAttended.map((reg) => (
+                  <div key={reg.id} className="attended-card card glass">
+                    <div className="attended-info">
+                      <h4>{reg.webinarTitle}</h4>
+                      <div className="d-flex gap-2 mt-2">
+                        <Link to={`/webinars/${reg.webinarId}#resources`} className="btn btn-xs btn-accent">Resources</Link>
+                        <button className="btn btn-xs btn-primary" onClick={() => handleDownloadCertificate(reg)}>Certificate</button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="empty-text">No recently completed webinars yet.</p>
             )}
           </section>
 
@@ -398,20 +418,17 @@ export default function Dashboard() {
 
         <aside className="dashboard-side-col">
           <div className="dashboard-sidebar-section card">
-            <h3>Recent Activity</h3>
-            {recentActivity.length > 0 ? (
-              <div className="activity-list">
-                {recentActivity.map(act => (
-                  <div key={act.id} className="activity-item">
-                    <Activity size={18} className="text-primary mt-1" />
-                    <div className="activity-details">
-                      <p>Registered for <strong>{act.webinarTitle}</strong></p>
-                      <span className="activity-time">Just recently</span>
-                    </div>
-                  </div>
-                ))}
+            <h3>Learning Progress</h3>
+            <div className="progress-mini-stats">
+              <div className="p-stat">
+                <span className="p-label">Growth Points</span>
+                <span className="p-value">+{stats.certificates * 50}</span>
               </div>
-            ) : <p className="empty-text">No recent activity.</p>}
+              <div className="p-stat">
+                <span className="p-label">Skill Level</span>
+                <span className="p-value">{stats.certificates > 5 ? 'Senior' : 'Junior'}</span>
+              </div>
+            </div>
           </div>
 
           <div className="dashboard-sidebar-section card mt-6">

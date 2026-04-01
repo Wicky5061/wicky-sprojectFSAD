@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { webinarAPI } from '../services/api';
 import WebinarCard from '../components/WebinarCard';
 import ThreeBackground from '../components/ThreeBackground';
+import FeaturedWebinar from '../components/FeaturedWebinar';
 import './Landing.css';
 
 export default function Landing() {
@@ -110,6 +111,17 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* Featured Banner — Nearest Upcoming */}
+      <div className="container" id="featured-home">
+        {!loading && webinars.length > 0 && (
+          <FeaturedWebinar 
+            webinar={webinars
+              .filter(w => w.status === 'UPCOMING' || w.status === 'LIVE')
+              .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime))[0] || webinars[0]} 
+          />
+        )}
+      </div>
 
       {/* How It Works Section */}
       <section className="how-it-works-section bg-secondary">

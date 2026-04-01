@@ -103,6 +103,18 @@ body {
   flex-direction: column;
 }
 
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.main-content {
+  flex: 1 0 auto;
+  width: 100%;
+}
+
 a {
   color: var(--primary-light);
   text-decoration: none;

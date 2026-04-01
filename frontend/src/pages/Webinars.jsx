@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { webinarAPI } from '../services/api';
 import WebinarCard from '../components/WebinarCard';
+import FeaturedWebinar from '../components/FeaturedWebinar';
 import './Webinars.css';
 
 /**
@@ -58,6 +59,15 @@ export default function Webinars() {
         <h1>Browse Webinars</h1>
         <p>Discover and register for upcoming sessions</p>
       </div>
+
+      {/* Featured Banner — Nearest Upcoming */}
+      {!loading && webinars.length > 0 && filter === 'ALL' && !search && (
+        <FeaturedWebinar 
+          webinar={webinars
+            .filter(w => w.status === 'UPCOMING' || w.status === 'LIVE')
+            .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime))[0] || webinars[0]} 
+        />
+      )}
 
       {/* Search & Filter Bar */}
       <div className="webinars-toolbar glass animate-fade-in" id="webinars-toolbar">
