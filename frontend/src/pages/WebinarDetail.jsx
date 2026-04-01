@@ -181,12 +181,9 @@ export default function WebinarDetail() {
               
               <div className="detail-instructor-strip">
                 <div className="instructor-info">
-                  <img 
-                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(webinar.instructor)}&background=random&color=fff&size=64`} 
-                    crossOrigin="anonymous"
-                    alt={webinar.instructor} 
-                    className="instructor-avatar-lg"
-                  />
+                  <div className="instructor-avatar-lg" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#8b5cf6', color: 'white', borderRadius: '50%', width: '64px', height: '64px', fontSize: '24px', fontWeight: 'bold' }}>
+                    {webinar.instructor ? webinar.instructor.charAt(0).toUpperCase() : 'I'}
+                  </div>
                   <div>
                     <span className="inst-label">Presented By</span>
                     <span className="inst-name">{webinar.instructor}</span>

@@ -60,17 +60,17 @@ export default function Landing() {
   };
 
   const speakers = [
-    { id: 1, name: 'Vivek Vardhan', title: 'Full Stack Architect', expertise: 'Spring Boot & React', image: 'https://ui-avatars.com/api/?name=Vivek+Vardhan&background=random&color=fff' },
-    { id: 2, name: 'Dr. Wicky', title: 'System Designer', expertise: 'Microservices & DevOps', image: 'https://ui-avatars.com/api/?name=Wicky&background=random&color=fff' },
-    { id: 3, name: 'Viswa', title: 'Cloud Specialist', expertise: 'AWS & Azure', image: 'https://ui-avatars.com/api/?name=Viswa&background=random&color=fff' },
-    { id: 4, name: 'Siddharth', title: 'AI Researcher', expertise: 'Machine Learning & LLMs', image: 'https://ui-avatars.com/api/?name=Siddharth&background=random&color=fff' },
+    { id: 1, name: 'Vivek Vardhan', title: 'Full Stack Architect', expertise: 'Spring Boot & React' },
+    { id: 2, name: 'Dr. Wicky', title: 'System Designer', expertise: 'Microservices & DevOps' },
+    { id: 3, name: 'Viswa', title: 'Cloud Specialist', expertise: 'AWS & Azure' },
+    { id: 4, name: 'Siddharth', title: 'AI Researcher', expertise: 'Machine Learning & LLMs' },
   ];
 
   const testimonials = [
-    { id: 1, name: 'Madhavi', text: 'The React architecture workshop was a complete game-changer for my career. The instructor was brilliant and the content was extremely practical!', rating: 5, photo: 'https://ui-avatars.com/api/?name=Madhavi&background=random&color=fff' },
-    { id: 2, name: 'Sekar', text: 'I love how interactive the live sessions are. Being able to ask questions and get immediate feedback is so much better than pre-recorded videos.', rating: 5, photo: 'https://ui-avatars.com/api/?name=Sekar&background=random&color=fff' },
-    { id: 3, name: 'Sathwik', text: 'The post-webinar resources and recording access are worth every second. I finally understood AWS networking thanks to Viswa\'s session.', rating: 5, photo: 'https://ui-avatars.com/api/?name=Sathwik&background=random&color=fff' },
-    { id: 4, name: 'Aditya', text: 'WebinarHub is my go-to platform for staying updated with the latest tech trends. The community and the quality of speakers are unmatched.', rating: 5, photo: 'https://ui-avatars.com/api/?name=Aditya&background=random&color=fff' },
+    { id: 1, name: 'Madhavi', text: 'The React architecture workshop was a complete game-changer for my career. The instructor was brilliant and the content was extremely practical!', rating: 5 },
+    { id: 2, name: 'Sekar', text: 'I love how interactive the live sessions are. Being able to ask questions and get immediate feedback is so much better than pre-recorded videos.', rating: 5 },
+    { id: 3, name: 'Sathwik', text: 'The post-webinar resources and recording access are worth every second. I finally understood AWS networking thanks to Viswa\'s session.', rating: 5 },
+    { id: 4, name: 'Aditya', text: 'WebinarHub is my go-to platform for staying updated with the latest tech trends. The community and the quality of speakers are unmatched.', rating: 5 },
   ];
 
   return (
@@ -154,7 +154,9 @@ export default function Landing() {
           <div className="speakers-grid">
             {speakers.map(speaker => (
               <div key={speaker.id} className="speaker-card card">
-                <img src={speaker.image} crossOrigin="anonymous" alt={speaker.name} className="speaker-image" />
+                <div className="speaker-image fallback-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#8b5cf6', color: 'white', fontSize: '36px', fontWeight: 'bold' }}>
+                  {speaker.name.charAt(0).toUpperCase()}
+                </div>
                 <h3>{speaker.name}</h3>
                 <p className="speaker-title">{speaker.title}</p>
                 <span className="speaker-expertise">{speaker.expertise}</span>
@@ -202,7 +204,9 @@ export default function Landing() {
                 <div className="rating">{'★'.repeat(t.rating)}</div>
                 <p>"{t.text}"</p>
                 <div className="testimonial-user">
-                  <img src={t.photo} crossOrigin="anonymous" alt={t.name} />
+                  <div className="inline-avatar sm" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#10b981', color: 'white', borderRadius: '50%', width: '40px', height: '40px', fontWeight: 'bold', marginRight: '1rem' }}>
+                    {t.name.charAt(0).toUpperCase()}
+                  </div>
                   <span>{t.name}</span>
                 </div>
               </div>

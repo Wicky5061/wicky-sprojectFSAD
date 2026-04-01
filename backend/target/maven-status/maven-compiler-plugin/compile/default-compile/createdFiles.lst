@@ -16,7 +16,6 @@ com\webinarhub\platform\service\EmailService.class
 com\webinarhub\platform\service\UserService.class
 com\webinarhub\platform\controller\AdminWebinarController.class
 com\webinarhub\platform\dto\UserDto.class
-com\webinarhub\platform\config\CorsConfig.class
 com\webinarhub\platform\service\WebinarService.class
 com\webinarhub\platform\config\JwtAuthenticationFilter.class
 com\webinarhub\platform\controller\AdminResourceController.class
