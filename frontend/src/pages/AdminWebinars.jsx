@@ -171,7 +171,7 @@ const AdminWebinars = () => {
           </div>
           <button onClick={handleOpenAddModal} className="btn-admin-primary d-flex align-items-center gap-2">
             <Plus size={20} />
-            <span>Initialize Session</span>
+            <span>Create Webinar</span>
           </button>
         </div>
       </div>
@@ -255,9 +255,12 @@ const AdminWebinars = () => {
                           <span className="text-slate-200">{webinar?.instructor || 'Anonymous'}</span>
                         </td>
                         <td>
-                          <div className="d-flex flex-column">
-                            <span className="fw-medium text-slate-200">{webinar?.dateTime ? new Date(webinar.dateTime).toLocaleDateString() : 'TBD'}</span>
-                            <span className="small opacity-50">{webinar?.dateTime ? new Date(webinar.dateTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--:--'}</span>
+                          <div>
+                            <span className="fw-medium text-slate-200">
+                              {webinar?.dateTime 
+                                ? `${new Date(webinar.dateTime).toLocaleDateString()} ${new Date(webinar.dateTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}` 
+                                : 'TBD'}
+                            </span>
                           </div>
                         </td>
                         <td>{getStatusBadge(webinar?.status)}</td>
@@ -299,7 +302,7 @@ const AdminWebinars = () => {
         <div className="admin-modal-overlay">
           <div className="premium-card w-full max-w-3xl animate-fade-in p-0 overflow-visible h-fit" style={{ maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
             <div className="modal-header-admin p-4 border-b border-slate-800 d-flex justify-content-between align-items-center bg-slate-900 rounded-t-[20px]">
-              <h2 className="text-xl font-bold mb-0">{currentWebinar ? 'Sync Parameters' : 'Deploy New Session'}</h2>
+              <h2 className="text-xl font-bold mb-0">{currentWebinar ? 'Edit Webinar' : 'Create Webinar'}</h2>
               <button onClick={() => setShowModal(false)} className="close-btn-admin opacity-60 hover:opacity-100"><X size={24} /></button>
             </div>
             
@@ -307,7 +310,7 @@ const AdminWebinars = () => {
               <form onSubmit={handleSubmit} className="premium-form">
                 <div className="row g-4">
                   <div className="col-12">
-                    <label className="premium-label">Session Identifier (Title)</label>
+                    <label className="premium-label">Title</label>
                     <input 
                       type="text" 
                       required 
@@ -317,7 +320,7 @@ const AdminWebinars = () => {
                     />
                   </div>
                   <div className="col-md-6">
-                    <label className="premium-label">Subject Matter Expert</label>
+                    <label className="premium-label">Instructor Name</label>
                     <input 
                       type="text" 
                       required 
@@ -327,7 +330,7 @@ const AdminWebinars = () => {
                     />
                   </div>
                   <div className="col-md-6">
-                    <label className="premium-label">Asset Classification</label>
+                    <label className="premium-label">Category</label>
                     <select 
                       className="premium-input w-full"
                       value={formData.category}
@@ -339,7 +342,7 @@ const AdminWebinars = () => {
                   
                   {/* SPLIT DATE & TIME - requested fix */}
                   <div className="col-md-6">
-                    <label className="premium-label">Solar Date</label>
+                    <label className="premium-label">Date</label>
                     <input 
                       type="date" 
                       required 
@@ -349,7 +352,7 @@ const AdminWebinars = () => {
                     />
                   </div>
                   <div className="col-md-6">
-                    <label className="premium-label">Broadcast Time</label>
+                    <label className="premium-label">Time</label>
                     <input 
                       type="time" 
                       required 
@@ -360,7 +363,17 @@ const AdminWebinars = () => {
                   </div>
 
                   <div className="col-md-6">
-                    <label className="premium-label">Duration Matrix (Min)</label>
+                    <label className="premium-label">Max Participants</label>
+                    <input 
+                      type="number" 
+                      required 
+                      className="premium-input" 
+                      value={formData.maxParticipants}
+                      onChange={(e) => setFormData({...formData, maxParticipants: parseInt(e.target.value)})}
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="premium-label">Duration (Minutes)</label>
                     <input 
                       type="number" 
                       required 
@@ -370,7 +383,7 @@ const AdminWebinars = () => {
                     />
                   </div>
                   <div className="col-md-6">
-                    <label className="premium-label">Session Pulse</label>
+                    <label className="premium-label">Status</label>
                     <select 
                       className="premium-input w-full"
                       value={formData.status}
@@ -383,7 +396,7 @@ const AdminWebinars = () => {
                     </select>
                   </div>
                   <div className="col-12">
-                    <label className="premium-label">Visual Hologram URL (Cover)</label>
+                    <label className="premium-label">Thumbnail URL (optional)</label>
                     <input 
                       type="url" 
                       className="premium-input" 
@@ -392,7 +405,7 @@ const AdminWebinars = () => {
                     />
                   </div>
                   <div className="col-12">
-                    <label className="premium-label">Data Stream Vector (Meeting)</label>
+                    <label className="premium-label">Stream URL (Meeting Link)</label>
                     <input 
                       type="url" 
                       className="premium-input" 
@@ -401,7 +414,7 @@ const AdminWebinars = () => {
                     />
                   </div>
                   <div className="col-12">
-                    <label className="premium-label">Neural Syllabus (Description)</label>
+                    <label className="premium-label">Description</label>
                     <textarea 
                       rows="4" 
                       required 
@@ -413,9 +426,9 @@ const AdminWebinars = () => {
                 </div>
                 
                 <div className="modal-footer-admin p-4 border-t border-slate-800 d-flex justify-content-end gap-3 bg-slate-900 rounded-b-[20px] mt-4">
-                  <button type="button" onClick={() => setShowModal(false)} className="btn-admin-secondary px-5 bg-transparent border-slate-700">Abort</button>
+                  <button type="button" onClick={() => setShowModal(false)} className="btn-admin-secondary px-5 bg-transparent border-slate-700">Cancel</button>
                   <button type="submit" disabled={saving} className="btn-admin-primary px-5 d-flex align-items-center gap-2">
-                    {saving ? <div className="spinner-border spinner-border-sm" role="status"></div> : (currentWebinar ? 'Synchronize' : 'Deploy')}
+                    {saving ? <div className="spinner-border spinner-border-sm" role="status"></div> : (currentWebinar ? 'Update' : 'Create')}
                   </button>
                 </div>
               </form>
@@ -429,15 +442,15 @@ const AdminWebinars = () => {
         <div className="admin-modal-overlay">
           <div className="premium-card max-w-md animate-fade-in text-center p-5">
             <div className="confirm-icon mb-4"><AlertTriangle size={64} className="text-rose-500 mx-auto" /></div>
-            <h2 className="text-2xl font-bold mb-3">Terminate Pulse?</h2>
-            <p className="text-slate-400 mb-5">Are you certain you want to purge <strong>{currentWebinar?.title}</strong>? This action will sever all student links.</p>
+            <h2 className="text-2xl font-bold mb-3">Delete Webinar</h2>
+            <p className="text-slate-400 mb-5">Are you sure you want to delete <strong>{currentWebinar?.title}</strong>? This action cannot be undone.</p>
             <div className="d-flex justify-content-center gap-3">
               <button onClick={() => setShowDeleteConfirm(false)} className="btn-admin-secondary flex-1 border-slate-700 bg-transparent py-3">Cancel</button>
               <button 
                 onClick={handleDelete} 
                 className="btn-admin-danger flex-1 bg-rose-600 hover:bg-rose-700 text-white rounded-xl py-3 border-0"
               >
-                Execute Purge
+                Delete
               </button>
             </div>
           </div>
