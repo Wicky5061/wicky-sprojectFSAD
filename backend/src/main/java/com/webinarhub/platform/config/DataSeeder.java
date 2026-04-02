@@ -112,7 +112,7 @@ public class DataSeeder implements CommandLineRunner {
             w1.setDateTime(LocalDateTime.now().plusDays(3).withHour(18).withMinute(0));
             w1.setDurationMinutes(120);
             w1.setStreamUrl("https://meet.jit.si/webinarhub-master-fs");
-            w1.setCoverImageUrl("https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=800");
+            w1.setCoverImageUrl("https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&q=80");
             w1.setMaxParticipants(2500);
             w1.setCategory("Development");
             w1.setStatus(Webinar.WebinarStatus.UPCOMING);
@@ -127,7 +127,7 @@ public class DataSeeder implements CommandLineRunner {
             w2.setDateTime(LocalDateTime.now().plusDays(7).withHour(10).withMinute(30));
             w2.setDurationMinutes(90);
             w2.setStreamUrl("https://meet.jit.si/webinarhub-aws-arch");
-            w2.setCoverImageUrl("https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800");
+            w2.setCoverImageUrl("https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800&q=80");
             w2.setMaxParticipants(1500);
             w2.setCategory("Cloud");
             w2.setStatus(Webinar.WebinarStatus.UPCOMING);
@@ -142,7 +142,7 @@ public class DataSeeder implements CommandLineRunner {
             w3.setDateTime(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0));
             w3.setDurationMinutes(60);
             w3.setStreamUrl("https://meet.jit.si/webinarhub-ai-gen");
-            w3.setCoverImageUrl("https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=800");
+            w3.setCoverImageUrl("https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80");
             w3.setMaxParticipants(3000);
             w3.setCategory("AI");
             w3.setStatus(Webinar.WebinarStatus.LIVE);
@@ -157,7 +157,7 @@ public class DataSeeder implements CommandLineRunner {
             w4.setDateTime(LocalDateTime.now().minusDays(10).withHour(11).withMinute(0));
             w4.setDurationMinutes(120);
             w4.setStreamUrl("");
-            w4.setCoverImageUrl("https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800");
+            w4.setCoverImageUrl("https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80");
             w4.setMaxParticipants(1000);
             w4.setCategory("Security");
             w4.setStatus(Webinar.WebinarStatus.COMPLETED);
@@ -180,7 +180,7 @@ public class DataSeeder implements CommandLineRunner {
             w5.setDateTime(LocalDateTime.now().minusDays(15).withHour(16).withMinute(0));
             w5.setDurationMinutes(90);
             w5.setStreamUrl("");
-            w5.setCoverImageUrl("https://images.unsplash.com/photo-1551288049-bbbda536339a?q=80&w=800");
+            w5.setCoverImageUrl("https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=800&q=80");
             w5.setMaxParticipants(2000);
             w5.setCategory("Data");
             w5.setStatus(Webinar.WebinarStatus.COMPLETED);
@@ -203,7 +203,7 @@ public class DataSeeder implements CommandLineRunner {
             w6.setDateTime(LocalDateTime.now().plusDays(5).withHour(15).withMinute(0));
             w6.setDurationMinutes(120);
             w6.setStreamUrl("https://meet.jit.si/webinarhub-blockchain");
-            w6.setCoverImageUrl("https://images.unsplash.com/photo-1516245834210-c4c142787335?q=80&w=800");
+            w6.setCoverImageUrl("https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=800&q=80");
             w6.setMaxParticipants(1200);
             w6.setCategory("Web3");
             w6.setStatus(Webinar.WebinarStatus.UPCOMING);
@@ -218,7 +218,7 @@ public class DataSeeder implements CommandLineRunner {
             w7.setDateTime(LocalDateTime.now().plusDays(10).withHour(19).withMinute(0));
             w7.setDurationMinutes(90);
             w7.setStreamUrl("https://meet.jit.si/webinarhub-data-eng");
-            w7.setCoverImageUrl("https://images.unsplash.com/photo-1518186285589-2f7649de83e0?q=80&w=800");
+            w7.setCoverImageUrl("https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80");
             w7.setMaxParticipants(1800);
             w7.setCategory("Data");
             w7.setStatus(Webinar.WebinarStatus.UPCOMING);

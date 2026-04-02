@@ -76,17 +76,17 @@ const AdminDashboard = () => {
         <div className="breadcrumbs">
           <span className="breadcrumb-item">Admin</span>
           <span className="breadcrumb-separator">/</span>
-          <span className="breadcrumb-item text-white">Command Center</span>
+          <span className="breadcrumb-item text-white">Dashboard</span>
         </div>
         <div className="admin-page-title-row">
           <div>
-            <h1 className="admin-page-title">Platform Intelligence</h1>
+            <h1 className="admin-page-title">Admin Dashboard</h1>
             <p className="admin-page-subtitle">Real-time engagement tracking and platform performance metrics.</p>
           </div>
           <div className="admin-quick-actions d-flex gap-3">
             <Link to="/admin/webinars" className="btn-admin-primary d-flex align-items-center gap-2">
               <PlusCircle size={18} />
-              <span>Initialize Session</span>
+              <span>Create Webinar</span>
             </Link>
           </div>
         </div>

@@ -151,7 +151,7 @@ const AdminResources = () => {
         <div className="breadcrumbs">
           <span className="breadcrumb-item">Admin</span>
           <span className="breadcrumb-separator">/</span>
-          <span className="breadcrumb-item text-white">Vault Index</span>
+          <span className="breadcrumb-item text-white">Resources</span>
         </div>
         <div className="admin-page-title-row">
           <div>
@@ -180,7 +180,7 @@ const AdminResources = () => {
               <div className="premium-card mb-4 bg-gradient-to-br from-slate-900 to-slate-950">
                 <h3 className="card-title-admin mb-4 d-flex align-items-center gap-3 fs-5">
                   <div className="p-2 bg-violet-600 rounded-lg"><Search size={22} className="text-white" /></div>
-                  Vault Target
+                   Select Webinar
                 </h3>
                 
                 <div className="premium-form-group">
@@ -194,7 +194,7 @@ const AdminResources = () => {
                         value={selectedWebinarId}
                         onChange={(e) => setSelectedWebinarId(e.target.value)}
                       >
-                        <option value="">-- Terminal Choice --</option>
+                        <option value="">-- Select Completed Webinar --</option>
                         {webinars.map(w => (
                           <option key={w?.id} value={w?.id}>{w?.title} ({new Date(w?.dateTime).toLocaleDateString()})</option>
                         ))}
@@ -208,12 +208,12 @@ const AdminResources = () => {
                 <div className="premium-card animate-fade-in bg-gradient-to-br from-violet-900/20 to-transparent border-violet-500/30">
                   <h3 className="card-title-admin mb-4 d-flex align-items-center gap-3 fs-5">
                     <div className="p-2 bg-emerald-600 rounded-lg"><FileUp size={22} className="text-white" /></div>
-                    Inject Matrix
+                     Upload Resource
                   </h3>
                   
                   <form onSubmit={handleSubmit}>
                     <div className="premium-form-group">
-                      <label className="premium-label">Asset Token (Title)</label>
+                      <label className="premium-label">Resource Title</label>
                       <input 
                         type="text" 
                         required 
@@ -239,7 +239,7 @@ const AdminResources = () => {
                         </select>
                         </div>
                         <div className="col-md-6 mb-3">
-                        <label className="premium-label">Data Vector (URL)</label>
+                        <label className="premium-label">File URL</label>
                         <input 
                             type="url" 
                             required 
@@ -251,7 +251,7 @@ const AdminResources = () => {
                     </div>
 
                     <div className="premium-form-group mt-2">
-                        <label className="premium-label">Neural Notes (Optional)</label>
+                        <label className="premium-label">Description (Optional)</label>
                         <textarea 
                             rows="3" 
                             className="premium-input bg-slate-800 border-slate-700" 
@@ -260,7 +260,7 @@ const AdminResources = () => {
                         ></textarea>
                     </div>
                     <button type="submit" disabled={saving} className="btn-admin-primary w-100 py-3 mt-2 d-flex align-items-center justify-content-center gap-2">
-                        {saving ? <div className="spinner-border spinner-border-sm"></div> : <><Plus size={20} /> Deploy Asset</>}
+                        {saving ? <div className="spinner-border spinner-border-sm"></div> : <><Plus size={20} /> Upload Resource</>}
                     </button>
                   </form>
                 </div>
@@ -271,7 +271,7 @@ const AdminResources = () => {
               <div className="premium-card min-vh-75 h-100 border-dashed border-slate-800 bg-transparent flex flex-col">
                 <h3 className="card-title-admin mb-4 d-flex align-items-center gap-3 fs-5">
                   <div className="p-2 bg-slate-800 rounded-lg text-slate-400"><Layers size={22} /></div>
-                  Encrypted Vault
+                   Resources
                 </h3>
                 
                 {!selectedWebinarId ? (
@@ -279,8 +279,8 @@ const AdminResources = () => {
                     <div className="p-5 bg-slate-900 rounded-full mb-4 border border-slate-800">
                       <Layout size={64} className="text-slate-500" />
                     </div>
-                    <h4 className="text-xl font-bold">Terminal ID Waiting</h4>
-                    <p className="max-w-sm">Select a finalized session on the left to activate the vault interface.</p>
+                    <h4 className="text-xl font-bold">No Webinar Selected</h4>
+                    <p className="max-w-sm">Select a completed session on the left to manage its resources.</p>
                   </div>
                 ) : loadingResources ? (
                   <div className="p-4 d-flex flex-grow-1 flex-col justify-center items-center">
@@ -316,8 +316,8 @@ const AdminResources = () => {
                 ) : (
                   <div className="flex-1 d-flex flex-column items-center justify-center text-center p-5 opacity-40">
                      <AlertCircle size={40} className="mb-3" />
-                     <p className="fs-5 font-bold">Zero Assets Detected</p>
-                     <p className="small">Begin deployment to populate this terminal.</p>
+                     <p className="fs-5 font-bold">No Resources Yet</p>
+                     <p className="small">Upload resources using the form on the left.</p>
                   </div>
                 )}
               </div>

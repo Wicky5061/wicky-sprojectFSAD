@@ -243,10 +243,10 @@ const AdminWebinars = () => {
               <table className="premium-table">
                 <thead>
                   <tr>
-                    <th>Webinar Vector</th>
-                    <th>Intelligence Node</th>
-                    <th>Temporal Coordinate</th>
-                    <th>Stability Status</th>
+                    <th>Webinar</th>
+                    <th>Instructor</th>
+                    <th>Date & Time</th>
+                    <th>Status</th>
                     <th>Audience</th>
                     <th style={{ minWidth: '100px', whiteSpace: 'nowrap' }}>Actions</th>
                   </tr>

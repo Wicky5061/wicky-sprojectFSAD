@@ -23,6 +23,7 @@ com\webinarhub\platform\config\AppConfig.class
 com\webinarhub\platform\controller\WebinarController.class
 com\webinarhub\platform\controller\UserController.class
 com\webinarhub\platform\service\RegistrationService.class
+com\webinarhub\platform\controller\AdminStatsController.class
 com\webinarhub\platform\dto\LoginResponse.class
 com\webinarhub\platform\service\RatingService.class
 com\webinarhub\platform\controller\AuthController.class

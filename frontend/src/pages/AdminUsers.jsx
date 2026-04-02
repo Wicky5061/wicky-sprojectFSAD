@@ -143,7 +143,7 @@ const AdminUsers = () => {
                         onChange={(e) => setSelectedWebinarId(e.target.value)}
                         disabled={loadingWebinars}
                       >
-                        <option value="">-- Targeted Session --</option>
+                        <option value="">-- Select Webinar --</option>
                         {webinars.map(w => (
                           <option key={w?.id} value={w?.id}>{w?.title} ({w?.dateTime ? new Date(w.dateTime).toLocaleDateString() : 'TBD'})</option>
                         ))}
@@ -164,7 +164,7 @@ const AdminUsers = () => {
                     <Search size={20} className="search-icon-table" />
                     <input 
                       type="text" 
-                      placeholder="Neural lookup by name or email..." 
+                      placeholder="Search by name or email..." 
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="premium-input ps-5 w-full"
@@ -186,19 +186,19 @@ const AdminUsers = () => {
                   <div className="p-5 bg-violet-900/10 rounded-full mb-4 ring-1 ring-violet-500/20">
                     <UserCheck size={64} className="text-violet-500" />
                   </div>
-                  <h3 className="fs-3 fw-bold text-slate-300">Terminal Standby</h3>
-                  <p className="text-slate-500 max-w-sm">Please select a session coordinate to analyze student pulse and registration metrics.</p>
+                   <h3 className="fs-3 fw-bold text-slate-300">No Webinar Selected</h3>
+                   <p className="text-slate-500 max-w-sm">Please select a webinar to view registered students and participation details.</p>
                 </div>
               ) : filteredRegistrations.length > 0 ? (
                 <div className="table-responsive">
                   <table className="premium-table">
                     <thead>
                       <tr>
-                        <th>Node Profile</th>
-                        <th>Email Vector</th>
-                        <th>Temporal Log</th>
-                        <th>Status Pulse</th>
-                        <th>Node Type</th>
+                        <th>Student</th>
+                        <th>Email</th>
+                        <th>Registered On</th>
+                        <th>Status</th>
+                        <th>Role</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -243,8 +243,8 @@ const AdminUsers = () => {
               ) : (
                 <div className="text-center p-5 opacity-40 py-24">
                    <Users size={48} className="mx-auto mb-3" />
-                   <p className="fs-4 fw-bold">Zero Hits Recorded</p>
-                   <p className="small">No neural patterns matched your current filter criteria.</p>
+                   <p className="fs-4 fw-bold">No Registrations Found</p>
+                   <p className="small">No students matched your current search criteria.</p>
                 </div>
               )}
             </div>

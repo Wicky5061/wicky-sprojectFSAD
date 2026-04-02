@@ -42,7 +42,7 @@ export default function FeaturedWebinar({ webinar }) {
         </div>
         <div className="featured-image-container">
           <img 
-            src={webinar.coverImageUrl || `https://source.unsplash.com/featured/?technology,coding&${webinar.id}`} 
+            src={webinar.coverImageUrl || `https://picsum.photos/seed/${webinar.id}/800/400`} 
             crossOrigin="anonymous"
             alt={webinar.title} 
             className="featured-image"
