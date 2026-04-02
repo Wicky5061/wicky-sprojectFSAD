@@ -1,6 +1,5 @@
 package com.webinarhub.platform.controller;
 
-import com.webinarhub.platform.entity.User;
 import com.webinarhub.platform.entity.Webinar;
 import com.webinarhub.platform.repository.RegistrationRepository;
 import com.webinarhub.platform.repository.UserRepository;
