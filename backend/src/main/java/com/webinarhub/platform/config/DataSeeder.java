@@ -229,5 +229,41 @@ public class DataSeeder implements CommandLineRunner {
         } else {
             System.out.println("ℹ️ Webinars already present (" + webinarRepository.count() + "). Skipping seeding.");
         }
+        // Always fix broken image URLs for existing webinars
+        fixBrokenImageUrls();
+    }
+
+    /**
+     * Fixes broken Unsplash image URLs in existing webinars.
+     * Replaces known dead image IDs with working alternatives.
+     */
+    private void fixBrokenImageUrls() {
+        java.util.Map<String, String> urlReplacements = new java.util.LinkedHashMap<>();
+        urlReplacements.put("photo-1633356122544-f134324a6cee", "photo-1461749280684-dccba630e2f6");
+        urlReplacements.put("photo-1451187580459-43490279c0fa", "photo-1544197150-b99a580bb7a8");
+        urlReplacements.put("photo-1620712943543-bcc4688e7485", "photo-1677442136019-21780ecad995");
+        urlReplacements.put("photo-1550751827-4bd374c3f58b", "photo-1563013544-824ae1b704d3");
+        urlReplacements.put("photo-1551288049-bbbda536339a", "photo-1526379095098-d400fd0bf935");
+        urlReplacements.put("photo-1516245834210-c4c142787335", "photo-1639762681485-074b7f938ba0");
+        urlReplacements.put("photo-1518186285589-2f7649de83e0", "photo-1551288049-bebda4e38f71");
+
+        int updated = 0;
+        for (Webinar w : webinarRepository.findAll()) {
+            String url = w.getCoverImageUrl();
+            if (url == null) continue;
+            for (java.util.Map.Entry<String, String> entry : urlReplacements.entrySet()) {
+                if (url.contains(entry.getKey())) {
+                    String newUrl = "https://images.unsplash.com/" + entry.getValue() + "?w=800&q=80";
+                    w.setCoverImageUrl(newUrl);
+                    webinarRepository.save(w);
+                    updated++;
+                    System.out.println("🔧 Fixed image URL for: " + w.getTitle());
+                    break;
+                }
+            }
+        }
+        if (updated > 0) {
+            System.out.println("✅ Fixed " + updated + " broken image URLs.");
+        }
     }
 }

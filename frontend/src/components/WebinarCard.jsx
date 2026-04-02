@@ -67,7 +67,9 @@ export default function WebinarCard({ webinar }) {
     >
       <div className="webinar-card-header">
         {webinar.coverImageUrl ? (
-          <img src={webinar.coverImageUrl} crossOrigin="anonymous" alt={webinar.title} className="webinar-cover" />
+          <img src={webinar.coverImageUrl} crossOrigin="anonymous" alt={webinar.title} className="webinar-cover" 
+            onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.querySelector('.webinar-cover-placeholder') || e.target.insertAdjacentHTML('afterend', '<div class="webinar-cover-placeholder">⚡</div>'); }}
+          />
         ) : (
           <div className="webinar-cover-placeholder">⚡</div>
         )}
