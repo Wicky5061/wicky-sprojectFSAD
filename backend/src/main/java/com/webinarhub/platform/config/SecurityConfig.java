@@ -53,6 +53,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Public auth endpoints
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/health/**").permitAll()
                 
                 // Explicit Admin REST permissions
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
@@ -61,6 +62,9 @@ public class SecurityConfig {
                 // These endpoints are needed by both Students and Admins
                 .requestMatchers(HttpMethod.GET, "/api/webinars").permitAll() 
                 .requestMatchers(HttpMethod.GET, "/api/webinars/{id}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/webinars/search").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/webinars/upcoming").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/webinars/category/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/resources/**").hasAnyRole("ADMIN", "USER")
                 .requestMatchers(HttpMethod.GET, "/api/registrations/**").hasAnyRole("ADMIN", "USER")
                 

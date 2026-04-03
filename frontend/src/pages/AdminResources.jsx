@@ -27,18 +27,9 @@ const AdminResources = () => {
     setLoadingWebinars(true);
     setError(null);
     try {
-      const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      };
-      const baseUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'https://wicky-sprojectfsad-backend.onrender.com';
-      const urlPrefix = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
-
-      const resp = await fetch(`${urlPrefix}/admin/webinars`, { headers });
-      if (!resp.ok) throw new Error('Failed to fetch');
-      const data = await resp.json();
-      const completed = (Array.isArray(data) ? data : []).filter(w => w.status === 'COMPLETED');
+      const resp = await API.get('/admin/webinars');
+      const data = Array.isArray(resp.data) ? resp.data : [];
+      const completed = data.filter(w => w.status === 'COMPLETED');
       setWebinars(completed);
     } catch (err) {
       setError('Failed to retrieve completed sessions from admin portal.');
@@ -54,20 +45,10 @@ const AdminResources = () => {
   const fetchResources = useCallback(async (id) => {
     setLoadingResources(true);
     try {
-      const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      };
-      const baseUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'https://wicky-sprojectfsad-backend.onrender.com';
-      const urlPrefix = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
-
-      const resp = await fetch(`${urlPrefix}/resources/webinar/${id}`, { headers });
-      if (!resp.ok) throw new Error('Failed to fetch resources');
-      const data = await resp.json();
-      setResources(data);
+      const resp = await resourceAPI.getByWebinar(id);
+      setResources(Array.isArray(resp.data) ? resp.data : []);
     } catch (err) {
-      toast.error('Material retrieval failed');
+      toast.error('Failed to load resources');
     } finally {
       setLoadingResources(false);
     }
@@ -87,26 +68,13 @@ const AdminResources = () => {
 
     setSaving(true);
     try {
-      const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      };
-      const baseUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'https://wicky-sprojectfsad-backend.onrender.com';
-      const urlPrefix = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
-
       const payload = { ...formData, webinarId: selectedWebinarId };
-      const resp = await fetch(`${urlPrefix}/admin/resources`, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(payload)
-      });
-      if (!resp.ok) throw new Error('Failed to create resource');
-      toast.success('Asset Uploaded Successfully');
+      await API.post('/admin/resources', payload);
+      toast.success('Resource uploaded successfully');
       setFormData({ title: '', fileType: 'PDF', fileUrl: '', description: '' });
       fetchResources(selectedWebinarId);
     } catch (err) {
-      toast.error('Sync failure with data center');
+      toast.error('Failed to upload resource');
     } finally {
       setSaving(false);
     }
@@ -114,23 +82,11 @@ const AdminResources = () => {
 
   const handleDelete = async (id) => {
     try {
-      const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      };
-      const baseUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'https://wicky-sprojectfsad-backend.onrender.com';
-      const urlPrefix = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
-
-      const resp = await fetch(`${urlPrefix}/admin/resources/${id}`, {
-        method: 'DELETE',
-        headers: headers
-      });
-      if (!resp.ok) throw new Error('Failed to delete resource');
-      toast.success('Asset Purged');
+      await API.delete(`/admin/resources/${id}`);
+      toast.success('Resource deleted');
       fetchResources(selectedWebinarId);
     } catch (err) {
-      toast.error('De-linking failed');
+      toast.error('Failed to delete resource');
     }
   };
 

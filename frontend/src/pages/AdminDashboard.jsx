@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import API from '../services/api';
 import './Admin.css';
 
 const AdminDashboard = () => {
@@ -25,14 +26,8 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      };
-
-      const resp = await fetch(`${import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'https://wicky-sprojectfsad-backend.onrender.com'}/api/admin/stats`, { headers });
-      const data = await resp.json();
+      const resp = await API.get('/admin/stats');
+      const data = resp.data;
 
       if (!data || Array.isArray(data)) return;
 
@@ -44,22 +39,16 @@ const AdminDashboard = () => {
       });
     } catch (err) {
       console.error('Error fetching admin stats:', err);
-      // Fallback
+      // Fallback values
       setStats({ webinars: 12, students: 450, registrations: 890, liveNow: 1 });
     }
   };
 
   const fetchRecentRegistrations = async () => {
     try {
-      const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      };
-
-      const resp = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/registrations`, { headers });
-      if (resp.ok) {
-        const data = await resp.json();
+      const resp = await API.get('/registrations');
+      if (resp.data) {
+        const data = Array.isArray(resp.data) ? resp.data : [];
         setRecentRegistrations(data.slice(0, 5));
       }
     } catch (err) {

@@ -104,11 +104,11 @@ public class WebinarService {
     /**
      * Delete webinar (Admin only)
      */
+    @Transactional
     public void deleteWebinar(Long id) {
-        if (!webinarRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Webinar", id);
-        }
-        webinarRepository.deleteById(id);
+        Webinar webinar = webinarRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Webinar", id));
+        webinarRepository.delete(webinar);
     }
 
     /**

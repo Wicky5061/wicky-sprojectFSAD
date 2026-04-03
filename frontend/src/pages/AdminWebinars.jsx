@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { 
   Plus, Search, Edit2, Trash2, Users, FileUp, CheckCircle, 
   Clock, Play, X, AlertTriangle, Calendar, Filter, MoreVertical,
-  ChevronRight, ExternalLink, Download, ArrowUpDown, RefreshCw
+  ChevronRight, ExternalLink, Download, ArrowUpDown, RefreshCw, Video
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { webinarAPI } from '../services/api';
@@ -101,48 +101,42 @@ const AdminWebinars = () => {
     // Safe combination of date and time
     let combinedDateTime;
     try {
-        combinedDateTime = new Date(`${formData.date}T${formData.time}`).toISOString();
+        const dateObj = new Date(`${formData.date}T${formData.time}`);
+        if (isNaN(dateObj.getTime())) throw new Error('Invalid date');
+        combinedDateTime = dateObj.toISOString();
     } catch(err) {
         toast.error('Invalid date or time format');
         setSaving(false);
         return;
     }
 
+    // Build clean payload - only send fields the backend expects
     const payload = {
-      ...formData,
-      dateTime: combinedDateTime
+      title: formData.title,
+      description: formData.description,
+      instructor: formData.instructor,
+      dateTime: combinedDateTime,
+      durationMinutes: formData.durationMinutes,
+      category: formData.category,
+      maxParticipants: formData.maxParticipants,
+      status: formData.status,
+      coverImageUrl: formData.coverImageUrl,
+      streamUrl: formData.streamUrl
     };
 
     try {
-      const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      };
-      // Determine base URL dynamically (using Vite environment or default relative path)
-      const baseUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'https://wicky-sprojectfsad-backend.onrender.com';
-      const urlPrefix = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
-
       if (currentWebinar) {
-        const response = await fetch(`${urlPrefix}/webinars/${currentWebinar.id}`, {
-          method: 'PUT',
-          headers: headers,
-          body: JSON.stringify(payload)
-        });
-        if (!response.ok) throw new Error('Update failed');
+        await webinarAPI.update(currentWebinar.id, payload);
       } else {
-        const response = await fetch(`${urlPrefix}/webinars`, {
-          method: 'POST',
-          headers: headers,
-          body: JSON.stringify(payload)
-        });
-        if (!response.ok) throw new Error('Create failed');
+        await webinarAPI.create(payload);
       }
-      toast.success(currentWebinar ? 'Webinar Session Synchronized' : 'Webinar Session Initialized');
+      toast.success(currentWebinar ? 'Webinar updated successfully' : 'Webinar created successfully');
       setShowModal(false);
       fetchWebinars();
     } catch (err) {
-      toast.error('Failed to sync changes with backend');
+      console.error('Webinar save error:', err);
+      const msg = err.response?.data?.message || 'Failed to save webinar. Please try again.';
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
@@ -151,25 +145,15 @@ const AdminWebinars = () => {
   const handleDelete = async () => {
     if (!currentWebinar) return;
     try {
-      const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      };
-      const baseUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'https://wicky-sprojectfsad-backend.onrender.com';
-      const urlPrefix = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
-
-      const response = await fetch(`${urlPrefix}/webinars/${currentWebinar.id}`, {
-        method: 'DELETE',
-        headers: headers
-      });
-      if (!response.ok) throw new Error('Delete failed');
-
-      toast.success('Session Terminated Successfully');
+      await webinarAPI.delete(currentWebinar.id);
+      toast.success('Webinar deleted successfully');
       setShowDeleteConfirm(false);
+      setCurrentWebinar(null);
       fetchWebinars();
     } catch (err) {
-      toast.error('Network failure during termination');
+      console.error('Webinar delete error:', err);
+      const msg = err.response?.data?.message || 'Failed to delete webinar. Please try again.';
+      toast.error(msg);
     }
   };
 
@@ -430,7 +414,7 @@ const AdminWebinars = () => {
                       <option value="UPCOMING">UPCOMING</option>
                       <option value="LIVE">LIVE</option>
                       <option value="COMPLETED">COMPLETED</option>
-                      <option value="CANCEL">SHUTDOWN</option>
+                      <option value="CANCELLED">CANCELLED</option>
                     </select>
                   </div>
                   <div className="col-12">
@@ -497,16 +481,27 @@ const AdminWebinars = () => {
 
       <style>{`
         .search-icon-table { position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%); color: #64748b; }
-        .modal-body-scrollable { scrollbar-width: thin; scrollbar-color: #334155 #0f172a; }
-        .btn-admin-primary { background: #7c3aed; color: white; border: none; border-radius: 12px; font-weight: 700; transition: all 0.2s; padding: 0.75rem 1.5rem; }
+        .admin-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1.5rem; }
+        .modal-body-scrollable { scrollbar-width: thin; scrollbar-color: #334155 #0f172a; max-height: calc(90vh - 140px); overflow-y: auto; }
+        .btn-admin-primary { background: #7c3aed; color: white; border: none; border-radius: 12px; font-weight: 700; transition: all 0.2s; padding: 0.75rem 1.5rem; cursor: pointer; }
         .btn-admin-primary:hover { background: #6d28d9; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4); }
-        .btn-admin-secondary { border-radius: 12px; font-weight: 600; padding: 0.75rem; border: 1px solid #1e293b; color: white; }
+        .btn-admin-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .btn-admin-secondary { border-radius: 12px; font-weight: 600; padding: 0.75rem; border: 1px solid #1e293b; color: white; cursor: pointer; }
+        .btn-admin-secondary:hover { background: rgba(30, 41, 59, 0.5); }
+        .btn-admin-danger { border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .btn-admin-danger:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(225, 29, 72, 0.4); }
+        .close-btn-admin { background: none; border: none; color: white; cursor: pointer; padding: 0.25rem; border-radius: 8px; transition: all 0.2s; }
+        .close-btn-admin:hover { background: rgba(30, 41, 59, 0.5); }
         .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .7; } }
         .animate-spin-slow { animation: spin 3s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .min-vh-50 { min-height: 50vh; }
         .skeleton-row-box { background: rgba(30, 41, 59, 0.2); border-radius: 12px; }
+        .premium-form .row { display: flex; flex-wrap: wrap; margin: -0.5rem; }
+        .premium-form .col-12 { flex: 0 0 100%; max-width: 100%; padding: 0.5rem; }
+        .premium-form .col-md-6 { flex: 0 0 50%; max-width: 50%; padding: 0.5rem; }
+        @media (max-width: 768px) { .premium-form .col-md-6 { flex: 0 0 100%; max-width: 100%; } }
       `}</style>
     </div>
   );
