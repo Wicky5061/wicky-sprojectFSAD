@@ -78,7 +78,7 @@ const AdminLogin = () => {
             <Shield size={48} className="admin-shield" />
             <Lock size={20} className="admin-lock" />
           </div>
-          <h1>Admin Portal</h1>
+          <h1>LearnHub Admin</h1>
           <p>{step === 1 ? 'Authorized Personnel Only' : 'MFA Verification'}</p>
         </div>
 

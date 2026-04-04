@@ -47,7 +47,7 @@ export default function Login() {
         <div className="auth-header">
           <span className="auth-icon" style={{ fontSize: '3rem', marginBottom: '15px', display: 'block' }}>🔐</span>
           <h1 className="gradient-text">Welcome Back</h1>
-          <p>Sign in to your WebinarHub account</p>
+          <p>Sign in to your LearnHub account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="auth-form" id="login-form">

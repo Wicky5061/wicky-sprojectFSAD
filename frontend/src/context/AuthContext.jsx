@@ -13,24 +13,24 @@ export function AuthProvider({ children }) {
   // On mount, restore user from localStorage
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('webinarhub_user');
+      const stored = localStorage.getItem('learnhub_user');
       if (stored) {
         setUser(JSON.parse(stored));
       }
     } catch {
-      localStorage.removeItem('webinarhub_user');
+      localStorage.removeItem('learnhub_user');
     }
     setLoading(false);
   }, []);
 
   const login = (userData) => {
     setUser(userData);
-    localStorage.setItem('webinarhub_user', JSON.stringify(userData));
+    localStorage.setItem('learnhub_user', JSON.stringify(userData));
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('webinarhub_user');
+    localStorage.removeItem('learnhub_user');
   };
 
   const isAdmin = () => user?.role === 'ADMIN';

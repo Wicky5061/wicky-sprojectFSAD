@@ -25,7 +25,7 @@ export default function Navbar() {
     <nav className="navbar" id="main-navbar">
       <div className="navbar-inner container">
         <Link to="/" className="navbar-brand" id="navbar-brand">
-          <img src={logo} alt="WickyWebinars" style={{ height: '55px', maxWidth: '280px', objectFit: 'contain', overflow: 'visible' }} />
+          <img src={logo} alt="LearnHub" style={{ height: '55px', maxWidth: '280px', objectFit: 'contain', overflow: 'visible' }} />
         </Link>
 
         <button

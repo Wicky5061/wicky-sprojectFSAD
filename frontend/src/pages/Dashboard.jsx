@@ -189,7 +189,7 @@ export default function Dashboard() {
         <body>
           <div class="cert-outer">
             <div class="cert-card">
-              <div class="branding">WebinarHub Academy</div>
+              <div class="branding">LearnHub Academy</div>
               <div class="cert-label">Certificate of Completion</div>
               
               <p>This academic credential is proudly presented to</p>
@@ -212,12 +212,12 @@ export default function Dashboard() {
                   <div class="signature-text" style="font-family: cursive; font-size: 24px;">Vivek Vardhan</div>
                   <div class="signature-box">
                     <strong>Director of Education</strong><br/>
-                    <small>WebinarHub Platform</small>
+                    <small>LearnHub Platform</small>
                   </div>
                 </div>
               </div>
 
-              <div class="cert-id">ID: WH-${certId}-${new Date().getFullYear()}</div>
+              <div class="cert-id">ID: LH-${certId}-${new Date().getFullYear()}</div>
             </div>
           </div>
           <script>

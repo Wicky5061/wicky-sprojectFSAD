@@ -43,7 +43,7 @@ export default function Register() {
       const { confirmPassword, ...data } = form;
       const res = await authAPI.register(data);
       login(res.data);
-      toast.success('Account created! Welcome to WebinarHub.');
+      toast.success('Account created! Welcome to LearnHub.');
       navigate('/dashboard');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed. Email may already exist.');
@@ -57,7 +57,7 @@ export default function Register() {
       <div className="auth-card glass animate-fade-in shadow-xl">
         <div className="auth-header">
           <span className="auth-icon" style={{ fontSize: '3rem', marginBottom: '15px', display: 'block' }}>🚀</span>
-          <h1 className="gradient-text">Join WebinarHub</h1>
+          <h1 className="gradient-text">Join LearnHub</h1>
           <p>Create your free account today</p>
         </div>
 

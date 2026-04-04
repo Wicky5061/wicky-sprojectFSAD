@@ -25,8 +25,8 @@ API.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   } else {
-    // Fallback to webinarhub_user if token is not found (backwards compatibility)
-    const stored = localStorage.getItem('webinarhub_user');
+    // Fallback to learnhub_user if token is not found (backwards compatibility)
+    const stored = localStorage.getItem('learnhub_user');
     if (stored) {
       try {
         const user = JSON.parse(stored);
@@ -34,7 +34,7 @@ API.interceptors.request.use((config) => {
           config.headers.Authorization = `Bearer ${user.id}`;
         }
       } catch {
-        localStorage.removeItem('webinarhub_user');
+        localStorage.removeItem('learnhub_user');
       }
     }
   }
@@ -46,7 +46,7 @@ API.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('webinarhub_user');
+      localStorage.removeItem('learnhub_user');
     }
     return Promise.reject(error);
   }

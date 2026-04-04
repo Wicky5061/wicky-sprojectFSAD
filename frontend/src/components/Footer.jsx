@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="container">
         <div className="footer-grid">
           <div className="footer-info">
-            <h3 className="gradient-text footer-logo">WickyWebinars</h3>
+            <h3 className="gradient-text footer-logo">LearnHub</h3>
             <p className="footer-tagline">
               Elevate your engineering skills with elite, industry-led workshops and interactive webinars.
             </p>
@@ -40,7 +40,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="footer-bottom">
-          <p>© 2026 WickyWebinars. All rights reserved.</p>
+          <p>© 2026 LearnHub. All rights reserved.</p>
         </div>
       </div>
     </footer>

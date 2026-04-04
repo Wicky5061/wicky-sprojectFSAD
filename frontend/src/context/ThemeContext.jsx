@@ -5,7 +5,7 @@ const ThemeContext = createContext(null);
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
     // Check localStorage first
-    const savedTheme = localStorage.getItem('webinarhub_theme');
+    const savedTheme = localStorage.getItem('learnhub_theme');
     if (savedTheme) {
       return savedTheme;
     }
@@ -20,7 +20,7 @@ export const ThemeProvider = ({ children }) => {
     // Apply theme to html root element
     document.documentElement.setAttribute('data-theme', theme);
     // Save to localStorage
-    localStorage.setItem('webinarhub_theme', theme);
+    localStorage.setItem('learnhub_theme', theme);
   }, [theme]);
 
   const toggleTheme = () => {

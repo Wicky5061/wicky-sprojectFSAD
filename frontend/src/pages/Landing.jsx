@@ -70,7 +70,7 @@ export default function Landing() {
     { id: 1, name: 'Madhavi', text: 'The React architecture workshop was a complete game-changer for my career. The instructor was brilliant and the content was extremely practical!', rating: 5 },
     { id: 2, name: 'Sekar', text: 'I love how interactive the live sessions are. Being able to ask questions and get immediate feedback is so much better than pre-recorded videos.', rating: 5 },
     { id: 3, name: 'Sathwik', text: 'The post-webinar resources and recording access are worth every second. I finally understood AWS networking thanks to Viswa\'s session.', rating: 5 },
-    { id: 4, name: 'Aditya', text: 'WebinarHub is my go-to platform for staying updated with the latest tech trends. The community and the quality of speakers are unmatched.', rating: 5 },
+    { id: 4, name: 'Aditya', text: 'LearnHub is my go-to platform for staying updated with the latest tech trends. The community and the quality of speakers are unmatched.', rating: 5 },
   ];
 
   return (
@@ -219,7 +219,7 @@ export default function Landing() {
       <section className="final-cta">
         <div className="container glass cta-inner">
           <h2>Ready to Ignite Your Learning Journey?</h2>
-          <p>Join over 5,000+ engineers learning and growing with WebinarHub every day.</p>
+          <p>Join over 5,000+ engineers learning and growing with LearnHub every day.</p>
           <div className="cta-buttons">
             <Link to="/register" className="btn btn-primary btn-lg">Create Free Account</Link>
           </div>

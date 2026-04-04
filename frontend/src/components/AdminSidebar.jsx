@@ -26,7 +26,7 @@ const AdminSidebar = () => {
         <div className="sidebar-logo-icon">
           <ShieldCheck size={28} color="#a78bfa" strokeWidth={2.5} />
         </div>
-        <span className="sidebar-logo-text">WebinarHub</span>
+        <span className="sidebar-logo-text">LearnHub</span>
       </div>
 
       <nav className="sidebar-nav">
