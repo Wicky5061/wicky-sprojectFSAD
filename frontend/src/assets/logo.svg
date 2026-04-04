@@ -34,8 +34,7 @@
   <rect x="26" y="18" width="16" height="7" rx="1" fill="#7c3aed" opacity="0.85"/>
   <line x1="52" y1="18" x2="52" y2="26" stroke="#ddd6fe" stroke-width="1.8" stroke-linecap="round"/>
   <circle cx="52" cy="27.5" r="2" fill="#ddd6fe"/>
-  <text x="80" y="32" font-family="'Trebuchet MS', 'Segoe UI', sans-serif" font-size="24" font-weight="800" letter-spacing="-0.3" fill="#7c3aed">Wicky</text>
-  <text x="152" y="32" font-family="'Trebuchet MS', 'Segoe UI', sans-serif" font-size="24" font-weight="800" letter-spacing="-0.3" fill="#7c3aed">Webinars</text>
-  <text x="81" y="52" font-family="'Trebuchet MS', 'Segoe UI', sans-serif" font-size="10.5" font-weight="500" letter-spacing="2.8" fill="#94a3b8">LEARN · GROW · CONNECT</text>
-  <rect x="80" y="36" width="50" height="2" rx="1" fill="#7c3aed" opacity="0.7"/>
+  <text x="80" y="32" font-family="'Trebuchet MS', 'Segoe UI', sans-serif" font-size="28" font-weight="800" letter-spacing="-0.5" fill="#7c3aed">LearnHub</text>
+  <text x="81" y="52" font-family="'Trebuchet MS', 'Segoe UI', sans-serif" font-size="10.5" font-weight="500" letter-spacing="2.8" fill="#94a3b8">LEARN · CONNECT · GROW</text>
+  <rect x="80" y="36" width="60" height="2" rx="1" fill="#7c3aed" opacity="0.7"/>
 </svg>
