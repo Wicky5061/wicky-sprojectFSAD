@@ -181,7 +181,7 @@ export default function Landing() {
               {webinars.slice(0, 3).map((webinar, idx) => (
                 <div key={webinar.id} className="timeline-item">
                   <div className="timeline-dot"></div>
-                  <div className="timeline-date">{new Date(webinar.dateTime).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+                  <div className="timeline-date">{new Date(webinar.dateTime).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })}</div>
                   <div className="timeline-content card">
                     <h3>{webinar.title}</h3>
                     <p>{webinar.instructor} &bull; {webinar.category}</p>

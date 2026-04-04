@@ -134,15 +134,16 @@ export default function WebinarDetail() {
     }
   };
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return 'TBD';
-    return new Date(dateStr).toLocaleDateString([], {
-      weekday: 'long',
+  const formatDateTime = (dateTime) => {
+    if (!dateTime) return 'TBD';
+    const date = new Date(dateTime);
+    return date.toLocaleString('en-IN', {
+      day: '2-digit',
+      month: 'short',
       year: 'numeric',
-      month: 'long',
-      day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
+      hour12: true
     });
   };
 
@@ -315,7 +316,7 @@ export default function WebinarDetail() {
                       <span className="review-stars">{'★'.repeat(r.stars)}</span>
                     </div>
                     {r.comment && <p className="review-text">{r.comment}</p>}
-                    <span className="review-date">{new Date(r.createdAt).toLocaleDateString()}</span>
+                    <span className="review-date">{new Date(r.createdAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })}</span>
                   </div>
                 ))}
                 {ratings.length === 0 && <p className="empty-reviews">No reviews yet. Join the session to be the first!</p>}
@@ -332,7 +333,7 @@ export default function WebinarDetail() {
                 <span className="side-icon">📅</span>
                 <div className="side-info">
                   <span className="side-label">Scheduled For</span>
-                  <span className="side-value">{formatDate(webinar.dateTime)}</span>
+                  <span className="side-value">{formatDateTime(webinar.dateTime)}</span>
                 </div>
               </div>
               <div className="side-meta-item">

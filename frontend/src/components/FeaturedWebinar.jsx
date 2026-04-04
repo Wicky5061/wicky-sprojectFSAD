@@ -4,14 +4,16 @@ import './FeaturedWebinar.css';
 export default function FeaturedWebinar({ webinar }) {
   if (!webinar) return null;
 
-  const formatDate = (dateStr) => {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString([], {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
+  const formatDateTime = (dateTime) => {
+    if (!dateTime) return 'TBD';
+    const date = new Date(dateTime);
+    return date.toLocaleString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
+      hour12: true
     });
   };
 
@@ -28,7 +30,7 @@ export default function FeaturedWebinar({ webinar }) {
           </p>
           <div className="featured-meta">
             <div className="meta-item">
-              <span>📅</span> {formatDate(webinar.dateTime)}
+              <span>📅</span> {formatDateTime(webinar.dateTime)}
             </div>
             <div className="meta-item">
               <span>⏱️</span> {webinar.durationMinutes || '60'} Minutes

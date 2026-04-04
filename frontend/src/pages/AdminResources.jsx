@@ -152,7 +152,7 @@ const AdminResources = () => {
                       >
                         <option value="">-- Select Completed Webinar --</option>
                         {webinars.map(w => (
-                          <option key={w?.id} value={w?.id}>{w?.title} ({new Date(w?.dateTime).toLocaleDateString()})</option>
+                          <option key={w?.id} value={w?.id}>{w?.title} ({w?.dateTime ? new Date(w.dateTime).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : 'TBD'})</option>
                         ))}
                       </select>
                     )}

@@ -79,7 +79,7 @@ const AdminUsers = () => {
     const selectedWebinar = webinars.find(w => w?.id?.toString() === selectedWebinarId.toString());
     const header = "Name,Email,Registered On,Status\n";
     const rows = (Array.isArray(registrations) ? registrations : []).map(reg => 
-      `${reg?.userName || 'Anon'},${reg?.userEmail || 'N/A'},${reg?.registrationDate ? new Date(reg.registrationDate).toLocaleDateString() : 'TBD'},Confirmed`
+      `${reg?.userName || 'Anon'},${reg?.userEmail || 'N/A'},${reg?.registrationDate ? new Date(reg.registrationDate).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : 'TBD'},Confirmed`
     ).join("\n");
     
     const blob = new Blob([header + rows], { type: 'text/csv' });
@@ -145,7 +145,7 @@ const AdminUsers = () => {
                       >
                         <option value="">-- Select Webinar --</option>
                         {webinars.map(w => (
-                          <option key={w?.id} value={w?.id}>{w?.title} ({w?.dateTime ? new Date(w.dateTime).toLocaleDateString() : 'TBD'})</option>
+                          <option key={w?.id} value={w?.id}>{w?.title} ({w?.dateTime ? new Date(w.dateTime).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : 'TBD'})</option>
                         ))}
                       </select>
                       {loadingWebinars ? (
@@ -224,7 +224,7 @@ const AdminUsers = () => {
                           <td>
                             <div className="d-flex align-items-center gap-2 text-slate-300">
                               <Calendar size={16} className="text-emerald-400 opacity-60" />
-                              <span>{reg?.registrationDate ? new Date(reg.registrationDate).toLocaleDateString() : 'TBD'}</span>
+                              <span>{reg?.registrationDate ? new Date(reg.registrationDate).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : 'TBD'}</span>
                             </div>
                           </td>
                           <td>

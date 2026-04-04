@@ -192,7 +192,7 @@ const AdminDashboard = () => {
                              {reg.webinarTitle}
                           </div>
                         </td>
-                        <td><span className="text-slate-400">{new Date(reg.registrationDate).toLocaleDateString()}</span></td>
+                        <td><span className="text-slate-400">{new Date(reg.registrationDate).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })}</span></td>
                         <td><span className="badge-premium badge-green">VERIFIED</span></td>
                       </tr>
                     )) : (

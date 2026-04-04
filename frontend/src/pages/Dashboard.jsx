@@ -50,7 +50,7 @@ export default function Dashboard() {
   const handleDownloadCertificate = (reg) => {
     const certId = crypto.randomUUID().split('-')[0].toUpperCase();
     const certWindow = window.open('', '_blank');
-    const completionDate = reg.dateTime ? new Date(reg.dateTime).toLocaleDateString() : new Date().toLocaleDateString();
+    const completionDate = reg.dateTime ? new Date(reg.dateTime).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : new Date().toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
     
     const content = `
       <html>
@@ -358,7 +358,7 @@ export default function Dashboard() {
                         <h4 className="reg-title m-0">{reg.webinarTitle}</h4>
                         {reg.webinarStatus === 'LIVE' && <span className="pulse-dot"></span>}
                       </div>
-                      <p className="reg-meta">📅 Next session: {new Date(reg.dateTime).toLocaleDateString()}</p>
+                      <p className="reg-meta">📅 Next session: {new Date(reg.dateTime).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })}</p>
                     </div>
                     <div className="reg-actions-flex d-flex gap-2">
                        <Link to={`/webinars/${reg.webinarId}`} className="btn btn-sm btn-primary">

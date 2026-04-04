@@ -15,14 +15,16 @@ export default function WebinarCard({ webinar }) {
   const attendedWebinars = JSON.parse(localStorage.getItem('attended_webinars') || '[]');
   const isCompletedByUser = attendedWebinars.includes(webinar.id) || webinar.attended;
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return 'TBD';
-    const d = new Date(dateStr);
-    return d.toLocaleDateString([], {
+  const formatDateTime = (dateTime) => {
+    if (!dateTime) return 'TBD';
+    const date = new Date(dateTime);
+    return date.toLocaleString('en-IN', {
+      day: '2-digit',
       month: 'short',
-      day: 'numeric',
+      year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
+      hour12: true
     });
   };
 
@@ -102,7 +104,7 @@ export default function WebinarCard({ webinar }) {
         <div className="webinar-meta">
           <div className="webinar-meta-item">
             <span>📅</span>
-            <span>{formatDate(webinar.dateTime)}</span>
+            <span>{formatDateTime(webinar.dateTime)}</span>
           </div>
           <div className="webinar-meta-item">
             <span>⏱️</span>

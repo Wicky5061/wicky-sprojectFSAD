@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { registrationAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { Calendar, Clock, Ticket, AlertCircle } from 'lucide-react';
+import { Calendar, Ticket, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import './Dashboard.css'; // Reuse dashboard styles for consistency
 
@@ -95,8 +95,7 @@ export default function MyWebinars() {
               <div className="reg-info">
                 <h3 className="reg-title text-xl font-bold">{reg.webinarTitle || 'Untitled Webinar'}</h3>
                 <div className="reg-meta-grid mt-2 flex gap-4">
-                   <span className="reg-meta flex items-center gap-2"><Calendar size={14} /> {reg.dateTime ? new Date(reg.dateTime).toLocaleDateString() : 'Date TBD'}</span>
-                   <span className="reg-meta flex items-center gap-2"><Clock size={14} /> {reg.dateTime ? new Date(reg.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Time TBD'}</span>
+                   <span className="reg-meta flex items-center gap-2"><Calendar size={14} /> {reg.dateTime ? new Date(reg.dateTime).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : 'Date TBD'}</span>
                 </div>
               </div>
               <div className="reg-actions-flex flex items-center gap-4">

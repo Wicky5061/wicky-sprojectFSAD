@@ -280,7 +280,7 @@ const AdminWebinars = () => {
                           <div>
                             <span className="fw-medium text-slate-200">
                               {webinar?.dateTime 
-                                ? `${new Date(webinar.dateTime).toLocaleDateString()} ${new Date(webinar.dateTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}` 
+                                ? new Date(webinar.dateTime).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })
                                 : 'TBD'}
                             </span>
                           </div>
